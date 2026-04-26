@@ -1,3 +1,4 @@
+import './_env.ts'
 import jwt from 'jsonwebtoken'
 import { parse } from 'cookie'
 import type { VercelRequest, VercelResponse } from '@vercel/node'

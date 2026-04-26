@@ -1,4 +1,4 @@
-import type { AuthUser, Task, Project, Contact, CalendarEvent, Calendar, Briefing } from './domain.ts'
+import type { AuthUser, Task, Project, Contact, Interaction, CalendarEvent, Calendar, Briefing } from './domain.ts'
 
 export interface ApiResponse<T> {
   data?: T
@@ -27,6 +27,15 @@ export interface ProjectsListResponse {
 
 export interface ContactsListResponse {
   contacts: Contact[]
+  googleConnected: boolean
+}
+
+export interface ContactSaveResponse {
+  contact: Contact
+}
+
+export interface InteractionsListResponse {
+  interactions: Interaction[]
 }
 
 export interface EventsListResponse {

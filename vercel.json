@@ -1,16 +1,3 @@
 {
-  "functions": {
-    "api/briefing-generate.ts": { "maxDuration": 60 },
-    "api/briefing-cron.ts": { "maxDuration": 60 },
-    "api/events-parse.ts": { "maxDuration": 30 },
-    "api/sync-tasks.ts": { "maxDuration": 60 },
-    "api/sync-calendar.ts": { "maxDuration": 60 },
-    "api/sync-contacts.ts": { "maxDuration": 60 }
-  },
-  "crons": [
-    { "path": "/api/briefing-cron", "schedule": "30 9 * * *" },
-    { "path": "/api/sync-tasks", "schedule": "*/5 * * * *" },
-    { "path": "/api/sync-calendar", "schedule": "*/2 * * * *" },
-    { "path": "/api/sync-contacts", "schedule": "*/30 * * * *" }
-  ]
+  "crons": []
 }

@@ -27,12 +27,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .eq('email', email)
     .single()
 
-  if (error) return res.status(401).json({ error: 'credenciais inválidas' })
-  if (!data) return res.status(401).json({ error: 'credenciais inválidas' })
+  if (error) {
+    console.error('[auth-login] supabase error:', error)
+    return res.status(401).json({ error: 'credenciais inválidas' })
+  }
+  if (!data) {
+    console.error('[auth-login] user not found:', email)
+    return res.status(401).json({ error: 'credenciais inválidas' })
+  }
   const user = data
 
   const valid = await bcrypt.compare(password, user.password_hash)
   if (!valid) {
+    console.error('[auth-login] wrong password for:', email)
     return res.status(401).json({ error: 'credenciais inválidas' })
   }
 

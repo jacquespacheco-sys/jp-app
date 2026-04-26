@@ -8,7 +8,7 @@ export const TaskSaveSchema = z.object({
   priority: z.enum(['high', 'med', 'low']).default('med'),
   projectId: z.string().uuid(),
   contactId: z.string().uuid().optional(),
-  dueDate: z.string().datetime().optional(),
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   tags: z.array(z.string()).default([]),
   startOffset: z.number().int().optional(),
   duration: z.number().int().optional(),

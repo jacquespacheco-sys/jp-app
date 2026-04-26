@@ -135,6 +135,15 @@ export interface BriefingItem {
   url: string
 }
 
+export interface Interaction {
+  id: string
+  contactId: string
+  date: string
+  type: 'call' | 'meeting' | 'email' | 'message'
+  note: string
+  createdAt: string
+}
+
 export interface AuthUser {
   id: string
   email: string
