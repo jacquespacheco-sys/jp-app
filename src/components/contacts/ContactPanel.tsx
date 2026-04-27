@@ -45,6 +45,7 @@ export function ContactPanel({ contact, onSave, onArchive, onClose }: Props) {
   const [nextContact, setNextContact] = useState(contact?.nextContact ?? '')
   const [notes, setNotes] = useState(contact?.notes ?? '')
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
 
   const [interactions, setInteractions] = useState<Interaction[]>([])
   const [showAddInteraction, setShowAddInteraction] = useState(false)
@@ -63,6 +64,7 @@ export function ContactPanel({ contact, onSave, onArchive, onClose }: Props) {
   const handleSave = async () => {
     if (!firstName.trim()) return
     setSaving(true)
+    setSaveError('')
     try {
       await onSave({
         ...(contact?.id ? { id: contact.id } : {}),
@@ -79,6 +81,8 @@ export function ContactPanel({ contact, onSave, onArchive, onClose }: Props) {
         tags: [],
       })
       onClose()
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : 'Erro ao salvar')
     } finally {
       setSaving(false)
     }
@@ -220,7 +224,13 @@ export function ContactPanel({ contact, onSave, onArchive, onClose }: Props) {
           )}
         </div>
 
-        <div className="task-panel-actions">
+        <div className="task-panel-actions" style={{ flexDirection: 'column', gap: '8px' }}>
+          {saveError && (
+            <div style={{ fontSize: '11px', fontFamily: 'Space Mono, monospace', color: 'var(--danger)', letterSpacing: '0.5px', padding: '8px 10px', border: '1px solid var(--danger)', width: '100%' }}>
+              {saveError}
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
           {contact?.id && (
             <button className="btn btn-ghost" style={{ borderColor: 'var(--border)' }} onClick={() => { void onArchive(contact.id).then(onClose) }}>
               Arquivar
@@ -229,6 +239,7 @@ export function ContactPanel({ contact, onSave, onArchive, onClose }: Props) {
           <button className="btn btn-accent" style={{ flex: 1, justifyContent: 'center' }} onClick={() => { void handleSave() }} disabled={saving || !firstName.trim()}>
             {saving ? 'Salvando…' : 'Salvar'}
           </button>
+          </div>
         </div>
       </div>
     </div>

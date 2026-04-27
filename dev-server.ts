@@ -18,6 +18,7 @@ import briefingHistory from './api/briefing-history.ts'
 import briefingGenerate from './api/briefing-generate.ts'
 import sourcesList from './api/sources-list.ts'
 import sourcesSave from './api/sources-save.ts'
+import sourcesDelete from './api/sources-delete.ts'
 import calendarsToggle from './api/calendars-toggle.ts'
 import contactsList from './api/contacts-list.ts'
 import contactsSave from './api/contacts-save.ts'
@@ -55,6 +56,7 @@ app.all('/api/briefing-history', h(briefingHistory))
 app.all('/api/briefing-generate', h(briefingGenerate))
 app.all('/api/sources-list', h(sourcesList))
 app.all('/api/sources-save', h(sourcesSave))
+app.all('/api/sources-delete', h(sourcesDelete))
 app.all('/api/contacts-list', h(contactsList))
 app.all('/api/contacts-save', h(contactsSave))
 app.all('/api/contacts-archive', h(contactsArchive))

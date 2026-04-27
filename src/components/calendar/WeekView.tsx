@@ -58,11 +58,24 @@ export function WeekView({ date, events, calendars, onOpen }: Props) {
           <div key={dayKey(d)} className={`cal-day-header${isToday(d) ? ' today' : ''}`}>
             <div>{format(d, 'EEE', { locale: ptBR })}</div>
             <div style={{ fontSize: '14px', fontWeight: 700 }}>{format(d, 'd')}</div>
-            {allDayEvents(d).map(ev => (
-              <div key={ev.id} className="cal-month-event" style={{ borderLeftColor: calendarColor(calendars, ev.calendarId) }} onClick={() => onOpen(ev)}>
-                {ev.summary}
-              </div>
-            ))}
+            {allDayEvents(d).map(ev => {
+              const isTask = ev.source === 'task_block'
+              return (
+                <div
+                  key={ev.id}
+                  className="cal-month-event"
+                  style={{
+                    borderLeftColor: isTask ? 'var(--accent)' : calendarColor(calendars, ev.calendarId),
+                    background: isTask ? 'var(--accent)' : undefined,
+                    color: isTask ? 'var(--accent-ink)' : undefined,
+                    cursor: isTask ? 'default' : 'pointer',
+                  }}
+                  onClick={() => onOpen(ev)}
+                >
+                  {isTask ? '✓ ' : ''}{ev.summary}
+                </div>
+              )
+            })}
           </div>
         ))}
       </div>

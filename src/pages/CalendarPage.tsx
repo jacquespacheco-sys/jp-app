@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { format, addDays, addWeeks, addMonths, subDays, subWeeks, subMonths, startOfMonth, endOfMonth } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Topbar } from '../components/layout/Topbar.tsx'
@@ -11,7 +11,8 @@ import { EventPanel } from '../components/calendar/EventPanel.tsx'
 import { CalendarPicker } from '../components/calendar/CalendarPicker.tsx'
 import { useCalendars } from '../hooks/useCalendars.ts'
 import { useEvents } from '../hooks/useEvents.ts'
-import type { CalendarEvent } from '../types/domain.ts'
+import { useTasks } from '../hooks/useTasks.ts'
+import type { CalendarEvent, Task } from '../types/domain.ts'
 import type { EventSaveInput } from '../../api/_schemas/event.ts'
 import { api } from '../api.ts'
 import type { EventSaveResponse } from '../types/api.ts'
@@ -19,33 +20,55 @@ import type { EventSaveResponse } from '../types/api.ts'
 const TABS = ['Semana', 'Mês', 'Agenda', 'Dia'] as const
 type Tab = typeof TABS[number]
 
+function taskToEvent(task: Task): CalendarEvent {
+  const dayStr = task.dueDate!.slice(0, 10)
+  return {
+    id: `task-${task.id}`,
+    userId: task.userId,
+    calendarId: '',
+    summary: task.title,
+    startAt: `${dayStr}T00:00:00.000Z`,
+    endAt: `${dayStr}T23:59:59.000Z`,
+    allDay: true,
+    status: 'confirmed',
+    isOrganizer: false,
+    source: 'task_block',
+    taskId: task.id,
+    synced: false,
+    createdAt: task.createdAt,
+    updatedAt: task.updatedAt,
+  }
+}
+
 function rangeForTab(tab: Tab, date: Date): { start: string; end: string } {
   const fmt = (d: Date) => d.toISOString()
   if (tab === 'Semana') return { start: fmt(subDays(date, 3)), end: fmt(addDays(date, 10)) }
   if (tab === 'Mês') return { start: fmt(startOfMonth(date)), end: fmt(endOfMonth(date)) }
   if (tab === 'Dia') return { start: fmt(date), end: fmt(addDays(date, 1)) }
-  return { start: fmt(subDays(date, 7)), end: fmt(addDays(date, 30)) }
+  // Agenda: today → +6 days (7 days total)
+  return { start: fmt(date), end: fmt(addDays(date, 6)) }
 }
 
 function navTitle(tab: Tab, date: Date): string {
   if (tab === 'Semana') return format(date, "'Semana de' d MMM yyyy", { locale: ptBR })
   if (tab === 'Mês') return format(date, 'MMMM yyyy', { locale: ptBR })
   if (tab === 'Dia') return format(date, "EEEE, d 'de' MMM", { locale: ptBR })
-  return format(date, 'MMM yyyy', { locale: ptBR })
+  // Agenda: show range
+  return `${format(date, "d MMM", { locale: ptBR })} – ${format(addDays(date, 6), "d MMM", { locale: ptBR })}`
 }
 
 function goNext(tab: Tab, date: Date): Date {
   if (tab === 'Semana') return addWeeks(date, 1)
   if (tab === 'Mês') return addMonths(date, 1)
   if (tab === 'Dia') return addDays(date, 1)
-  return addDays(date, 14)
+  return addDays(date, 7)
 }
 
 function goPrev(tab: Tab, date: Date): Date {
   if (tab === 'Semana') return subWeeks(date, 1)
   if (tab === 'Mês') return subMonths(date, 1)
   if (tab === 'Dia') return subDays(date, 1)
-  return subDays(date, 14)
+  return subDays(date, 7)
 }
 
 export function CalendarPage() {
@@ -58,11 +81,28 @@ export function CalendarPage() {
 
   const { calendars, googleConnected, sync: syncCalendars, refetch: refetchCalendars } = useCalendars()
   const { events, loading, fetchRange, sync: syncEvents, range } = useEvents()
+  const { tasks } = useTasks()
 
   useEffect(() => {
     const { start, end } = rangeForTab(tab, date)
     void fetchRange(start, end)
   }, [tab, date, fetchRange])
+
+  // Merge task events (with dueDate) into the event list
+  const taskEvents = useMemo<CalendarEvent[]>(() => {
+    if (!range) return []
+    const rangeStart = range.start.slice(0, 10)
+    const rangeEnd = range.end.slice(0, 10)
+    return tasks
+      .filter(t => t.dueDate && !t.archived && t.status !== 'done')
+      .filter(t => {
+        const day = t.dueDate!.slice(0, 10)
+        return day >= rangeStart && day <= rangeEnd
+      })
+      .map(taskToEvent)
+  }, [tasks, range])
+
+  const allEvents = useMemo(() => [...events, ...taskEvents], [events, taskEvents])
 
   const handleSync = async () => {
     setSyncing(true)
@@ -96,12 +136,17 @@ export function CalendarPage() {
   }
 
   const handleCalendarToggle = (id: string, visible: boolean) => {
-    // Optimistic update via refetch after a tick
     void refetchCalendars()
-    // Also refresh events since visible calendars changed
     const { start, end } = rangeForTab(tab, date)
     void fetchRange(start, end)
     void id; void visible
+  }
+
+  // Don't open EventPanel for task blocks — they belong to the Tasks module
+  const handleOpen = (ev: CalendarEvent) => {
+    if (ev.source === 'task_block') return
+    setSelected(ev)
+    setPanelOpen(true)
   }
 
   const actions = (
@@ -144,22 +189,22 @@ export function CalendarPage() {
       {loading && <div className="empty-state">Carregando…</div>}
 
       {!loading && tab === 'Agenda' && (
-        <AgendaView events={events} calendars={calendars} onOpen={ev => { setSelected(ev); setPanelOpen(true) }} />
+        <AgendaView events={allEvents} calendars={calendars} onOpen={handleOpen} />
       )}
 
       {!loading && tab === 'Semana' && (
-        <WeekView date={date} events={events} calendars={calendars} onOpen={ev => { setSelected(ev); setPanelOpen(true) }} />
+        <WeekView date={date} events={allEvents} calendars={calendars} onOpen={handleOpen} />
       )}
 
       {!loading && tab === 'Mês' && (
-        <MonthView date={date} events={events} calendars={calendars} onOpen={ev => { setSelected(ev); setPanelOpen(true) }} />
+        <MonthView date={date} events={allEvents} calendars={calendars} onOpen={handleOpen} />
       )}
 
       {!loading && tab === 'Dia' && (
         <AgendaView
-          events={events.filter(e => e.startAt.slice(0, 10) === format(date, 'yyyy-MM-dd'))}
+          events={allEvents.filter(e => e.startAt.slice(0, 10) === format(date, 'yyyy-MM-dd'))}
           calendars={calendars}
-          onOpen={ev => { setSelected(ev); setPanelOpen(true) }}
+          onOpen={handleOpen}
         />
       )}
 
