@@ -159,7 +159,7 @@ export async function generateBriefing(
     )
   )
 
-  console.log('[briefing] sources:', sources?.length ?? 0, '| rss items:', rssResults.flatMap(r => r.items).length)
+  console.error('[briefing] sources:', sources?.length ?? 0, '| rss items:', rssResults.flatMap(r => r.items).length)
 
   const newsLines = rssResults
     .flatMap(r => r.items.map(i => `[${r.source}] ${i.title} | ${i.url}`))

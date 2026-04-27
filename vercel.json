@@ -2,6 +2,10 @@
   "rewrites": [
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
+  "functions": {
+    "api/briefing-generate.ts": { "maxDuration": 60 },
+    "api/briefing-cron.ts": { "maxDuration": 300 }
+  },
   "crons": [
     {
       "path": "/api/briefing-cron",
