@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './hooks/AuthProvider.tsx'
 import { useAuth } from './hooks/useAuth.ts'
 import { BottomNav } from './components/layout/BottomNav.tsx'
+import { ErrorBoundary } from './components/common/ErrorBoundary.tsx'
 import { LoginPage } from './pages/LoginPage.tsx'
 import { BriefingPage } from './pages/BriefingPage.tsx'
 import { TasksPage } from './pages/TasksPage.tsx'
@@ -61,7 +62,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <ErrorBoundary>
+          <AppRoutes />
+        </ErrorBoundary>
       </AuthProvider>
     </BrowserRouter>
   )

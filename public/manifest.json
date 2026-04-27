@@ -1,0 +1,31 @@
+{
+  "name": "JP App — STATE",
+  "short_name": "JP App",
+  "description": "Assistente pessoal do Jorge — STATE Innovation Center",
+  "start_url": "/briefing",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0a0a0a",
+  "background_color": "#0a0a0a",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    { "name": "Briefing", "url": "/briefing", "description": "Briefing matinal" },
+    { "name": "Tasks",    "url": "/tasks",    "description": "Tarefas" },
+    { "name": "Calendar", "url": "/calendar", "description": "Agenda" }
+  ]
+}
