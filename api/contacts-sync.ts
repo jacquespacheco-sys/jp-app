@@ -35,6 +35,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ...(pageToken ? { pageToken } : {}),
     })
 
+    console.error('[contacts-sync] connections on page:', data.connections?.length ?? 0)
     for (const person of data.connections ?? []) {
       const resourceName = person.resourceName
       if (!resourceName) continue
