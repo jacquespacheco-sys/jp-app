@@ -127,7 +127,7 @@ export function BriefingPage() {
     setGenerating(true)
     setError('')
     try {
-      const res = await api.post<BriefingResponse>('/api/briefing-generate')
+      const res = await api.post<BriefingResponse>(todayBriefing ? '/api/briefing-generate?force=true' : '/api/briefing-generate')
       setTodayBriefing(res.briefing)
       setHistory(h => [res.briefing, ...h])
     } catch (e) {

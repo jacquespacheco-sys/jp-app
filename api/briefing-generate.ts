@@ -15,6 +15,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const supabase = getSupabase()
   const today = new Date().toISOString().slice(0, 10)
 
+  const force = req.query['force'] === 'true'
+
   const { data: existing } = await supabase
     .from('briefings')
     .select('id')
@@ -23,7 +25,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .single()
 
   if (existing) {
-    return res.status(409).json({ error: 'Briefing de hoje já gerado' })
+    if (!force) return res.status(409).json({ error: 'Briefing de hoje já gerado' })
+    await supabase.from('briefings').delete().eq('id', existing.id)
   }
 
   try {
