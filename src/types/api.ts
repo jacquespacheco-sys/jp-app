@@ -1,4 +1,4 @@
-import type { AuthUser, Task, Project, Contact, Interaction, CalendarEvent, Calendar, Briefing } from './domain.ts'
+import type { AuthUser, Task, Project, Contact, Interaction, CalendarEvent, Calendar, Briefing, Source, Newsletter } from './domain.ts'
 
 export interface ApiResponse<T> {
   data?: T
@@ -56,6 +56,11 @@ export interface BriefingResponse {
 
 export interface BriefingHistoryResponse {
   briefings: Briefing[]
+}
+
+export interface SourcesListResponse {
+  sources: Source[]
+  newsletters: Newsletter[]
 }
 
 export interface SyncStatusResponse {

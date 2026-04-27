@@ -42,7 +42,7 @@ function BriefingView({ briefing }: { briefing: Briefing }) {
             <div key={i} className="agenda-item">
               <div className="agenda-time">
                 {(ev as { all_day?: boolean }).all_day ? 'Dia todo'
-                  : format(parseISO((ev as { start_at: string }).start_at), 'HH:mm')}
+                  : format(parseISO((ev as unknown as { start_at: string }).start_at), 'HH:mm')}
               </div>
               <div>
                 <div className="agenda-title">{(ev as { summary: string }).summary}</div>

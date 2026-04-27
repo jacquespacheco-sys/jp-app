@@ -34,11 +34,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const supabase = getSupabase()
-  const now = new Date().toISOString()
 
   if (parsed.data.type === 'source') {
     const { id, name, url, active } = parsed.data
-    const payload = { name, url, active, user_id: user.id, updated_at: now }
+    const payload = { name, url, active, user_id: user.id }
 
     const query = id
       ? supabase.from('sources').update(payload).eq('id', id).eq('user_id', user.id).select().single()
@@ -50,7 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const { id, name, senderEmail, active } = parsed.data
-  const payload = { name, sender_email: senderEmail, active, user_id: user.id, updated_at: now }
+  const payload = { name, sender_email: senderEmail, active, user_id: user.id }
 
   const query = id
     ? supabase.from('newsletters').update(payload).eq('id', id).eq('user_id', user.id).select().single()

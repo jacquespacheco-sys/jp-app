@@ -144,6 +144,24 @@ export interface Interaction {
   createdAt: string
 }
 
+export interface Source {
+  id: string
+  name: string
+  url: string
+  active: boolean
+  lastFetch?: string
+  createdAt: string
+}
+
+export interface Newsletter {
+  id: string
+  name: string
+  senderEmail: string
+  active: boolean
+  lastFetch?: string
+  createdAt: string
+}
+
 export interface AuthUser {
   id: string
   email: string
