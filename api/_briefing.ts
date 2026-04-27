@@ -20,7 +20,8 @@ async function fetchRssItems(url: string, max = 5): Promise<RssItem[]> {
       summary: item.contentSnippet ?? item.content ?? '',
       url: item.link ?? url,
     }))
-  } catch {
+  } catch (err) {
+    console.error('[rss] fetch failed:', url, err instanceof Error ? err.message : err)
     return []
   }
 }
@@ -158,8 +159,10 @@ export async function generateBriefing(
     )
   )
 
+  console.log('[briefing] sources:', sources?.length ?? 0, '| rss items:', rssResults.flatMap(r => r.items).length)
+
   const newsLines = rssResults
-    .flatMap(r => r.items.map(i => `[${r.source}] ${i.title}`))
+    .flatMap(r => r.items.map(i => `[${r.source}] ${i.title} | ${i.url}`))
     .join('\n')
 
   const tasksLines = (tasks ?? [])
@@ -182,7 +185,7 @@ export async function generateBriefing(
       content: `Você é o assistente pessoal do Jorge, founder do STATE Innovation Center, Curitiba/BR.
 Gere um briefing matinal CONCISO para hoje (${today}).
 
-NOTÍCIAS DO DIA:
+NOTÍCIAS DO DIA (formato: [Fonte] Título | URL):
 ${newsLines || '(sem notícias)'}
 
 AGENDA DE HOJE:
@@ -191,15 +194,15 @@ ${eventsLines || '(sem eventos)'}
 TASKS PRIORITÁRIAS:
 ${tasksLines || '(sem tasks)'}
 
-Responda em JSON exato:
+Responda APENAS com JSON exato (sem markdown, sem texto fora do JSON):
 {
   "highlight": "frase motivacional ou insight do dia (max 120 chars)",
-  "global": [{"source":"...", "title":"...", "summary":"...(max 80 chars)", "url":"..."}],
-  "brasil": [{"source":"...", "title":"...", "summary":"...(max 80 chars)", "url":"..."}],
+  "global": [{"source":"nome da fonte","title":"título original","summary":"resumo max 80 chars","url":"url exata fornecida acima"}],
+  "brasil": [{"source":"nome da fonte","title":"título original","summary":"resumo max 80 chars","url":"url exata fornecida acima"}],
   "newsletters": []
 }
 
-Máximo 3 itens em global e 2 em brasil. Priorize o que é mais relevante para Jorge.`,
+Regras: use APENAS as notícias fornecidas acima com suas URLs exatas. Máximo 3 em global, 2 em brasil. Classifique por relevância geográfica (brasil = notícias do Brasil).`,
     }],
   })
 
