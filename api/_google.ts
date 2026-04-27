@@ -15,7 +15,9 @@ export function getOAuthUrl(state: string) {
     access_type: 'offline',
     scope: [
       'https://www.googleapis.com/auth/calendar',
+      'https://www.googleapis.com/auth/tasks',
       'https://www.googleapis.com/auth/contacts.readonly',
+      'https://www.googleapis.com/auth/directory.readonly',
     ],
     prompt: 'consent',
     state,
