@@ -1,4 +1,4 @@
-import { getSupabase } from './_supabase.ts'
+import { getSupabase } from './_supabase.js'
 import Anthropic from '@anthropic-ai/sdk'
 import Parser from 'rss-parser'
 import { Resend } from 'resend'

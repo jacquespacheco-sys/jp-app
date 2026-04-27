@@ -1,6 +1,6 @@
-import { requireAuth } from './_middleware.ts'
-import { getSupabase } from './_supabase.ts'
-import { getAuthedClient } from './_google.ts'
+import { requireAuth } from './_middleware.js'
+import { getSupabase } from './_supabase.js'
+import { getAuthedClient } from './_google.js'
 import { google } from 'googleapis'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 

@@ -1,7 +1,7 @@
-import './_env.ts'
-import { requireCron } from './_middleware.ts'
-import { getSupabase } from './_supabase.ts'
-import { generateBriefing } from './_briefing.ts'
+import './_env.js'
+import { requireCron } from './_middleware.js'
+import { getSupabase } from './_supabase.js'
+import { generateBriefing } from './_briefing.js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 export const maxDuration = 300

@@ -1,6 +1,6 @@
-import { requireAuth } from './_middleware.ts'
-import { getSupabase } from './_supabase.ts'
-import { TaskSaveSchema } from './_schemas/task.ts'
+import { requireAuth } from './_middleware.js'
+import { getSupabase } from './_supabase.js'
+import { TaskSaveSchema } from './_schemas/task.js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

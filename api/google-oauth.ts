@@ -1,6 +1,6 @@
-import { requireAuth } from './_middleware.ts'
-import { getOAuthClient, getOAuthUrl } from './_google.ts'
-import { getSupabase } from './_supabase.ts'
+import { requireAuth } from './_middleware.js'
+import { getOAuthClient, getOAuthUrl } from './_google.js'
+import { getSupabase } from './_supabase.js'
 import jwt from 'jsonwebtoken'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 

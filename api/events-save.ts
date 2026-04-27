@@ -1,6 +1,6 @@
-import { requireAuth } from './_middleware.ts'
-import { getSupabase } from './_supabase.ts'
-import { EventSaveSchema } from './_schemas/event.ts'
+import { requireAuth } from './_middleware.js'
+import { getSupabase } from './_supabase.js'
+import { EventSaveSchema } from './_schemas/event.js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

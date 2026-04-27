@@ -1,6 +1,6 @@
-import './_env.ts'
+import './_env.js'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '../src/types/database.ts'
+import type { Database } from '../src/types/database.js'
 
 let _client: SupabaseClient<Database> | null = null
 

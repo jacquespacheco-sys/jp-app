@@ -1,5 +1,5 @@
-import { requireAuth } from './_middleware.ts'
-import { getSupabase } from './_supabase.ts'
+import { requireAuth } from './_middleware.js'
+import { getSupabase } from './_supabase.js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

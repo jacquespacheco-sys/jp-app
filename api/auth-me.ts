@@ -1,4 +1,4 @@
-import { requireAuth } from './_middleware.ts'
+import { requireAuth } from './_middleware.js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 export default function handler(req: VercelRequest, res: VercelResponse) {

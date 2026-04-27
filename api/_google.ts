@@ -1,4 +1,4 @@
-import './_env.ts'
+import './_env.js'
 import { google } from 'googleapis'
 
 export function getOAuthClient() {

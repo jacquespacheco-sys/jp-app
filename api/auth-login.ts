@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { serialize } from 'cookie'
 import { z } from 'zod'
-import { getSupabase } from './_supabase.ts'
+import { getSupabase } from './_supabase.js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 const LoginSchema = z.object({

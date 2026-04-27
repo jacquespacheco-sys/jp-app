@@ -1,7 +1,7 @@
-import { requireAuth } from './_middleware.ts'
-import { getSupabase } from './_supabase.ts'
-import { ContactSaveSchema } from './_schemas/contact.ts'
-import { mapContact } from './contacts-list.ts'
+import { requireAuth } from './_middleware.js'
+import { getSupabase } from './_supabase.js'
+import { ContactSaveSchema } from './_schemas/contact.js'
+import { mapContact } from './contacts-list.js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
