@@ -164,7 +164,22 @@ export function BriefingPage() {
             </div>
           )}
 
-          {!loading && todayBriefing && <BriefingView briefing={todayBriefing} />}
+          {!loading && todayBriefing && (
+            <>
+              <BriefingView briefing={todayBriefing} />
+              <div className="content" style={{ textAlign: 'center', paddingTop: 0 }}>
+                {error && (
+                  <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '11px', color: 'var(--danger)', marginBottom: '16px', padding: '10px 12px', border: '1px solid var(--danger)' }}>
+                    {error}
+                  </div>
+                )}
+                <button className="btn" onClick={() => { void handleGenerate() }} disabled={generating}
+                  style={{ fontSize: '11px', opacity: 0.6 }}>
+                  {generating ? 'Gerando…' : 'Regenerar briefing'}
+                </button>
+              </div>
+            </>
+          )}
         </>
       )}
 
