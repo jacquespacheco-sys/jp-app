@@ -14,11 +14,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: parsed.error.issues[0]?.message ?? 'dados inválidos' })
   }
 
-  const { id, projectId, contactId, dueDate, dependsOn, startOffset, duration, ...rest } = parsed.data
+  const { id, title, projectId, contactId, dueDate, dependsOn, startOffset, duration, ...rest } = parsed.data
   const supabase = getSupabase()
   const now = new Date().toISOString()
 
   const payload = {
+    title,
     ...rest,
     project_id: projectId,
     contact_id: contactId ?? null,
