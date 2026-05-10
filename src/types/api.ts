@@ -68,3 +68,19 @@ export interface SyncStatusResponse {
   calendar: { lastSync?: string; pending: number }
   contacts: { lastSync?: string; pending: number }
 }
+
+import type { Area, QuadrantAggregate, AreaAggregate, AqalTotals } from './domain.ts'
+
+export interface AreasListResponse {
+  areas: Area[]
+}
+
+export interface AreaSaveResponse {
+  area: Area
+}
+
+export interface AqalDashboardResponse {
+  byQuadrant: QuadrantAggregate[]
+  byArea: AreaAggregate[]
+  totals: AqalTotals
+}

@@ -67,3 +67,10 @@ if (error) {
 }
 
 console.log('✅  Usuário criado/atualizado:', data.id, data.email)
+
+const { error: seedError } = await supabase.rpc('seed_default_areas', { p_user_id: data.id })
+if (seedError) {
+  console.error('⚠️  Falha ao semear áreas padrão:', seedError.message)
+  process.exit(1)
+}
+console.log('✅  Áreas padrão garantidas (idempotente)')

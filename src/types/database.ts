@@ -1,737 +1,636 @@
-// Gerado por: npm run db:types
-// Para atualizar: npm run db:types (requer SUPABASE_PROJECT_ID no .env)
-// NÃO editar manualmente — este arquivo é sobrescrito pelo CLI
+// Gerado/mantido manualmente após migrations 0001-0011.
+// Para regenerar via CLI: ajustar `db:types` no package.json com SUPABASE_PROJECT_ID
+// e rodar `npm run db:types` — o resultado deve ser equivalente.
+//
+// Inserts ficam fora do tipo Database para evitar ciclos de inferência
+// quando supabase-js resolve overload de `.from(...).insert(...)`.
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
+// AQAL/GTD types (do enum SQL)
+export type Quadrant = 'I' | 'IT' | 'WE' | 'ITS'
+export type HorizonLvl = 'H0' | 'H1' | 'H2' | 'H3' | 'H4' | 'H5'
+export type TaskContext = 'deep' | 'shallow' | 'social' | 'criativo' | 'somatico' | 'offline'
+export type ProjectKind = 'outcome' | 'evergreen'
+export type ProjectStatusAqal = 'active' | 'on_hold' | 'someday' | 'done' | 'archived'
+export type HabitDose = 'full' | 'min' | 'skip'
+export type CoachKind = 'briefing' | 'check_in' | 'callout' | 'celebration' | 'chat' | 'review'
+export type MemoryKind = 'fact' | 'pattern' | 'promise' | 'concern' | 'preference'
+export type CaptureSrc = 'manual' | 'voice' | 'email' | 'briefing' | 'coach' | 'google'
+
+// Tasks: status é text com check constraint que aceita valores legados e novos.
+export type TaskStatus =
+  | 'inbox' | 'next' | 'doing' | 'blocked' | 'done'    // legado
+  | 'waiting' | 'scheduled' | 'someday' | 'cancelled'  // novos AQAL/GTD
+
+// -------------------------------------------------------------
+// Insert types — fora do tipo Database (quebra recursão)
+// -------------------------------------------------------------
+type UsersInsert = {
+  id?: string; email: string; password_hash: string; name: string
+  city?: string | null; timezone?: string; google_refresh_token?: string | null
+  anthropic_api_key?: string | null; theme?: string
+  created_at?: string; updated_at?: string
+}
+
+type ProjectsInsert = {
+  id?: string; user_id: string; name: string; color?: string
+  google_task_list_id?: string | null; archived?: boolean
+  // AQAL
+  area_id?: string | null; parent_id?: string | null; title?: string
+  outcome?: string | null; kind?: ProjectKind; status_aqal?: ProjectStatusAqal
+  quadrant_override?: Quadrant | null; horizon?: HorizonLvl
+  target_date?: string | null; metadata?: Json; position?: number
+  completed_at?: string | null; archived_at?: string | null
+  created_at?: string; updated_at?: string
+}
+
+type ContactsInsert = {
+  id?: string; user_id: string; first_name: string
+  last_name?: string | null; company?: string | null; role?: string | null
+  email?: string | null; phone?: string | null; address?: string | null
+  birthday?: string | null; tags?: string[]; phase?: string | null
+  next_contact?: string | null; notes?: string
+  google_contact_id?: string | null; synced?: boolean
+  archived?: boolean; archived_at?: string | null
+  created_at?: string; updated_at?: string
+}
+
+type TasksInsert = {
+  id?: string; user_id: string; project_id: string
+  contact_id?: string | null; title: string; notes?: string
+  status?: TaskStatus; priority?: string; tags?: string[]
+  due_date?: string | null; start_offset?: number | null
+  duration?: number | null; depends_on?: string[]
+  archived?: boolean; archived_at?: string | null
+  google_tasks_id?: string | null; synced?: boolean
+  // AQAL
+  area_id?: string | null; parent_task_id?: string | null
+  quadrant_override?: Quadrant | null; context?: TaskContext | null
+  energy?: number | null; time_estimate_min?: number | null
+  waiting_for?: string | null; due_at?: string | null
+  scheduled_at?: string | null; completed_at?: string | null
+  rrule?: string | null; rrule_parent_id?: string | null
+  source?: CaptureSrc; external_id?: string | null
+  position?: number; ai_classified?: boolean
+  created_at?: string; updated_at?: string
+}
+
+type TaskLogsInsert = { id?: string; task_id: string; changes: Json; timestamp?: string }
+type InteractionsInsert = { id?: string; contact_id: string; date: string; type: string; note?: string; created_at?: string }
+type RelationshipsInsert = { id?: string; contact_id: string; related_id: string; label: string; created_at?: string }
+type ContactLogsInsert = { id?: string; contact_id: string; changes: Json; timestamp?: string }
+type SourcesInsert = { id?: string; user_id: string; name: string; url: string; active?: boolean; last_fetch?: string | null; created_at?: string }
+type NewslettersInsert = { id?: string; user_id: string; name: string; sender_email: string; active?: boolean; last_fetch?: string | null; created_at?: string }
+
+type BriefingsInsert = {
+  id?: string; user_id: string; date: string; highlight: string
+  content: Json; email_sent?: boolean; email_sent_at?: string | null
+  model?: string; token_count?: number | null; cost?: number | null
+  created_at?: string
+  // AQAL
+  briefed_for?: string | null; content_md?: string | null
+  context_snapshot?: Json | null; external_tasks_count?: number
+  model_used?: string | null; delivered_at?: string | null; opened_at?: string | null
+}
+
+type CalendarsInsert = {
+  id?: string; user_id: string; google_calendar_id: string; summary: string
+  description?: string | null; google_color_id?: string | null; custom_color?: string | null
+  is_primary?: boolean; is_visible?: boolean; is_default_for_create?: boolean
+  access_role?: string | null; sync_token?: string | null; last_sync_at?: string | null
+  created_at?: string; updated_at?: string
+}
+
+type CalendarEventsInsert = {
+  id?: string; user_id: string; calendar_id: string
+  google_event_id?: string | null; ical_uid?: string | null
+  summary: string; description?: string | null; location?: string | null
+  start_at: string; end_at: string; all_day?: boolean
+  timezone?: string | null; status?: string; recurrence?: string[] | null
+  recurring_event_id?: string | null; attendees?: Json | null
+  organizer_email?: string | null; is_organizer?: boolean
+  source?: string; task_id?: string | null; synced?: boolean
+  etag?: string | null; created_at?: string; updated_at?: string
+}
+
+type EventLogsInsert = {
+  id?: string; event_id?: string | null; user_id: string
+  action: string; changes?: Json | null; source: string; timestamp?: string
+}
+
+// Notes module (0008)
+type NoteFoldersInsert = { id?: string; user_id: string; parent_id?: string | null; name: string; created_at?: string; updated_at?: string }
+type NoteTagsInsert = { id?: string; user_id: string; name: string; color?: string; created_at?: string }
+type NotesInsert = {
+  id?: string; user_id: string; folder_id?: string | null
+  type: 'postit' | 'text' | 'audio' | 'link'
+  title?: string | null; content?: string; url?: string | null
+  thumbnail_url?: string | null; audio_duration?: number | null
+  pinned?: boolean; archived?: boolean; created_at?: string; updated_at?: string
+}
+type NoteTagMapInsert = { note_id: string; tag_id: string }
+
+// News module (0009)
+type NewsItemsInsert = {
+  id?: string; user_id: string; source_id?: string | null
+  title: string; url: string; summary?: string | null
+  content?: string | null; author?: string | null; image_url?: string | null
+  published_at: string; favorited?: boolean; read?: boolean; created_at?: string
+}
+
+// AQAL module (0010)
+type AreasInsert = {
+  id?: string; user_id: string; parent_id?: string | null
+  name: string; slug: string; quadrant: Quadrant
+  vision_h4?: string | null; color?: string | null; icon?: string | null
+  position?: number; archived_at?: string | null
+  created_at?: string; updated_at?: string
+}
+
+type TagsInsert = {
+  id?: string; user_id: string; parent_id?: string | null
+  name: string; slug: string; color?: string | null; icon?: string | null
+  metadata?: Json; created_at?: string
+}
+
+type HabitsInsert = {
+  id?: string; user_id: string; area_id?: string | null
+  identity: string; title: string; action: string; min_dose: string
+  cue?: string | null; reward?: string | null; quadrant: Quadrant
+  cadence: Json; schedule_time?: string | null
+  stack_after_habit_id?: string | null; active?: boolean
+  archived_at?: string | null; created_at?: string; updated_at?: string
+}
+
+type HabitLogsInsert = {
+  id?: string; habit_id: string; user_id: string
+  done_on: string; done_at?: string; dose: HabitDose; note?: string | null
+}
+
+type RitualsInsert = {
+  id?: string; user_id: string; name: string
+  trigger_time?: string | null; description?: string | null
+  active?: boolean; created_at?: string; updated_at?: string
+}
+
+type RitualStepsInsert = {
+  id?: string; ritual_id: string; position: number
+  habit_id?: string | null; custom_step?: string | null; estimated_min?: number | null
+}
+
+type InboxItemsInsert = {
+  id?: string; user_id: string; raw_text: string; source: CaptureSrc
+  external_ref?: string | null; ai_suggestion?: Json | null
+  processed?: boolean; processed_to_task?: string | null
+  processed_to_project?: string | null
+  created_at?: string; processed_at?: string | null
+}
+
+type ExternalTasksInsert = {
+  id?: string; user_id: string; provider?: string
+  external_list_id: string; external_list_name?: string | null
+  external_id: string; title: string; notes?: string | null
+  status: string; due_at?: string | null; completed_at?: string | null
+  last_synced_at?: string
+}
+
+type IntegrationsInsert = {
+  id?: string; user_id: string; provider: string
+  account_email?: string | null; scopes?: string[]
+  access_token_secret_id?: string | null; refresh_token_secret_id?: string | null
+  expires_at?: string | null; status?: string; last_synced_at?: string | null
+  metadata?: Json; created_at?: string; updated_at?: string
+}
+
+type CoachProfileInsert = {
+  user_id: string; name?: string; tone?: string
+  voice_examples?: string | null; values_md?: Json; boundaries?: string | null
+  check_in_schedule?: Json; system_prompt_override?: string | null
+  north_star_md?: string | null; h3_goals?: Json; updated_at?: string
+}
+
+type CoachMemoryInsert = {
+  id?: string; user_id: string; kind: MemoryKind; content: string
+  source?: string | null; related_area_id?: string | null
+  related_project_id?: string | null; related_task_id?: string | null
+  relevance?: number; expires_at?: string | null
+  last_referenced_at?: string | null; created_at?: string
+}
+
+type CoachLogInsert = {
+  id?: string; user_id: string; kind: CoachKind
+  direction: 'coach_to_user' | 'user_to_coach'
+  content_md: string; context_snapshot?: Json | null; resulted_in?: Json | null
+  model_used?: string | null; tokens_in?: number | null
+  tokens_out?: number | null; created_at?: string
+}
+
+type ReviewsInsert = {
+  id?: string; user_id: string; week_start: string
+  quadrant_distribution: Json; habit_completion: Json; metrics: Json
+  alerts?: Json; insights_md?: string | null; model_used?: string | null
+  created_at?: string
+}
+
+// -------------------------------------------------------------
 export type Database = {
   public: {
     Tables: {
       users: {
         Row: {
-          id: string
-          email: string
-          password_hash: string
-          name: string
-          city: string | null
-          timezone: string
-          google_refresh_token: string | null
-          anthropic_api_key: string | null
-          theme: string
-          created_at: string
-          updated_at: string
+          id: string; email: string; password_hash: string; name: string
+          city: string | null; timezone: string
+          google_refresh_token: string | null; anthropic_api_key: string | null
+          theme: string; created_at: string; updated_at: string
         }
-        Insert: {
-          id?: string
-          email: string
-          password_hash: string
-          name: string
-          city?: string | null
-          timezone?: string
-          google_refresh_token?: string | null
-          anthropic_api_key?: string | null
-          theme?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          email?: string
-          password_hash?: string
-          name?: string
-          city?: string | null
-          timezone?: string
-          google_refresh_token?: string | null
-          anthropic_api_key?: string | null
-          theme?: string
-          created_at?: string
-          updated_at?: string
-        }
+        Insert: UsersInsert
+        Update: Partial<UsersInsert>
         Relationships: []
       }
       projects: {
         Row: {
-          id: string
-          user_id: string
-          name: string
-          color: string
-          google_task_list_id: string | null
-          archived: boolean
-          created_at: string
-          updated_at: string
+          id: string; user_id: string; name: string; color: string
+          google_task_list_id: string | null; archived: boolean
+          created_at: string; updated_at: string
+          // AQAL
+          area_id: string | null; parent_id: string | null; title: string | null
+          outcome: string | null; kind: ProjectKind; status_aqal: ProjectStatusAqal
+          quadrant_override: Quadrant | null; horizon: HorizonLvl
+          target_date: string | null; metadata: Json; position: number
+          completed_at: string | null; archived_at: string | null
         }
-        Insert: {
-          id?: string
-          user_id: string
-          name: string
-          color?: string
-          google_task_list_id?: string | null
-          archived?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          name?: string
-          color?: string
-          google_task_list_id?: string | null
-          archived?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "projects_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
+        Insert: ProjectsInsert
+        Update: Partial<ProjectsInsert>
+        Relationships: []
       }
       contacts: {
         Row: {
-          id: string
-          user_id: string
-          first_name: string
-          last_name: string | null
-          company: string | null
-          role: string | null
-          email: string | null
-          phone: string | null
-          address: string | null
-          birthday: string | null
-          tags: string[]
-          phase: string | null
-          next_contact: string | null
-          notes: string
-          google_contact_id: string | null
-          synced: boolean
-          archived: boolean
-          archived_at: string | null
-          created_at: string
-          updated_at: string
+          id: string; user_id: string; first_name: string
+          last_name: string | null; company: string | null; role: string | null
+          email: string | null; phone: string | null; address: string | null
+          birthday: string | null; tags: string[]; phase: string | null
+          next_contact: string | null; notes: string
+          google_contact_id: string | null; synced: boolean
+          archived: boolean; archived_at: string | null
+          created_at: string; updated_at: string
         }
-        Insert: {
-          id?: string
-          user_id: string
-          first_name: string
-          last_name?: string | null
-          company?: string | null
-          role?: string | null
-          email?: string | null
-          phone?: string | null
-          address?: string | null
-          birthday?: string | null
-          tags?: string[]
-          phase?: string | null
-          next_contact?: string | null
-          notes?: string
-          google_contact_id?: string | null
-          synced?: boolean
-          archived?: boolean
-          archived_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          first_name?: string
-          last_name?: string | null
-          company?: string | null
-          role?: string | null
-          email?: string | null
-          phone?: string | null
-          address?: string | null
-          birthday?: string | null
-          tags?: string[]
-          phase?: string | null
-          next_contact?: string | null
-          notes?: string
-          google_contact_id?: string | null
-          synced?: boolean
-          archived?: boolean
-          archived_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "contacts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
+        Insert: ContactsInsert
+        Update: Partial<ContactsInsert>
+        Relationships: []
       }
       tasks: {
         Row: {
-          id: string
-          user_id: string
-          project_id: string
-          contact_id: string | null
-          title: string
-          notes: string
-          status: string
-          priority: string
-          tags: string[]
-          due_date: string | null
-          start_offset: number | null
-          duration: number | null
-          depends_on: string[]
-          archived: boolean
-          archived_at: string | null
-          google_tasks_id: string | null
-          synced: boolean
-          created_at: string
-          updated_at: string
+          id: string; user_id: string; project_id: string
+          contact_id: string | null; title: string; notes: string
+          status: TaskStatus; priority: string; tags: string[]
+          due_date: string | null; start_offset: number | null
+          duration: number | null; depends_on: string[]
+          archived: boolean; archived_at: string | null
+          google_tasks_id: string | null; synced: boolean
+          created_at: string; updated_at: string
+          // AQAL
+          area_id: string | null; parent_task_id: string | null
+          quadrant_override: Quadrant | null; context: TaskContext | null
+          energy: number | null; time_estimate_min: number | null
+          waiting_for: string | null; due_at: string | null
+          scheduled_at: string | null; completed_at: string | null
+          rrule: string | null; rrule_parent_id: string | null
+          source: CaptureSrc; external_id: string | null
+          position: number; ai_classified: boolean
         }
-        Insert: {
-          id?: string
-          user_id: string
-          project_id: string
-          contact_id?: string | null
-          title: string
-          notes?: string
-          status?: string
-          priority?: string
-          tags?: string[]
-          due_date?: string | null
-          start_offset?: number | null
-          duration?: number | null
-          depends_on?: string[]
-          archived?: boolean
-          archived_at?: string | null
-          google_tasks_id?: string | null
-          synced?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          project_id?: string
-          contact_id?: string | null
-          title?: string
-          notes?: string
-          status?: string
-          priority?: string
-          tags?: string[]
-          due_date?: string | null
-          start_offset?: number | null
-          duration?: number | null
-          depends_on?: string[]
-          archived?: boolean
-          archived_at?: string | null
-          google_tasks_id?: string | null
-          synced?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tasks_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tasks_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tasks_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "contacts"
-            referencedColumns: ["id"]
-          }
-        ]
+        Insert: TasksInsert
+        Update: Partial<TasksInsert>
+        Relationships: []
       }
       task_logs: {
-        Row: {
-          id: string
-          task_id: string
-          changes: Json
-          timestamp: string
-        }
-        Insert: {
-          id?: string
-          task_id: string
-          changes: Json
-          timestamp?: string
-        }
-        Update: {
-          id?: string
-          task_id?: string
-          changes?: Json
-          timestamp?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "task_logs_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          }
-        ]
+        Row: { id: string; task_id: string; changes: Json; timestamp: string }
+        Insert: TaskLogsInsert
+        Update: Partial<TaskLogsInsert>
+        Relationships: []
       }
       interactions: {
-        Row: {
-          id: string
-          contact_id: string
-          date: string
-          type: string
-          note: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          contact_id: string
-          date: string
-          type: string
-          note?: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          contact_id?: string
-          date?: string
-          type?: string
-          note?: string
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "interactions_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "contacts"
-            referencedColumns: ["id"]
-          }
-        ]
+        Row: { id: string; contact_id: string; date: string; type: string; note: string; created_at: string }
+        Insert: InteractionsInsert
+        Update: Partial<InteractionsInsert>
+        Relationships: []
       }
       relationships: {
-        Row: {
-          id: string
-          contact_id: string
-          related_id: string
-          label: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          contact_id: string
-          related_id: string
-          label: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          contact_id?: string
-          related_id?: string
-          label?: string
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "relationships_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "relationships_related_id_fkey"
-            columns: ["related_id"]
-            isOneToOne: false
-            referencedRelation: "contacts"
-            referencedColumns: ["id"]
-          }
-        ]
+        Row: { id: string; contact_id: string; related_id: string; label: string; created_at: string }
+        Insert: RelationshipsInsert
+        Update: Partial<RelationshipsInsert>
+        Relationships: []
       }
       contact_logs: {
-        Row: {
-          id: string
-          contact_id: string
-          changes: Json
-          timestamp: string
-        }
-        Insert: {
-          id?: string
-          contact_id: string
-          changes: Json
-          timestamp?: string
-        }
-        Update: {
-          id?: string
-          contact_id?: string
-          changes?: Json
-          timestamp?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "contact_logs_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "contacts"
-            referencedColumns: ["id"]
-          }
-        ]
+        Row: { id: string; contact_id: string; changes: Json; timestamp: string }
+        Insert: ContactLogsInsert
+        Update: Partial<ContactLogsInsert>
+        Relationships: []
       }
       sources: {
-        Row: {
-          id: string
-          user_id: string
-          name: string
-          url: string
-          active: boolean
-          last_fetch: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          name: string
-          url: string
-          active?: boolean
-          last_fetch?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          name?: string
-          url?: string
-          active?: boolean
-          last_fetch?: string | null
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sources_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
+        Row: { id: string; user_id: string; name: string; url: string; active: boolean; last_fetch: string | null; created_at: string }
+        Insert: SourcesInsert
+        Update: Partial<SourcesInsert>
+        Relationships: []
       }
       newsletters: {
-        Row: {
-          id: string
-          user_id: string
-          name: string
-          sender_email: string
-          active: boolean
-          last_fetch: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          name: string
-          sender_email: string
-          active?: boolean
-          last_fetch?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          name?: string
-          sender_email?: string
-          active?: boolean
-          last_fetch?: string | null
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "newsletters_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
+        Row: { id: string; user_id: string; name: string; sender_email: string; active: boolean; last_fetch: string | null; created_at: string }
+        Insert: NewslettersInsert
+        Update: Partial<NewslettersInsert>
+        Relationships: []
       }
       briefings: {
         Row: {
-          id: string
-          user_id: string
-          date: string
-          highlight: string
-          content: Json
-          email_sent: boolean
-          email_sent_at: string | null
-          model: string
-          token_count: number | null
-          cost: number | null
+          id: string; user_id: string; date: string; highlight: string
+          content: Json; email_sent: boolean; email_sent_at: string | null
+          model: string; token_count: number | null; cost: number | null
           created_at: string
+          // AQAL
+          briefed_for: string | null; content_md: string | null
+          context_snapshot: Json | null; external_tasks_count: number
+          model_used: string | null; delivered_at: string | null; opened_at: string | null
         }
-        Insert: {
-          id?: string
-          user_id: string
-          date: string
-          highlight: string
-          content: Json
-          email_sent?: boolean
-          email_sent_at?: string | null
-          model?: string
-          token_count?: number | null
-          cost?: number | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          date?: string
-          highlight?: string
-          content?: Json
-          email_sent?: boolean
-          email_sent_at?: string | null
-          model?: string
-          token_count?: number | null
-          cost?: number | null
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "briefings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
+        Insert: BriefingsInsert
+        Update: Partial<BriefingsInsert>
+        Relationships: []
       }
       calendars: {
         Row: {
-          id: string
-          user_id: string
-          google_calendar_id: string
-          summary: string
-          description: string | null
-          google_color_id: string | null
-          custom_color: string | null
-          is_primary: boolean
-          is_visible: boolean
-          is_default_for_create: boolean
-          access_role: string | null
-          sync_token: string | null
-          last_sync_at: string | null
-          created_at: string
-          updated_at: string
+          id: string; user_id: string; google_calendar_id: string; summary: string
+          description: string | null; google_color_id: string | null; custom_color: string | null
+          is_primary: boolean; is_visible: boolean; is_default_for_create: boolean
+          access_role: string | null; sync_token: string | null; last_sync_at: string | null
+          created_at: string; updated_at: string
         }
-        Insert: {
-          id?: string
-          user_id: string
-          google_calendar_id: string
-          summary: string
-          description?: string | null
-          google_color_id?: string | null
-          custom_color?: string | null
-          is_primary?: boolean
-          is_visible?: boolean
-          is_default_for_create?: boolean
-          access_role?: string | null
-          sync_token?: string | null
-          last_sync_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          google_calendar_id?: string
-          summary?: string
-          description?: string | null
-          google_color_id?: string | null
-          custom_color?: string | null
-          is_primary?: boolean
-          is_visible?: boolean
-          is_default_for_create?: boolean
-          access_role?: string | null
-          sync_token?: string | null
-          last_sync_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "calendars_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
+        Insert: CalendarsInsert
+        Update: Partial<CalendarsInsert>
+        Relationships: []
       }
       calendar_events: {
         Row: {
-          id: string
-          user_id: string
-          calendar_id: string
-          google_event_id: string | null
-          ical_uid: string | null
-          summary: string
-          description: string | null
-          location: string | null
-          start_at: string
-          end_at: string
-          all_day: boolean
-          timezone: string | null
-          status: string
-          recurrence: string[] | null
-          recurring_event_id: string | null
-          attendees: Json | null
-          organizer_email: string | null
-          is_organizer: boolean
-          source: string
-          task_id: string | null
-          synced: boolean
-          etag: string | null
-          created_at: string
-          updated_at: string
+          id: string; user_id: string; calendar_id: string
+          google_event_id: string | null; ical_uid: string | null
+          summary: string; description: string | null; location: string | null
+          start_at: string; end_at: string; all_day: boolean
+          timezone: string | null; status: string; recurrence: string[] | null
+          recurring_event_id: string | null; attendees: Json | null
+          organizer_email: string | null; is_organizer: boolean
+          source: string; task_id: string | null; synced: boolean
+          etag: string | null; created_at: string; updated_at: string
         }
-        Insert: {
-          id?: string
-          user_id: string
-          calendar_id: string
-          google_event_id?: string | null
-          ical_uid?: string | null
-          summary: string
-          description?: string | null
-          location?: string | null
-          start_at: string
-          end_at: string
-          all_day?: boolean
-          timezone?: string | null
-          status?: string
-          recurrence?: string[] | null
-          recurring_event_id?: string | null
-          attendees?: Json | null
-          organizer_email?: string | null
-          is_organizer?: boolean
-          source?: string
-          task_id?: string | null
-          synced?: boolean
-          etag?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          calendar_id?: string
-          google_event_id?: string | null
-          ical_uid?: string | null
-          summary?: string
-          description?: string | null
-          location?: string | null
-          start_at?: string
-          end_at?: string
-          all_day?: boolean
-          timezone?: string | null
-          status?: string
-          recurrence?: string[] | null
-          recurring_event_id?: string | null
-          attendees?: Json | null
-          organizer_email?: string | null
-          is_organizer?: boolean
-          source?: string
-          task_id?: string | null
-          synced?: boolean
-          etag?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "calendar_events_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "calendar_events_calendar_id_fkey"
-            columns: ["calendar_id"]
-            isOneToOne: false
-            referencedRelation: "calendars"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "calendar_events_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          }
-        ]
+        Insert: CalendarEventsInsert
+        Update: Partial<CalendarEventsInsert>
+        Relationships: []
       }
       event_logs: {
         Row: {
-          id: string
-          event_id: string | null
-          user_id: string
-          action: string
-          changes: Json | null
-          source: string
-          timestamp: string
+          id: string; event_id: string | null; user_id: string
+          action: string; changes: Json | null; source: string; timestamp: string
         }
-        Insert: {
-          id?: string
-          event_id?: string | null
-          user_id: string
-          action: string
-          changes?: Json | null
-          source: string
-          timestamp?: string
+        Insert: EventLogsInsert
+        Update: Partial<EventLogsInsert>
+        Relationships: []
+      }
+      // Notes (0008)
+      note_folders: {
+        Row: { id: string; user_id: string; parent_id: string | null; name: string; created_at: string; updated_at: string }
+        Insert: NoteFoldersInsert
+        Update: Partial<NoteFoldersInsert>
+        Relationships: []
+      }
+      note_tags: {
+        Row: { id: string; user_id: string; name: string; color: string; created_at: string }
+        Insert: NoteTagsInsert
+        Update: Partial<NoteTagsInsert>
+        Relationships: []
+      }
+      notes: {
+        Row: {
+          id: string; user_id: string; folder_id: string | null
+          type: 'postit' | 'text' | 'audio' | 'link'
+          title: string | null; content: string; url: string | null
+          thumbnail_url: string | null; audio_duration: number | null
+          pinned: boolean; archived: boolean
+          created_at: string; updated_at: string
         }
-        Update: {
-          id?: string
-          event_id?: string | null
-          user_id?: string
-          action?: string
-          changes?: Json | null
-          source?: string
-          timestamp?: string
+        Insert: NotesInsert
+        Update: Partial<NotesInsert>
+        Relationships: []
+      }
+      note_tag_map: {
+        Row: { note_id: string; tag_id: string }
+        Insert: NoteTagMapInsert
+        Update: NoteTagMapInsert
+        Relationships: []
+      }
+      // News (0009)
+      news_items: {
+        Row: {
+          id: string; user_id: string; source_id: string | null
+          title: string; url: string; summary: string | null
+          content: string | null; author: string | null; image_url: string | null
+          published_at: string; favorited: boolean; read: boolean; created_at: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "event_logs_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "calendar_events"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "event_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
+        Insert: NewsItemsInsert
+        Update: Partial<NewsItemsInsert>
+        Relationships: []
+      }
+      // AQAL (0010)
+      areas: {
+        Row: {
+          id: string; user_id: string; parent_id: string | null
+          name: string; slug: string; quadrant: Quadrant
+          vision_h4: string | null; color: string | null; icon: string | null
+          position: number; archived_at: string | null
+          created_at: string; updated_at: string
+        }
+        Insert: AreasInsert
+        Update: Partial<AreasInsert>
+        Relationships: []
+      }
+      tags: {
+        Row: {
+          id: string; user_id: string; parent_id: string | null
+          name: string; slug: string; color: string | null; icon: string | null
+          metadata: Json; created_at: string
+        }
+        Insert: TagsInsert
+        Update: Partial<TagsInsert>
+        Relationships: []
+      }
+      task_tags: {
+        Row: { task_id: string; tag_id: string }
+        Insert: { task_id: string; tag_id: string }
+        Update: { task_id?: string; tag_id?: string }
+        Relationships: []
+      }
+      project_tags: {
+        Row: { project_id: string; tag_id: string }
+        Insert: { project_id: string; tag_id: string }
+        Update: { project_id?: string; tag_id?: string }
+        Relationships: []
+      }
+      habits: {
+        Row: {
+          id: string; user_id: string; area_id: string | null
+          identity: string; title: string; action: string; min_dose: string
+          cue: string | null; reward: string | null; quadrant: Quadrant
+          cadence: Json; schedule_time: string | null
+          stack_after_habit_id: string | null; active: boolean
+          archived_at: string | null; created_at: string; updated_at: string
+        }
+        Insert: HabitsInsert
+        Update: Partial<HabitsInsert>
+        Relationships: []
+      }
+      habit_logs: {
+        Row: {
+          id: string; habit_id: string; user_id: string
+          done_on: string; done_at: string; dose: HabitDose; note: string | null
+        }
+        Insert: HabitLogsInsert
+        Update: Partial<HabitLogsInsert>
+        Relationships: []
+      }
+      rituals: {
+        Row: {
+          id: string; user_id: string; name: string
+          trigger_time: string | null; description: string | null
+          active: boolean; created_at: string; updated_at: string
+        }
+        Insert: RitualsInsert
+        Update: Partial<RitualsInsert>
+        Relationships: []
+      }
+      ritual_steps: {
+        Row: {
+          id: string; ritual_id: string; position: number
+          habit_id: string | null; custom_step: string | null; estimated_min: number | null
+        }
+        Insert: RitualStepsInsert
+        Update: Partial<RitualStepsInsert>
+        Relationships: []
+      }
+      inbox_items: {
+        Row: {
+          id: string; user_id: string; raw_text: string; source: CaptureSrc
+          external_ref: string | null; ai_suggestion: Json | null
+          processed: boolean; processed_to_task: string | null
+          processed_to_project: string | null
+          created_at: string; processed_at: string | null
+        }
+        Insert: InboxItemsInsert
+        Update: Partial<InboxItemsInsert>
+        Relationships: []
+      }
+      external_tasks: {
+        Row: {
+          id: string; user_id: string; provider: string
+          external_list_id: string; external_list_name: string | null
+          external_id: string; title: string; notes: string | null
+          status: string; due_at: string | null; completed_at: string | null
+          last_synced_at: string
+        }
+        Insert: ExternalTasksInsert
+        Update: Partial<ExternalTasksInsert>
+        Relationships: []
+      }
+      integrations: {
+        Row: {
+          id: string; user_id: string; provider: string
+          account_email: string | null; scopes: string[]
+          access_token_secret_id: string | null; refresh_token_secret_id: string | null
+          expires_at: string | null; status: string; last_synced_at: string | null
+          metadata: Json; created_at: string; updated_at: string
+        }
+        Insert: IntegrationsInsert
+        Update: Partial<IntegrationsInsert>
+        Relationships: []
+      }
+      coach_profile: {
+        Row: {
+          user_id: string; name: string; tone: string
+          voice_examples: string | null; values_md: Json; boundaries: string | null
+          check_in_schedule: Json; system_prompt_override: string | null
+          north_star_md: string | null; h3_goals: Json; updated_at: string
+        }
+        Insert: CoachProfileInsert
+        Update: Partial<CoachProfileInsert>
+        Relationships: []
+      }
+      coach_memory: {
+        Row: {
+          id: string; user_id: string; kind: MemoryKind; content: string
+          source: string | null; related_area_id: string | null
+          related_project_id: string | null; related_task_id: string | null
+          relevance: number; expires_at: string | null
+          last_referenced_at: string | null; created_at: string
+        }
+        Insert: CoachMemoryInsert
+        Update: Partial<CoachMemoryInsert>
+        Relationships: []
+      }
+      coach_log: {
+        Row: {
+          id: string; user_id: string; kind: CoachKind
+          direction: 'coach_to_user' | 'user_to_coach'
+          content_md: string; context_snapshot: Json | null; resulted_in: Json | null
+          model_used: string | null; tokens_in: number | null
+          tokens_out: number | null; created_at: string
+        }
+        Insert: CoachLogInsert
+        Update: Partial<CoachLogInsert>
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          id: string; user_id: string; week_start: string
+          quadrant_distribution: Json; habit_completion: Json; metrics: Json
+          alerts: Json; insights_md: string | null; model_used: string | null
+          created_at: string
+        }
+        Insert: ReviewsInsert
+        Update: Partial<ReviewsInsert>
+        Relationships: []
       }
     }
     Views: {
-      [_ in never]: never
+      v_tasks_resolved: {
+        Row: Database['public']['Tables']['tasks']['Row'] & {
+          resolved_quadrant: Quadrant | null
+        }
+        Relationships: []
+      }
+      v_quadrant_last_7d: {
+        Row: {
+          user_id: string
+          resolved_quadrant: Quadrant | null
+          completed: number
+          minutes: number
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      seed_default_areas: {
+        Args: { p_user_id: string }
+        Returns: void
+      }
+      sync_contacts_from_google: {
+        Args: { p_user_id: string; p_contacts: Json }
+        Returns: number
+      }
     }
     Enums: {
-      [_ in never]: never
+      quadrant: Quadrant
+      horizon_lvl: HorizonLvl
+      task_context: TaskContext
+      project_kind: ProjectKind
+      project_status_aqal: ProjectStatusAqal
+      habit_dose: HabitDose
+      coach_kind: CoachKind
+      memory_kind: MemoryKind
+      capture_src: CaptureSrc
     }
     CompositeTypes: {
       [_ in never]: never

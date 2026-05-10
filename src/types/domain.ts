@@ -221,3 +221,76 @@ export interface NewsItem {
   read: boolean
   createdAt: string
 }
+
+// =============================================================
+// AQAL/GTD (additivo — não modifica tipos legacy acima)
+// =============================================================
+
+import type {
+  Quadrant as QuadrantDB, HorizonLvl as HorizonLvlDB,
+  TaskContext as TaskContextDB, ProjectKind as ProjectKindDB,
+  ProjectStatusAqal, HabitDose as HabitDoseDB,
+  MemoryKind as MemoryKindDB, CaptureSrc as CaptureSrcDB,
+} from './database.ts'
+
+export type Quadrant = QuadrantDB
+export type HorizonLvl = HorizonLvlDB
+export type TaskContext = TaskContextDB
+export type ProjectKind = ProjectKindDB
+export type ProjectStatusType = ProjectStatusAqal
+export type HabitDose = HabitDoseDB
+export type MemoryKind = MemoryKindDB
+export type CaptureSrc = CaptureSrcDB
+
+export interface Area {
+  id: string
+  userId: string
+  parentId?: string
+  name: string
+  slug: string
+  quadrant: Quadrant
+  visionH4?: string
+  color?: string
+  icon?: string
+  position: number
+  archivedAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AreaAggregate {
+  areaId: string
+  name: string
+  quadrant: Quadrant
+  completed: number
+  open: number
+}
+
+export interface QuadrantAggregate {
+  quadrant: Quadrant
+  completed: number
+  minutes: number
+}
+
+export interface AqalTotals {
+  completedThisWeek: number
+  minutesThisWeek: number
+  openTasks: number
+}
+
+// -------------------------------------------------------------
+// Constantes UI
+// -------------------------------------------------------------
+export const QUADRANT_LABELS: Record<Quadrant, string> = {
+  I: 'Interior individual',
+  IT: 'Comportamento',
+  WE: 'Coletivo cultural',
+  ITS: 'Sistemas',
+}
+
+export const QUADRANT_COLORS: Record<Quadrant, string> = {
+  I: '#a78bfa',
+  IT: '#34d399',
+  WE: '#fb923c',
+  ITS: '#60a5fa',
+}

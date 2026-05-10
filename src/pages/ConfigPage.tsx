@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { Topbar } from '../components/layout/Topbar.tsx'
 import { ThemeToggle } from '../components/common/ThemeToggle.tsx'
 import { useAuth } from '../hooks/useAuth.ts'
@@ -122,6 +122,7 @@ export function ConfigPage() {
   const { googleConnected, sync: syncCalendars } = useCalendars()
   const { sources, loading: sourcesLoading, addSource, toggleSource, deleteSource } = useSources()
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
   const [connectMsg, setConnectMsg] = useState('')
   const [syncing, setSyncing] = useState(false)
   const [syncingTasks, setSyncingTasks] = useState(false)
@@ -193,6 +194,32 @@ export function ConfigPage() {
           <button type="button" className="btn btn-ghost" onClick={() => { void logout() }} style={{ borderColor: 'var(--border)' }}>
             Sair
           </button>
+        </div>
+
+        <div className="section">
+          <div className="section-title">AQAL</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--border-light)' }}>
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '3px' }}>Áreas de vida</div>
+              <div style={{ fontSize: '11px', color: 'var(--fg-muted)', fontFamily: 'Space Mono, monospace', letterSpacing: '0.5px' }}>
+                Quadrantes integrais I · IT · WE · ITS
+              </div>
+            </div>
+            <button className="btn btn-ghost" onClick={() => navigate('/areas')} style={{ fontSize: '10px' }}>
+              Configurar
+            </button>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--border-light)' }}>
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '3px' }}>Mandala</div>
+              <div style={{ fontSize: '11px', color: 'var(--fg-muted)', fontFamily: 'Space Mono, monospace', letterSpacing: '0.5px' }}>
+                Distribuição AQAL nos últimos 7 dias
+              </div>
+            </div>
+            <button className="btn btn-ghost" onClick={() => navigate('/dashboard')} style={{ fontSize: '10px' }}>
+              Abrir
+            </button>
+          </div>
         </div>
 
         <div className="section">

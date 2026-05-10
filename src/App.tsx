@@ -11,6 +11,8 @@ import { ContactsPage } from './pages/ContactsPage.tsx'
 import { ConfigPage } from './pages/ConfigPage.tsx'
 import { NotesPage } from './pages/NotesPage.tsx'
 import { NewsPage } from './pages/NewsPage.tsx'
+import { AreasPage } from './pages/AreasPage.tsx'
+import { DashboardPage } from './pages/DashboardPage.tsx'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -62,6 +64,14 @@ function AppRoutes() {
       <Route
         path="/news"
         element={<ProtectedRoute><NewsPage /></ProtectedRoute>}
+      />
+      <Route
+        path="/areas"
+        element={<ProtectedRoute><AreasPage /></ProtectedRoute>}
+      />
+      <Route
+        path="/dashboard"
+        element={<ProtectedRoute><DashboardPage /></ProtectedRoute>}
       />
       <Route path="*" element={<Navigate to="/briefing" replace />} />
     </Routes>
