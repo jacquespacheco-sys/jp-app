@@ -124,6 +124,7 @@ export function ConfigPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [connectMsg, setConnectMsg] = useState('')
   const [syncing, setSyncing] = useState(false)
+  const [syncingTasks, setSyncingTasks] = useState(false)
   const [showAddSource, setShowAddSource] = useState(false)
 
   useEffect(() => {
@@ -146,11 +147,28 @@ export function ConfigPage() {
   const handleSyncGoogle = async () => {
     setSyncing(true)
     try {
-      await syncCalendars()
-      await api.post('/api/events-sync')
-      setConnectMsg('Google sincronizado!')
+      await Promise.all([
+        syncCalendars(),
+        api.post('/api/events-sync'),
+        api.post('/api/contacts-sync'),
+      ])
+      setConnectMsg('Calendar e contatos sincronizados!')
+    } catch (e) {
+      setConnectMsg(e instanceof Error ? e.message : 'Erro ao sincronizar')
     } finally {
       setSyncing(false)
+    }
+  }
+
+  const handleSyncTasks = async () => {
+    setSyncingTasks(true)
+    try {
+      await api.post('/api/tasks-sync')
+      setConnectMsg('Tasks sincronizadas!')
+    } catch (e) {
+      setConnectMsg(e instanceof Error ? e.message : 'Erro ao sincronizar tasks')
+    } finally {
+      setSyncingTasks(false)
     }
   }
 
@@ -188,7 +206,7 @@ export function ConfigPage() {
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--border-light)' }}>
             <div>
-              <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '3px' }}>Google Calendar</div>
+              <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '3px' }}>Google Calendar + Contatos</div>
               <div style={{ fontSize: '11px', color: 'var(--fg-muted)', fontFamily: 'Space Mono, monospace', letterSpacing: '0.5px' }}>
                 {googleConnected ? 'Conectado' : 'Não conectado'}
               </div>
@@ -203,6 +221,20 @@ export function ConfigPage() {
               </button>
             )}
           </div>
+
+          {googleConnected && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--border-light)' }}>
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '3px' }}>Google Tasks</div>
+                <div style={{ fontSize: '11px', color: 'var(--fg-muted)', fontFamily: 'Space Mono, monospace', letterSpacing: '0.5px' }}>
+                  Importa listas e tarefas
+                </div>
+              </div>
+              <button className="btn btn-ghost" onClick={() => { void handleSyncTasks() }} disabled={syncingTasks} style={{ fontSize: '10px' }}>
+                {syncingTasks ? 'Sync…' : 'Sincronizar'}
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="section">

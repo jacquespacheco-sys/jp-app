@@ -16,7 +16,7 @@ export function getOAuthUrl(state: string) {
     scope: [
       'https://www.googleapis.com/auth/calendar',
       'https://www.googleapis.com/auth/tasks',
-      'https://www.googleapis.com/auth/contacts.readonly',
+      'https://www.googleapis.com/auth/contacts',
       'https://www.googleapis.com/auth/directory.readonly',
     ],
     prompt: 'consent',

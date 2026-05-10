@@ -169,3 +169,55 @@ export interface AuthUser {
   timezone: string
   theme: string
 }
+
+export type NoteType = 'postit' | 'text' | 'audio' | 'link'
+
+export interface NoteFolder {
+  id: string
+  userId: string
+  parentId?: string
+  name: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface NoteTag {
+  id: string
+  userId: string
+  name: string
+  color: string
+  createdAt: string
+}
+
+export interface Note {
+  id: string
+  userId: string
+  folderId?: string
+  type: NoteType
+  title?: string
+  content: string
+  url?: string
+  thumbnailUrl?: string
+  audioDuration?: number
+  pinned: boolean
+  archived: boolean
+  tagIds: string[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface NewsItem {
+  id: string
+  userId: string
+  sourceId?: string
+  title: string
+  url: string
+  summary?: string
+  content?: string
+  author?: string
+  imageUrl?: string
+  publishedAt: string
+  favorited: boolean
+  read: boolean
+  createdAt: string
+}

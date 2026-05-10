@@ -135,7 +135,7 @@ export async function generateBriefing(
 
   const supabase = getSupabase()
 
-  const [{ data: sources }, { data: tasks }, { data: events }] = await Promise.all([
+  const [{ data: sources }, { data: tasks }, { data: visibleCals }, { data: events }] = await Promise.all([
     supabase.from('sources').select('*').eq('user_id', userId).eq('active', true),
     supabase.from('tasks')
       .select('title,status,due_date')
@@ -144,14 +144,21 @@ export async function generateBriefing(
       .eq('archived', false)
       .order('due_date', { ascending: true })
       .limit(10),
+    supabase.from('calendars').select('id').eq('user_id', userId).eq('is_visible', true),
     supabase.from('calendar_events')
-      .select('summary,start_at,end_at,all_day')
+      .select('summary,start_at,end_at,all_day,calendar_id')
       .eq('user_id', userId)
       .gte('start_at', `${today}T00:00:00Z`)
       .lte('start_at', `${today}T23:59:59Z`)
       .neq('status', 'cancelled')
       .order('start_at', { ascending: true }),
   ])
+
+  // Filter events to only calendars the user has visible (synced preference from Calendar module)
+  type EventRow = { summary: string; start_at: string; end_at: string; all_day: boolean; calendar_id: string }
+  const visibleCalIds = new Set((visibleCals ?? []).map(c => (c as { id: string }).id))
+  const allEvents = (events ?? []) as EventRow[]
+  const filteredEvents = visibleCalIds.size === 0 ? allEvents : allEvents.filter(e => visibleCalIds.has(e.calendar_id))
 
   const rssResults = await Promise.all(
     (sources ?? []).map(s =>
@@ -169,10 +176,8 @@ export async function generateBriefing(
     .map(t => `- ${t.title} (${t.status})`)
     .join('\n')
 
-  const eventsLines = (events ?? [])
-    .map(e =>
-      `- ${e.all_day ? '(dia todo)' : new Date(e.start_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} ${e.summary}`
-    )
+  const eventsLines = filteredEvents
+    .map(e => `- ${e.all_day ? '(dia todo)' : new Date(e.start_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} ${e.summary}`)
     .join('\n')
 
   const anthropic = new Anthropic({ apiKey })
@@ -217,7 +222,7 @@ Regras: use APENAS as notícias fornecidas acima com suas URLs exatas. Máximo 3
     global: (parsed.global ?? []).slice(0, 3),
     brasil: (parsed.brasil ?? []).slice(0, 3),
     newsletters: parsed.newsletters ?? [],
-    agenda: events ?? [],
+    agenda: filteredEvents,
     tasks: tasks ?? [],
   }
 
@@ -238,7 +243,7 @@ Regras: use APENAS as notícias fornecidas acima com suas URLs exatas. Máximo 3
         global: content.global as NewsItem[],
         brasil: content.brasil as NewsItem[],
         newsletters: content.newsletters as NewsItem[],
-        agenda: (events ?? []) as AgendaItem[],
+        agenda: filteredEvents as AgendaItem[],
         tasks: (tasks ?? []) as TaskItem[],
       })
       const { error: emailError } = await resend.emails.send({

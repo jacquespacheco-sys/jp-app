@@ -46,25 +46,27 @@ export function AgendaView({ events, calendars, onOpen }: Props) {
             </div>
             {dayEvents.map(ev => {
               const isTask = ev.source === 'task_block'
+              const isPast = new Date(ev.startAt) < new Date()
+              const taskColor = isPast ? 'var(--fg-muted)' : 'var(--accent)'
               return (
                 <div
                   key={ev.id}
                   className="agenda-event"
                   onClick={() => onOpen(ev)}
-                  style={isTask ? { cursor: 'default', opacity: 0.9 } : undefined}
+                  style={isTask ? { cursor: 'default', opacity: isPast ? 0.6 : 0.9 } : { opacity: isPast ? 0.55 : 1 }}
                 >
-                  <div className="agenda-event-time" style={isTask ? { color: 'var(--accent)', fontWeight: 600 } : undefined}>
+                  <div className="agenda-event-time" style={isTask ? { color: taskColor, fontWeight: 600 } : undefined}>
                     {isTask ? 'tarefa' : (ev.allDay ? 'dia todo' : format(parseISO(ev.startAt), 'HH:mm'))}
                   </div>
                   <div
                     className="agenda-event-dot"
                     style={{
-                      background: isTask ? 'var(--accent)' : calendarColor(calendars, ev.calendarId),
+                      background: isTask ? taskColor : calendarColor(calendars, ev.calendarId),
                       borderRadius: isTask ? '2px' : undefined,
                     }}
                   />
                   <div>
-                    <div className="agenda-event-title" style={isTask ? { color: 'var(--accent)' } : undefined}>
+                    <div className="agenda-event-title" style={isTask ? { color: taskColor } : undefined}>
                       {ev.summary}
                     </div>
                     {ev.location && <div className="agenda-event-sub">{ev.location}</div>}

@@ -17,26 +17,27 @@ import type { EventSaveInput } from '../../api/_schemas/event.ts'
 import { api } from '../api.ts'
 import type { EventSaveResponse } from '../types/api.ts'
 
-const TABS = ['Semana', 'Mês', 'Agenda', 'Dia'] as const
+const TABS = ['Dia', 'Agenda', 'Semana', 'Mês'] as const
 type Tab = typeof TABS[number]
+
+interface ParsedEvent {
+  summary: string
+  startAt: string
+  endAt: string
+  allDay: boolean
+  location: string | null
+  notes: string | null
+}
 
 function taskToEvent(task: Task): CalendarEvent {
   const dayStr = task.dueDate!.slice(0, 10)
   return {
-    id: `task-${task.id}`,
-    userId: task.userId,
-    calendarId: '',
+    id: `task-${task.id}`, userId: task.userId, calendarId: '',
     summary: task.title,
-    startAt: `${dayStr}T00:00:00.000Z`,
-    endAt: `${dayStr}T23:59:59.000Z`,
-    allDay: true,
-    status: 'confirmed',
-    isOrganizer: false,
-    source: 'task_block',
-    taskId: task.id,
-    synced: false,
-    createdAt: task.createdAt,
-    updatedAt: task.updatedAt,
+    startAt: `${dayStr}T00:00:00.000Z`, endAt: `${dayStr}T23:59:59.000Z`,
+    allDay: true, status: 'confirmed', isOrganizer: false,
+    source: 'task_block', taskId: task.id, synced: false,
+    createdAt: task.createdAt, updatedAt: task.updatedAt,
   }
 }
 
@@ -45,7 +46,6 @@ function rangeForTab(tab: Tab, date: Date): { start: string; end: string } {
   if (tab === 'Semana') return { start: fmt(subDays(date, 3)), end: fmt(addDays(date, 10)) }
   if (tab === 'Mês') return { start: fmt(startOfMonth(date)), end: fmt(endOfMonth(date)) }
   if (tab === 'Dia') return { start: fmt(date), end: fmt(addDays(date, 1)) }
-  // Agenda: today → +6 days (7 days total)
   return { start: fmt(date), end: fmt(addDays(date, 6)) }
 }
 
@@ -53,8 +53,7 @@ function navTitle(tab: Tab, date: Date): string {
   if (tab === 'Semana') return format(date, "'Semana de' d MMM yyyy", { locale: ptBR })
   if (tab === 'Mês') return format(date, 'MMMM yyyy', { locale: ptBR })
   if (tab === 'Dia') return format(date, "EEEE, d 'de' MMM", { locale: ptBR })
-  // Agenda: show range
-  return `${format(date, "d MMM", { locale: ptBR })} – ${format(addDays(date, 6), "d MMM", { locale: ptBR })}`
+  return `${format(date, 'd MMM', { locale: ptBR })} – ${format(addDays(date, 6), 'd MMM', { locale: ptBR })}`
 }
 
 function goNext(tab: Tab, date: Date): Date {
@@ -72,11 +71,18 @@ function goPrev(tab: Tab, date: Date): Date {
 }
 
 export function CalendarPage() {
-  const [tab, setTab] = useState<Tab>('Semana')
+  const [tab, setTab] = useState<Tab>('Dia')
   const [date, setDate] = useState(new Date())
   const [selected, setSelected] = useState<CalendarEvent | null>(null)
   const [panelOpen, setPanelOpen] = useState(false)
+  const [prefill, setPrefill] = useState<{ summary?: string; startAt?: string; endAt?: string; allDay?: boolean; location?: string; description?: string } | undefined>()
   const [syncing, setSyncing] = useState(false)
+  const [nlpBar, setNlpBar] = useState(false)
+  const [nlpText, setNlpText] = useState('')
+  const [nlpLoading, setNlpLoading] = useState(false)
+  const [nlpError, setNlpError] = useState('')
+  const [lastSync, setLastSync] = useState<string | null>(null)
+  const nlpRef = useRef<HTMLInputElement>(null)
   const autoSyncDone = useRef(false)
 
   const { calendars, googleConnected, sync: syncCalendars, refetch: refetchCalendars } = useCalendars()
@@ -84,21 +90,21 @@ export function CalendarPage() {
   const { tasks } = useTasks()
 
   useEffect(() => {
+    setLastSync(localStorage.getItem('jp_cal_last_sync'))
+  }, [])
+
+  useEffect(() => {
     const { start, end } = rangeForTab(tab, date)
     void fetchRange(start, end)
   }, [tab, date, fetchRange])
 
-  // Merge task events (with dueDate) into the event list
   const taskEvents = useMemo<CalendarEvent[]>(() => {
     if (!range) return []
     const rangeStart = range.start.slice(0, 10)
     const rangeEnd = range.end.slice(0, 10)
     return tasks
       .filter(t => t.dueDate && !t.archived && t.status !== 'done')
-      .filter(t => {
-        const day = t.dueDate!.slice(0, 10)
-        return day >= rangeStart && day <= rangeEnd
-      })
+      .filter(t => { const day = t.dueDate!.slice(0, 10); return day >= rangeStart && day <= rangeEnd })
       .map(taskToEvent)
   }, [tasks, range])
 
@@ -109,12 +115,14 @@ export function CalendarPage() {
     try {
       if (calendars.length === 0) await syncCalendars()
       await syncEvents()
+      const ts = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+      localStorage.setItem('jp_cal_last_sync', ts)
+      setLastSync(ts)
     } finally {
       setSyncing(false)
     }
   }
 
-  // Auto-sync once on first load if Google is connected but no events found
   useEffect(() => {
     if (googleConnected && range !== null && !loading && events.length === 0 && !autoSyncDone.current) {
       autoSyncDone.current = true
@@ -142,22 +150,55 @@ export function CalendarPage() {
     void id; void visible
   }
 
-  // Don't open EventPanel for task blocks — they belong to the Tasks module
   const handleOpen = (ev: CalendarEvent) => {
     if (ev.source === 'task_block') return
-    setSelected(ev)
-    setPanelOpen(true)
+    setSelected(ev); setPrefill(undefined); setPanelOpen(true)
   }
+
+  const handleNlpSubmit = async () => {
+    const text = nlpText.trim()
+    if (!text) return
+    setNlpLoading(true); setNlpError('')
+    try {
+      const result = await api.post<ParsedEvent>('/api/events-parse', { text, lang: 'auto' })
+      setSelected(null)
+      setPrefill({
+        summary: result.summary, startAt: result.startAt, endAt: result.endAt, allDay: result.allDay,
+        ...(result.location != null && { location: result.location }),
+        ...(result.notes != null && { description: result.notes }),
+      })
+      setPanelOpen(true); setNlpBar(false); setNlpText('')
+    } catch (e) {
+      setNlpError(e instanceof Error ? e.message : 'Erro ao interpretar')
+    } finally {
+      setNlpLoading(false)
+    }
+  }
+
+  useEffect(() => { if (nlpBar) setTimeout(() => nlpRef.current?.focus(), 50) }, [nlpBar])
 
   const actions = (
     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
       {googleConnected && (
-        <button className="sync-status" onClick={() => { void handleSync() }} disabled={syncing}>
-          {syncing ? 'Sync…' : 'Sync'}
-        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px' }}>
+          <button className="sync-status" onClick={() => { void handleSync() }} disabled={syncing}>
+            {syncing ? 'Sync…' : 'Sync'}
+          </button>
+          {lastSync && <span style={{ fontSize: '7px', fontFamily: 'Space Mono, monospace', color: 'var(--fg-dim)', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>{lastSync}</span>}
+        </div>
       )}
-      <button className="icon-btn" onClick={() => { setSelected(null); setPanelOpen(true) }} title="Novo evento">
-        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+      <button
+        className="icon-btn"
+        onClick={() => { setNlpBar(v => !v); setNlpError('') }}
+        title="Criar com texto"
+        style={nlpBar ? { background: 'var(--accent)', borderColor: 'var(--accent)' } : undefined}
+      >
+        <svg viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+      </button>
+      <button className="icon-btn" onClick={() => { setSelected(null); setPrefill(undefined); setPanelOpen(true) }} title="Novo evento">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
       <ThemeToggle />
     </div>
@@ -167,6 +208,23 @@ export function CalendarPage() {
     <div>
       <Topbar title="Calendar" actions={actions} />
       <Subtabs tabs={[...TABS]} active={tab} onChange={t => setTab(t as Tab)} />
+
+      {nlpBar && (
+        <div className="nlp-bar">
+          <input
+            ref={nlpRef}
+            value={nlpText}
+            onChange={e => setNlpText(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') void handleNlpSubmit() }}
+            placeholder="Ex: Reunião com João amanhã às 15h por 1h no escritório"
+            disabled={nlpLoading}
+          />
+          {nlpError && <span style={{ fontSize: '10px', color: 'var(--danger)', whiteSpace: 'nowrap' }}>{nlpError}</span>}
+          <button className="btn btn-accent" style={{ fontSize: '10px', padding: '6px 12px', whiteSpace: 'nowrap' }} onClick={() => void handleNlpSubmit()} disabled={nlpLoading || !nlpText.trim()}>
+            {nlpLoading ? '…' : 'Criar'}
+          </button>
+        </div>
+      )}
 
       {calendars.length > 0 && (
         <CalendarPicker calendars={calendars} onToggle={handleCalendarToggle} />
@@ -179,42 +237,35 @@ export function CalendarPage() {
       </div>
 
       {!googleConnected && calendars.length === 0 && (
-        <div className="content">
-          <div className="empty-state">
-            Google não conectado — vá em Config para sincronizar
-          </div>
-        </div>
+        <div className="content"><div className="empty-state">Google não conectado — vá em Config para sincronizar</div></div>
       )}
 
       {loading && <div className="empty-state">Carregando…</div>}
 
-      {!loading && tab === 'Agenda' && (
-        <AgendaView events={allEvents} calendars={calendars} onOpen={handleOpen} />
-      )}
-
-      {!loading && tab === 'Semana' && (
-        <WeekView date={date} events={allEvents} calendars={calendars} onOpen={handleOpen} />
-      )}
-
-      {!loading && tab === 'Mês' && (
-        <MonthView date={date} events={allEvents} calendars={calendars} onOpen={handleOpen} />
-      )}
-
       {!loading && tab === 'Dia' && (
         <AgendaView
           events={allEvents.filter(e => e.startAt.slice(0, 10) === format(date, 'yyyy-MM-dd'))}
-          calendars={calendars}
-          onOpen={handleOpen}
+          calendars={calendars} onOpen={handleOpen}
         />
+      )}
+      {!loading && tab === 'Agenda' && (
+        <AgendaView events={allEvents} calendars={calendars} onOpen={handleOpen} />
+      )}
+      {!loading && tab === 'Semana' && (
+        <WeekView date={date} events={allEvents} calendars={calendars} onOpen={handleOpen} />
+      )}
+      {!loading && tab === 'Mês' && (
+        <MonthView date={date} events={allEvents} calendars={calendars} onOpen={handleOpen} />
       )}
 
       {panelOpen && (
         <EventPanel
           event={selected}
+          {...(prefill !== undefined ? { prefill } : {})}
           calendars={calendars}
           onSave={handleSave}
           onDelete={handleDelete}
-          onClose={() => { setPanelOpen(false); setSelected(null) }}
+          onClose={() => { setPanelOpen(false); setSelected(null); setPrefill(undefined) }}
         />
       )}
     </div>

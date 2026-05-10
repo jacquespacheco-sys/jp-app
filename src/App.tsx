@@ -9,6 +9,8 @@ import { TasksPage } from './pages/TasksPage.tsx'
 import { CalendarPage } from './pages/CalendarPage.tsx'
 import { ContactsPage } from './pages/ContactsPage.tsx'
 import { ConfigPage } from './pages/ConfigPage.tsx'
+import { NotesPage } from './pages/NotesPage.tsx'
+import { NewsPage } from './pages/NewsPage.tsx'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -52,6 +54,14 @@ function AppRoutes() {
       <Route
         path="/config"
         element={<ProtectedRoute><ConfigPage /></ProtectedRoute>}
+      />
+      <Route
+        path="/notes"
+        element={<ProtectedRoute><NotesPage /></ProtectedRoute>}
+      />
+      <Route
+        path="/news"
+        element={<ProtectedRoute><NewsPage /></ProtectedRoute>}
       />
       <Route path="*" element={<Navigate to="/briefing" replace />} />
     </Routes>
