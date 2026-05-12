@@ -1,6 +1,6 @@
 -- =============================================================
 -- JP APP — Migration 0013: Coach chat MVP
--- Aditiva. Compatível com 0010 (coach_profile, coach_memory, coach_log).
+-- Aditiva. Depende de 0001 (users, briefings) e 0010 (coach_log, memory_kind enum).
 -- =============================================================
 
 -- 1) coach_memory_candidate (staging para extrações pendentes)
@@ -31,5 +31,6 @@ alter table public.briefings
 -- 4) coach_log: conversation_id opcional + index pra recentes por kind
 alter table public.coach_log
   add column if not exists conversation_id uuid;
+-- complementa coach_log_user_recent_idx (0010); este filtra também por kind
 create index if not exists coach_log_user_kind_recent_idx
   on public.coach_log (user_id, kind, created_at desc);

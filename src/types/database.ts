@@ -206,6 +206,7 @@ type IntegrationsInsert = {
   metadata?: Json; created_at?: string; updated_at?: string
 }
 
+// Coach module (0010-0013)
 type CoachProfileInsert = {
   user_id: string; name?: string; tone?: string
   voice_examples?: string | null; values_md?: Json; boundaries?: string | null
