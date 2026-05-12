@@ -117,3 +117,9 @@ export interface HabitLogSaveResponse { log: HabitLog }
 export interface HabitStreaksResponse { streaks: HabitStreak[] }
 export interface RitualsListResponse { rituals: Ritual[] }
 export interface RitualSaveResponse { ritual: Ritual }
+
+import type { CoachProfile, CoachMemoryEntry } from './domain.ts'
+
+export interface CoachProfileResponse { profile: CoachProfile | null }
+export interface CoachMemoryListResponse { memories: CoachMemoryEntry[] }
+export interface CoachMemorySaveResponse { memory: CoachMemoryEntry }

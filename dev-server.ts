@@ -15,6 +15,10 @@ import habitsStreaks from './api/habits-streaks.ts'
 import ritualsList from './api/rituals-list.ts'
 import ritualsSave from './api/rituals-save.ts'
 import ritualsArchive from './api/rituals-archive.ts'
+import coachProfile from './api/coach-profile.ts'
+import coachMemoryList from './api/coach-memory-list.ts'
+import coachMemorySave from './api/coach-memory-save.ts'
+import coachMemoryArchive from './api/coach-memory-archive.ts'
 import tasksList from './api/tasks-list.ts'
 import tasksSave from './api/tasks-save.ts'
 import tasksArchive from './api/tasks-archive.ts'
@@ -92,6 +96,12 @@ app.all('/api/habits-streaks', h(habitsStreaks))
 app.all('/api/rituals-list', h(ritualsList))
 app.all('/api/rituals-save', h(ritualsSave))
 app.all('/api/rituals-archive', h(ritualsArchive))
+
+// Coach
+app.all('/api/coach-profile', h(coachProfile))
+app.all('/api/coach-memory-list', h(coachMemoryList))
+app.all('/api/coach-memory-save', h(coachMemorySave))
+app.all('/api/coach-memory-archive', h(coachMemoryArchive))
 app.all('/api/tasks-list', h(tasksList))
 app.all('/api/tasks-save', h(tasksSave))
 app.all('/api/tasks-archive', h(tasksArchive))

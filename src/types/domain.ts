@@ -436,3 +436,41 @@ export interface Ritual {
   updatedAt: string
   steps: RitualStep[]
 }
+
+// =============================================================
+// AI Coach
+// =============================================================
+
+export interface CoachProfile {
+  userId: string
+  name: string
+  tone: string
+  voiceExamples?: string
+  valuesMd: string[]
+  boundaries?: string
+  checkInSchedule: {
+    morning?: string
+    evening?: string
+    weeklyDay?: 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU'
+    weeklyTime?: string
+  }
+  systemPromptOverride?: string
+  northStarMd?: string
+  h3Goals: { title: string; horizon: 'H3'; targetDate?: string }[]
+  updatedAt: string
+}
+
+export interface CoachMemoryEntry {
+  id: string
+  userId: string
+  kind: MemoryKind
+  content: string
+  source?: string
+  relatedAreaId?: string
+  relatedProjectId?: string
+  relatedTaskId?: string
+  relevance: number
+  expiresAt?: string
+  lastReferencedAt?: string
+  createdAt: string
+}
