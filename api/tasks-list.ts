@@ -11,7 +11,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const supabase = getSupabase()
 
   const { data, error } = await supabase
-    .from('tasks')
+    .from('v_tasks_resolved')
     .select('*')
     .eq('user_id', user.id)
     .eq('archived', false)
@@ -39,6 +39,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     synced: r.synced,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
+    // AQAL/GTD
+    areaId: r.area_id ?? undefined,
+    quadrantOverride: r.quadrant_override ?? undefined,
+    resolvedQuadrant: r.resolved_quadrant ?? undefined,
+    context: r.context ?? undefined,
+    energy: r.energy ?? undefined,
+    timeEstimateMin: r.time_estimate_min ?? undefined,
+    dueAt: r.due_at ?? undefined,
+    scheduledAt: r.scheduled_at ?? undefined,
+    completedAt: r.completed_at ?? undefined,
+    waitingFor: r.waiting_for ?? undefined,
+    rrule: r.rrule ?? undefined,
+    rruleParentId: r.rrule_parent_id ?? undefined,
+    parentTaskId: r.parent_task_id ?? undefined,
+    source: r.source ?? 'manual',
+    aiClassified: r.ai_classified ?? false,
   }))
 
   return res.status(200).json({ tasks })
