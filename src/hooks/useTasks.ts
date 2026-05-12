@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { api } from '../api.ts'
-import type { Task } from '../types/domain.ts'
-import type { TasksListResponse, TaskSaveResponse } from '../types/api.ts'
+import type { Task, TaskClassifyResult } from '../types/domain.ts'
+import type { TasksListResponse, TaskSaveResponse, TaskClassifyResponse } from '../types/api.ts'
 import type { TaskSaveInput } from '../../api/_schemas/task.ts'
 
 export function useTasks() {
@@ -44,5 +44,14 @@ export function useTasks() {
     await save({ ...task, id: task.id, projectId: task.projectId, status })
   }, [tasks, save])
 
-  return { tasks, loading, save, archive, updateStatus, refetch: fetch }
+  const classify = useCallback(async (taskId: string): Promise<TaskClassifyResult> => {
+    const res = await api.post<TaskClassifyResponse>('/api/tasks-classify', { taskId })
+    if (res.task) {
+      const updated = res.task as Task
+      setTasks(prev => prev.map(t => (t.id === updated.id ? updated : t)))
+    }
+    return res.classification
+  }, [])
+
+  return { tasks, loading, save, archive, updateStatus, classify, refetch: fetch }
 }
