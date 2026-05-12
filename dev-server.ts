@@ -7,6 +7,14 @@ import projectsList from './api/projects-list.ts'
 import projectsSave from './api/projects-save.ts'
 import projectsArchive from './api/projects-archive.ts'
 import projectsComplete from './api/projects-complete.ts'
+import habitsList from './api/habits-list.ts'
+import habitsSave from './api/habits-save.ts'
+import habitsArchive from './api/habits-archive.ts'
+import habitLogsSave from './api/habit-logs-save.ts'
+import habitsStreaks from './api/habits-streaks.ts'
+import ritualsList from './api/rituals-list.ts'
+import ritualsSave from './api/rituals-save.ts'
+import ritualsArchive from './api/rituals-archive.ts'
 import tasksList from './api/tasks-list.ts'
 import tasksSave from './api/tasks-save.ts'
 import tasksArchive from './api/tasks-archive.ts'
@@ -74,6 +82,16 @@ app.all('/api/projects-list', h(projectsList))
 app.all('/api/projects-save', h(projectsSave))
 app.all('/api/projects-archive', h(projectsArchive))
 app.all('/api/projects-complete', h(projectsComplete))
+
+// Hábitos + Rituais
+app.all('/api/habits-list', h(habitsList))
+app.all('/api/habits-save', h(habitsSave))
+app.all('/api/habits-archive', h(habitsArchive))
+app.all('/api/habit-logs-save', h(habitLogsSave))
+app.all('/api/habits-streaks', h(habitsStreaks))
+app.all('/api/rituals-list', h(ritualsList))
+app.all('/api/rituals-save', h(ritualsSave))
+app.all('/api/rituals-archive', h(ritualsArchive))
 app.all('/api/tasks-list', h(tasksList))
 app.all('/api/tasks-save', h(tasksSave))
 app.all('/api/tasks-archive', h(tasksArchive))

@@ -108,3 +108,12 @@ export interface InboxProcessResponse {
 export interface ProjectSaveResponse {
   project: Project
 }
+
+import type { Habit, HabitLog, HabitStreak, Ritual } from './domain.ts'
+
+export interface HabitsListResponse { habits: Habit[] }
+export interface HabitSaveResponse { habit: Habit }
+export interface HabitLogSaveResponse { log: HabitLog }
+export interface HabitStreaksResponse { streaks: HabitStreak[] }
+export interface RitualsListResponse { rituals: Ritual[] }
+export interface RitualSaveResponse { ritual: Ritual }

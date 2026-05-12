@@ -367,3 +367,72 @@ export interface TaskClassifyResult {
   rationale: string
   confidence: 'high' | 'medium' | 'low'
 }
+
+// =============================================================
+// Hábitos + Rituais
+// =============================================================
+
+export type HabitCadence =
+  | { type: 'daily' }
+  | { type: 'weekdays' }
+  | { type: 'weekly'; days: ('MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU')[] }
+  | { type: 'every_n_days'; n: number }
+  | { type: 'monthly'; dayOfMonth: number }
+
+export interface Habit {
+  id: string
+  userId: string
+  areaId?: string
+  identity: string
+  title: string
+  action: string
+  minDose: string
+  cue?: string
+  reward?: string
+  quadrant: Quadrant
+  cadence: HabitCadence
+  scheduleTime?: string
+  stackAfterHabitId?: string
+  active: boolean
+  archivedAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface HabitLog {
+  id: string
+  habitId: string
+  userId: string
+  doneOn: string
+  doneAt: string
+  dose: HabitDose
+  note?: string
+}
+
+export interface HabitStreak {
+  habitId: string
+  currentStreak: number
+  longestStreak: number
+  doneToday: HabitDose | null
+  rateLast30: number
+}
+
+export interface RitualStep {
+  id?: string
+  position: number
+  habitId?: string
+  customStep?: string
+  estimatedMin?: number
+}
+
+export interface Ritual {
+  id: string
+  userId: string
+  name: string
+  triggerTime?: string
+  description?: string
+  active: boolean
+  createdAt: string
+  updatedAt: string
+  steps: RitualStep[]
+}
