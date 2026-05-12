@@ -89,6 +89,7 @@ export function TasksPage() {
         <KanbanView
           tasks={tasks}
           projects={projects}
+          areas={[]}
           onOpen={setSelected}
           onStatusChange={(id, status) => { void updateStatus(id, status) }}
         />

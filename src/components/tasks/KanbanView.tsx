@@ -1,28 +1,67 @@
-import { useState } from 'react'
+import { useState, useEffect, memo } from 'react'
 import { DndContext, type DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
-import { memo } from 'react'
-import type { Task, Project } from '../../types/domain.ts'
+import type { Task, Project, Area, Quadrant, TaskContext, HorizonLvl } from '../../types/domain.ts'
+import { QUADRANT_COLORS, QUADRANT_LABELS } from '../../types/domain.ts'
+
+type Mode = 'quadrant' | 'status' | 'area' | 'horizon' | 'context'
 
 interface Props {
   tasks: Task[]
   projects: Project[]
+  areas: Area[]
   onOpen: (task: Task) => void
   onStatusChange: (taskId: string, status: Task['status']) => void
 }
 
-const COLUMNS: { key: Task['status']; label: string }[] = [
+const STATUS_COLUMNS: { key: Task['status']; label: string }[] = [
   { key: 'inbox', label: 'Inbox' },
   { key: 'next', label: 'Próximas' },
   { key: 'doing', label: 'Fazendo' },
-  { key: 'blocked', label: 'Bloqueado' },
-  { key: 'done', label: 'Concluído' },
+  { key: 'scheduled', label: 'Agendadas' },
+  { key: 'waiting', label: 'Aguardando' },
+  { key: 'blocked', label: 'Bloqueadas' },
+  { key: 'someday', label: 'Algum dia' },
+  { key: 'done', label: 'Concluídas' },
+  { key: 'cancelled', label: 'Canceladas' },
+]
+
+const QUADRANT_COLUMNS: { key: Quadrant; label: string }[] = [
+  { key: 'I', label: QUADRANT_LABELS.I },
+  { key: 'IT', label: QUADRANT_LABELS.IT },
+  { key: 'WE', label: QUADRANT_LABELS.WE },
+  { key: 'ITS', label: QUADRANT_LABELS.ITS },
+]
+
+const HORIZON_COLUMNS: { key: HorizonLvl; label: string }[] = [
+  { key: 'H0', label: 'H0 · agora' },
+  { key: 'H1', label: 'H1 · hoje' },
+  { key: 'H2', label: 'H2 · áreas' },
+  { key: 'H3', label: 'H3 · 1-2 anos' },
+  { key: 'H4', label: 'H4 · 3-5 anos' },
+  { key: 'H5', label: 'H5 · vida' },
+]
+
+const CONTEXT_COLUMNS: { key: TaskContext; label: string }[] = [
+  { key: 'deep', label: '@deep' },
+  { key: 'shallow', label: '@shallow' },
+  { key: 'social', label: '@social' },
+  { key: 'criativo', label: '@criativo' },
+  { key: 'somatico', label: '@somático' },
+  { key: 'offline', label: '@offline' },
 ]
 
 interface CardProps { task: Task; project: Project | undefined; onOpen: (task: Task) => void }
 
 const KanbanCard = memo(function KanbanCard({ task, project, onOpen }: CardProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: task.id })
+  const q = task.resolvedQuadrant
+  const meta: string[] = []
+  if (task.status !== 'next' && task.status !== 'inbox') meta.push(task.status)
+  if (task.context) meta.push(`@${task.context}`)
+  if (task.energy) meta.push('⚡'.repeat(task.energy))
+  if (task.timeEstimateMin) meta.push(`${task.timeEstimateMin}m`)
+  if (task.rrule) meta.push('🔄')
 
   return (
     <div
@@ -31,26 +70,36 @@ const KanbanCard = memo(function KanbanCard({ task, project, onOpen }: CardProps
       {...listeners}
       {...attributes}
       onClick={() => onOpen(task)}
+      style={q ? { borderLeft: `3px solid ${QUADRANT_COLORS[q]}` } : undefined}
     >
       {project && <div className="kanban-card-project">{project.name}</div>}
       <div className="kanban-card-title">{task.title}</div>
-      <div className="kanban-card-meta">
-        {task.dueDate && <span>{task.dueDate}</span>}
-        {task.tags.slice(0, 2).map(tag => <span key={tag}>#{tag}</span>)}
-      </div>
+      {meta.length > 0 && (
+        <div className="kanban-card-meta">
+          {meta.map((m, i) => <span key={i}>{m}</span>)}
+        </div>
+      )}
     </div>
   )
 })
 
-interface ColProps { status: Task['status']; label: string; tasks: Task[]; projects: Project[]; onOpen: (task: Task) => void }
+interface ColProps {
+  id: string
+  label: string
+  tasks: Task[]
+  projects: Project[]
+  onOpen: (task: Task) => void
+  accent?: string
+  droppable: boolean
+}
 
-const KanbanColumn = memo(function KanbanColumn({ status, label, tasks, projects, onOpen }: ColProps) {
-  const { setNodeRef, isOver } = useDroppable({ id: status })
+const KanbanColumn = memo(function KanbanColumn({ id, label, tasks, projects, onOpen, accent, droppable }: ColProps) {
+  const { setNodeRef, isOver } = useDroppable({ id, disabled: !droppable })
 
   return (
     <div className="kanban-col">
       <div className="kanban-col-header">
-        <span className="kanban-col-title">{label}</span>
+        <span className="kanban-col-title" style={accent ? { color: accent } : undefined}>{label}</span>
         <span className="kanban-col-count">{tasks.length}</span>
       </div>
       <div ref={setNodeRef} className={`kanban-col-body${isOver ? ' drag-over' : ''}`}>
@@ -67,68 +116,29 @@ const KanbanColumn = memo(function KanbanColumn({ status, label, tasks, projects
   )
 })
 
-// ---- Groups view (vertical list per status) ----
-
-interface GroupRowProps { task: Task; project: Project | undefined; onOpen: (task: Task) => void }
-
-function GroupRow({ task, project, onOpen }: GroupRowProps) {
-  return (
-    <div className="task-row" onClick={() => onOpen(task)} style={{ cursor: 'pointer' }}>
-      <div className="task-check" style={task.status === 'done' ? undefined : { background: 'transparent' }} />
-      <div className="task-main">
-        <div className="task-title" style={task.status === 'done' ? { textDecoration: 'line-through', opacity: 0.5 } : undefined}>
-          {task.title}
-        </div>
-        <div className="task-meta">
-          {project && <span className="task-meta-project">{project.name}</span>}
-          {task.dueDate && <span>{task.dueDate.slice(0, 10)}</span>}
-          {task.tags.slice(0, 2).map(tag => <span key={tag}>#{tag}</span>)}
-        </div>
-      </div>
-    </div>
-  )
+const MODE_LABELS: Record<Mode, string> = {
+  quadrant: 'Quadrante',
+  status: 'Status',
+  area: 'Área',
+  horizon: 'Horizonte',
+  context: 'Contexto',
 }
 
-function GroupsView({ tasks, projects, onOpen }: { tasks: Task[]; projects: Project[]; onOpen: (task: Task) => void }) {
-  return (
-    <div className="content">
-      {COLUMNS.map(col => {
-        const colTasks = tasks.filter(t => t.status === col.key)
-        if (colTasks.length === 0) return null
-        return (
-          <div key={col.key} style={{ marginBottom: '24px' }}>
-            <div className="kanban-groups-header">
-              <span className="kanban-col-title">{col.label}</span>
-              <span className="kanban-col-count">{colTasks.length}</span>
-            </div>
-            <div>
-              {colTasks.map(task => (
-                <GroupRow
-                  key={task.id}
-                  task={task}
-                  project={projects.find(p => p.id === task.projectId)}
-                  onOpen={onOpen}
-                />
-              ))}
-            </div>
-          </div>
-        )
-      })}
-      {tasks.length === 0 && <div className="empty-state">Nenhuma tarefa</div>}
-    </div>
-  )
-}
+export function KanbanView({ tasks, projects, areas, onOpen, onStatusChange }: Props) {
+  const [mode, setMode] = useState<Mode>(() => {
+    const saved = typeof window !== 'undefined' ? window.localStorage.getItem('jp_kanban_mode') : null
+    if (saved === 'quadrant' || saved === 'status' || saved === 'area' || saved === 'horizon' || saved === 'context') return saved
+    return 'quadrant'
+  })
 
-// ---- Main export ----
+  useEffect(() => {
+    try { window.localStorage.setItem('jp_kanban_mode', mode) } catch { /* noop */ }
+  }, [mode])
 
-export function KanbanView({ tasks, projects, onOpen, onStatusChange }: Props) {
-  const [mode, setMode] = useState<'flow' | 'groups'>('flow')
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
-  )
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
 
   const handleDragEnd = (event: DragEndEvent) => {
+    if (mode !== 'status') return
     const { active, over } = event
     if (!over) return
     const taskId = String(active.id)
@@ -139,43 +149,94 @@ export function KanbanView({ tasks, projects, onOpen, onStatusChange }: Props) {
     }
   }
 
+  let columns: { id: string; label: string; tasks: Task[]; accent?: string }[] = []
+  let droppable = false
+
+  if (mode === 'status') {
+    droppable = true
+    columns = STATUS_COLUMNS.map(c => ({
+      id: c.key,
+      label: c.label,
+      tasks: tasks.filter(t => t.status === c.key),
+    }))
+  } else if (mode === 'quadrant') {
+    columns = QUADRANT_COLUMNS.map(c => ({
+      id: c.key,
+      label: c.label,
+      accent: QUADRANT_COLORS[c.key],
+      tasks: tasks.filter(t => t.resolvedQuadrant === c.key),
+    }))
+    const semQuad = tasks.filter(t => !t.resolvedQuadrant)
+    if (semQuad.length > 0) columns.push({ id: 'none', label: 'sem quadrante', tasks: semQuad })
+  } else if (mode === 'area') {
+    columns = areas.map(a => ({
+      id: a.id,
+      label: a.name,
+      accent: QUADRANT_COLORS[a.quadrant],
+      tasks: tasks.filter(t => t.areaId === a.id),
+    })).filter(c => c.tasks.length > 0)
+    const semArea = tasks.filter(t => !t.areaId)
+    if (semArea.length > 0) columns.push({ id: 'none', label: 'sem área', tasks: semArea })
+  } else if (mode === 'horizon') {
+    const projectHorizonMap = new Map<string, HorizonLvl>()
+    for (const p of projects) {
+      const ph = (p as Project & { horizon?: HorizonLvl }).horizon
+      if (ph) projectHorizonMap.set(p.id, ph)
+    }
+    columns = HORIZON_COLUMNS.map(c => ({
+      id: c.key,
+      label: c.label,
+      tasks: tasks.filter(t => projectHorizonMap.get(t.projectId) === c.key),
+    })).filter(c => c.tasks.length > 0)
+    const semHorizon = tasks.filter(t => !projectHorizonMap.get(t.projectId))
+    if (semHorizon.length > 0) columns.push({ id: 'none', label: 'sem horizonte', tasks: semHorizon })
+  } else if (mode === 'context') {
+    columns = CONTEXT_COLUMNS.map(c => ({
+      id: c.key,
+      label: c.label,
+      tasks: tasks.filter(t => t.context === c.key),
+    })).filter(c => c.tasks.length > 0)
+    const semCtx = tasks.filter(t => !t.context)
+    if (semCtx.length > 0) columns.push({ id: 'none', label: 'sem contexto', tasks: semCtx })
+  }
+
+  const body = (
+    <div className="kanban-wrapper">
+      <div className="kanban-columns">
+        {columns.map(col => (
+          <KanbanColumn
+            key={col.id}
+            id={col.id}
+            label={col.label}
+            tasks={col.tasks}
+            projects={projects}
+            onOpen={onOpen}
+            {...(col.accent ? { accent: col.accent } : {})}
+            droppable={droppable}
+          />
+        ))}
+        {columns.length === 0 && <div className="empty-state">Nenhuma tarefa</div>}
+      </div>
+    </div>
+  )
+
   return (
     <div>
       <div className="kanban-mode-bar">
-        <button
-          className={`kanban-mode-btn${mode === 'flow' ? ' active' : ''}`}
-          onClick={() => setMode('flow')}
-        >
-          Fluxo
-        </button>
-        <button
-          className={`kanban-mode-btn${mode === 'groups' ? ' active' : ''}`}
-          onClick={() => setMode('groups')}
-        >
-          Grupos
-        </button>
+        {(Object.keys(MODE_LABELS) as Mode[]).map(m => (
+          <button
+            key={m}
+            className={`kanban-mode-btn${mode === m ? ' active' : ''}`}
+            onClick={() => setMode(m)}
+          >
+            {MODE_LABELS[m]}
+          </button>
+        ))}
       </div>
 
-      {mode === 'groups' ? (
-        <GroupsView tasks={tasks} projects={projects} onOpen={onOpen} />
-      ) : (
-        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-          <div className="kanban-wrapper">
-            <div className="kanban-columns">
-              {COLUMNS.map(col => (
-                <KanbanColumn
-                  key={col.key}
-                  status={col.key}
-                  label={col.label}
-                  tasks={tasks.filter(t => t.status === col.key)}
-                  projects={projects}
-                  onOpen={onOpen}
-                />
-              ))}
-            </div>
-          </div>
-        </DndContext>
-      )}
+      {droppable ? (
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>{body}</DndContext>
+      ) : body}
     </div>
   )
 }
