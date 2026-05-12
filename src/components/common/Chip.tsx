@@ -47,10 +47,11 @@ export function Chip({ label, icon, active, variant = 'default', ariaLabel, popo
   ].filter(Boolean).join(' ')
 
   return (
-    <span ref={wrapRef} className="chip-wrap" style={style}>
+    <span ref={wrapRef} className="chip-wrap">
       <button
         type="button"
         className={className}
+        style={style}
         onClick={handleClick}
         aria-label={ariaLabel ?? label}
         aria-expanded={popover ? open : undefined}
