@@ -32,3 +32,6 @@ coverage/
 
 .vercel
 .env*.local
+
+# Brainstorming companion
+.superpowers/
