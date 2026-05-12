@@ -12,6 +12,8 @@ interface Props {
   areas: Area[]
   onOpen: (task: Task) => void
   onStatusChange: (taskId: string, status: Task['status']) => void
+  onQuadrantChange?: (taskId: string, quadrant: Quadrant | null) => void
+  onAreaChange?: (taskId: string, areaId: string | null) => void
 }
 
 const STATUS_COLUMNS: { key: Task['status']; label: string }[] = [
@@ -124,7 +126,7 @@ const MODE_LABELS: Record<Mode, string> = {
   context: 'Contexto',
 }
 
-export function KanbanView({ tasks, projects, areas, onOpen, onStatusChange }: Props) {
+export function KanbanView({ tasks, projects, areas, onOpen, onStatusChange, onQuadrantChange, onAreaChange }: Props) {
   const [mode, setMode] = useState<Mode>(() => {
     const saved = typeof window !== 'undefined' ? window.localStorage.getItem('jp_kanban_mode') : null
     if (saved === 'quadrant' || saved === 'status' || saved === 'area' || saved === 'horizon' || saved === 'context') return saved
@@ -138,22 +140,29 @@ export function KanbanView({ tasks, projects, areas, onOpen, onStatusChange }: P
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
 
   const handleDragEnd = (event: DragEndEvent) => {
-    if (mode !== 'status') return
     const { active, over } = event
     if (!over) return
     const taskId = String(active.id)
-    const newStatus = String(over.id) as Task['status']
+    const overId = String(over.id)
     const task = tasks.find(t => t.id === taskId)
-    if (task && task.status !== newStatus) {
-      onStatusChange(taskId, newStatus)
+    if (!task) return
+
+    if (mode === 'status') {
+      const newStatus = overId as Task['status']
+      if (task.status !== newStatus) onStatusChange(taskId, newStatus)
+    } else if (mode === 'quadrant') {
+      const newQuadrant = overId === 'none' ? null : (overId as Quadrant)
+      onQuadrantChange?.(taskId, newQuadrant)
+    } else if (mode === 'area') {
+      const newAreaId = overId === 'none' ? null : overId
+      onAreaChange?.(taskId, newAreaId)
     }
   }
 
   let columns: { id: string; label: string; tasks: Task[]; accent?: string }[] = []
-  let droppable = false
+  let droppable = mode === 'status' || mode === 'quadrant' || mode === 'area'
 
   if (mode === 'status') {
-    droppable = true
     columns = STATUS_COLUMNS.map(c => ({
       id: c.key,
       label: c.label,

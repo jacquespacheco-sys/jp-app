@@ -149,6 +149,18 @@ export function TasksPage() {
           areas={areas}
           onOpen={setSelected}
           onStatusChange={(id, status) => { void updateStatus(id, status) }}
+          onQuadrantChange={(id, quadrant) => {
+            const t = tasks.find(x => x.id === id)
+            if (!t) return
+            const input = { ...t, id: t.id, projectId: t.projectId, quadrantOverride: quadrant ?? undefined }
+            void save(input)
+          }}
+          onAreaChange={(id, areaId) => {
+            const t = tasks.find(x => x.id === id)
+            if (!t) return
+            const input = { ...t, id: t.id, projectId: t.projectId, areaId: areaId ?? undefined }
+            void save(input)
+          }}
         />
       )}
 

@@ -298,10 +298,9 @@ export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify
                       type="datetime-local"
                       value={dueAt}
                       onChange={e => setDueAt(e.target.value)}
-                      onBlur={close}
                       autoFocus
                     />
-                    {dueAt && <button className="popover-item-small" onClick={() => { setDueAt(''); close() }}>limpar</button>}
+                    {dueAt && <button className="popover-item-small" onMouseDown={() => { setDueAt(''); close() }}>limpar</button>}
                   </div>
                 )}
               />
@@ -313,10 +312,9 @@ export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify
                       type="datetime-local"
                       value={scheduledAt}
                       onChange={e => setScheduledAt(e.target.value)}
-                      onBlur={close}
                       autoFocus
                     />
-                    {scheduledAt && <button className="popover-item-small" onClick={() => { setScheduledAt(''); close() }}>limpar</button>}
+                    {scheduledAt && <button className="popover-item-small" onMouseDown={() => { setScheduledAt(''); close() }}>limpar</button>}
                   </div>
                 )}
               />
