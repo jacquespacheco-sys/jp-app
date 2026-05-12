@@ -6,6 +6,14 @@ import { Chip } from '../common/Chip.tsx'
 import { IconCalendar, IconClock, IconPause, IconRepeat, IconSparkle, EnergyDots } from '../common/Icon.tsx'
 import { QUADRANT_COLORS } from '../../types/domain.ts'
 
+function tinted(color: string): React.CSSProperties {
+  return {
+    background: `${color}33`,
+    borderColor: `${color}88`,
+    color: 'var(--fg)',
+  }
+}
+
 interface ClassifyResult {
   areaId: string | null
   context: TaskContext | null
@@ -204,7 +212,7 @@ export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify
               />
               <Chip
                 label={PRIORITY_LABELS[priority]}
-                style={{ borderLeft: `3px solid ${PRIORITY_COLORS[priority]}` }}
+                style={tinted(PRIORITY_COLORS[priority])}
                 popover={(close) => (
                   <div className="popover-list">
                     {(Object.keys(PRIORITY_LABELS) as Task['priority'][]).map(p => (
@@ -238,7 +246,7 @@ export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify
             <div className="chip-row">
               <Chip
                 label={selectedArea?.name ?? '+ área'}
-                {...(selectedArea ? { style: { borderLeft: `3px solid ${QUADRANT_COLORS[selectedArea.quadrant]}` } } : {})}
+                {...(selectedArea ? { style: tinted(QUADRANT_COLORS[selectedArea.quadrant]) } : {})}
                 popover={(close) => (
                   <div className="popover-list">
                     <button className="popover-item" onClick={() => { setAreaId(undefined); close() }}>
@@ -259,7 +267,7 @@ export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify
               />
               <Chip
                 label={context ? `@${CONTEXT_LABELS[context]}` : '+ contexto'}
-                {...(context ? { style: { borderLeft: `3px solid ${CONTEXT_COLORS[context]}` } } : {})}
+                {...(context ? { style: tinted(CONTEXT_COLORS[context]) } : {})}
                 popover={(close) => (
                   <div className="popover-list">
                     <button className="popover-item" onClick={() => { setContext(undefined); close() }}>sem contexto</button>

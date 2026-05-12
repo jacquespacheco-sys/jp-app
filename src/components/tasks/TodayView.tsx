@@ -99,12 +99,16 @@ export function TodayView({ tasks, projects, onOpen, onToggleDone }: Props) {
         <span className="today-filter-label">eu estou:</span>
         {CONTEXTS.map(c => {
           const active = filter.contexts.includes(c)
+          const color = CONTEXT_COLORS[c]
+          const style = active
+            ? { background: `${color}33`, borderColor: `${color}88`, color: 'var(--fg)' }
+            : { borderLeftWidth: '3px', borderLeftStyle: 'solid' as const, borderLeftColor: color }
           return (
             <button
               key={c}
               className={`today-filter-chip${active ? ' active' : ''}`}
               onClick={() => toggleContext(c)}
-              style={{ borderLeftWidth: '3px', borderLeftStyle: 'solid', borderLeftColor: CONTEXT_COLORS[c] }}
+              style={style}
             >
               @{c}
             </button>

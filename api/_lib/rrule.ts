@@ -1,4 +1,6 @@
-import { rrulestr } from 'rrule'
+import rrulePkg from 'rrule'
+
+const { rrulestr } = rrulePkg
 
 export function nextOccurrence(rrule: string, after: Date): Date | null {
   if (!rrule || !rrule.startsWith('FREQ=')) return null

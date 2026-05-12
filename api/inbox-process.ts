@@ -102,7 +102,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .insert({
         user_id: user.id,
         name: item.raw_text.slice(0, 100),
-        color: '#a8ff00',
+        color: '#7dd3fc',
       })
       .select()
       .single()

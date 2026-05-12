@@ -38,3 +38,5 @@ coverage/
 
 # Handoff notes (sessões noturnas)
 HANDOFF-NOTE.md
+
+.env*.local

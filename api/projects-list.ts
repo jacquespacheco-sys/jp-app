@@ -22,7 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!existing || existing.length === 0) {
     const { data: inbox, error: createErr } = await supabase
       .from('projects')
-      .insert({ user_id: user.id, name: 'Inbox', color: '#a8ff00' })
+      .insert({ user_id: user.id, name: 'Inbox', color: '#7dd3fc' })
       .select()
       .single()
 
