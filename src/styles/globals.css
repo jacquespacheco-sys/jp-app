@@ -1264,3 +1264,131 @@ html, body {
     to { transform: translateY(0); }
   }
 }
+
+/* =============================================================
+   PROJECTS MODULE — rows, panel, dashboard card, toolbar
+   ============================================================= */
+
+/* ---------- Project Row ---------- */
+.project-row {
+  display: flex; gap: 12px; padding: 14px 12px;
+  border-bottom: 1px solid var(--border-light);
+  cursor: pointer; transition: background 0.15s;
+}
+.project-row:hover { background: var(--bg-elevated); }
+.project-row.is-child { padding-left: 32px; background: var(--bg-elevated); }
+.project-row.is-child::before {
+  content: '↳'; color: var(--fg-dim); margin-right: 6px;
+  font-family: 'Space Mono', monospace; font-size: 10px;
+}
+.project-row-main { flex: 1; min-width: 0; }
+.project-row-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+}
+.project-row-name {
+  font-size: 13px; font-weight: 500; color: var(--fg);
+}
+.project-row-badge {
+  font-family: 'Space Mono', monospace; font-size: 9px;
+  color: var(--fg-muted); letter-spacing: 1px;
+  background: var(--bg-elevated); padding: 2px 6px; border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.project-row-outcome {
+  font-size: 11px; color: var(--fg-muted); line-height: 1.4;
+  margin-bottom: 6px;
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.project-row-meta {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  font-family: 'Space Mono', monospace; font-size: 9px;
+  color: var(--fg-muted); letter-spacing: 0.5px;
+}
+.project-row-progress {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+  min-width: 80px; padding-top: 4px;
+}
+.project-progress-bar {
+  width: 80px; height: 3px; background: var(--bg-elevated); border-radius: 2px; overflow: hidden;
+}
+.project-progress-fill {
+  height: 100%; background: var(--accent); transition: width 0.3s;
+}
+.project-progress-pct {
+  font-family: 'Space Mono', monospace; font-size: 9px;
+  color: var(--fg-muted); letter-spacing: 0.5px;
+}
+
+/* ---------- Projects Toolbar ---------- */
+.projects-toolbar {
+  display: flex; gap: 12px; padding: 10px 18px;
+  border-bottom: 1px solid var(--border);
+  align-items: center; flex-wrap: wrap;
+}
+.projects-toolbar-group {
+  display: flex; gap: 4px;
+}
+.projects-new-btn {
+  margin-left: auto; padding: 6px 12px; font-size: 11px;
+}
+
+/* ---------- Popover divider + add item ---------- */
+.popover-divider {
+  height: 1px; background: var(--border-light); margin: 6px 0;
+}
+.popover-item-add {
+  color: var(--accent-ink); background: var(--accent-soft);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.popover-item-add:hover {
+  background: var(--accent); color: var(--accent-ink);
+}
+
+/* ---------- Task project dot ---------- */
+.task-project-dot {
+  display: inline-block; width: 6px; height: 6px;
+  border-radius: 50%; margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* ---------- Dashboard project card ---------- */
+.dashboard-card {
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: 6px; padding: 14px; margin-bottom: 16px;
+}
+.dashboard-card-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px;
+}
+.dashboard-card-title {
+  font-family: 'Space Mono', monospace; font-size: 10px;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--fg-muted); font-weight: 700;
+}
+.dashboard-card-link {
+  font-family: 'Space Mono', monospace; font-size: 9px;
+  letter-spacing: 1px; color: var(--accent-ink);
+  text-decoration: none; opacity: 0.7;
+}
+.dashboard-card-link:hover { opacity: 1; }
+.dashboard-card-empty {
+  font-size: 12px; color: var(--fg-muted); padding: 20px 0; text-align: center;
+}
+.dashboard-card-list { display: flex; flex-direction: column; gap: 4px; }
+.dashboard-card-row {
+  display: flex; gap: 10px; padding: 10px 12px;
+  text-decoration: none; color: var(--fg);
+  background: var(--bg); border-radius: 4px;
+  transition: background 0.15s;
+}
+.dashboard-card-row:hover { background: var(--border-light); }
+.dashboard-card-row-main { flex: 1; min-width: 0; }
+.dashboard-card-row-name {
+  font-size: 12px; font-weight: 500; margin-bottom: 4px;
+}
+.dashboard-card-row-meta {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  font-family: 'Space Mono', monospace; font-size: 9px;
+  color: var(--fg-muted); letter-spacing: 0.5px;
+}
