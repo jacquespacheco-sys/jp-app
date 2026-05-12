@@ -1,7 +1,6 @@
 import { getSupabase } from './_supabase.js'
 import { fetchAqalContext, type AqalContextSnapshot } from './_briefing-context.js'
 import { COACH_MODEL, buildCoachSnapshot, formatSnapshotForPrompt, getAnthropic } from './_coach.js'
-import Anthropic from '@anthropic-ai/sdk'
 import Parser from 'rss-parser'
 import { Resend } from 'resend'
 import { format, parseISO } from 'date-fns'
@@ -303,7 +302,7 @@ Responda APENAS o texto do parágrafo, sem aspas, sem cabeçalhos.`,
     console.error('[briefing] coach paragraph failed:', e instanceof Error ? e.message : e)
   }
 
-  const anthropic = new Anthropic({ apiKey })
+  const anthropic = getAnthropic()
 
   const message = await anthropic.messages.create({
     model: MODEL,

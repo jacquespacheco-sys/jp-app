@@ -22,19 +22,19 @@ export function CoachProfilePanel() {
 
   useEffect(() => {
     if (!profile) return
-    const sched = (profile.checkInSchedule ?? {}) as Record<string, unknown>
+    const sched = profile.checkInSchedule ?? {}
     setForm({
       name: profile.name ?? 'Coach',
       tone: profile.tone ?? 'firme-mas-gentil',
       valuesMd: profile.valuesMd ?? [],
       boundaries: profile.boundaries ?? '',
       northStarMd: profile.northStarMd ?? '',
-      morning: (sched['morning'] as string | undefined) ?? '',
-      evening: (sched['evening'] as string | undefined) ?? '',
-      emailMorning: sched['emailMorning'] !== false,
-      emailEvening: sched['emailEvening'] === true,
-      weeklyDay: ((sched['weeklyDay'] as string | undefined) ?? '') as typeof form.weeklyDay,
-      weeklyTime: (sched['weeklyTime'] as string | undefined) ?? '',
+      morning: sched.morning ?? '',
+      evening: sched.evening ?? '',
+      emailMorning: sched.emailMorning !== false,
+      emailEvening: sched.emailEvening === true,
+      weeklyDay: (sched.weeklyDay ?? '') as typeof form.weeklyDay,
+      weeklyTime: sched.weeklyTime ?? '',
       systemPromptOverride: profile.systemPromptOverride ?? '',
     })
   }, [profile])

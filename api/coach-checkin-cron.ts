@@ -5,6 +5,7 @@ import { Resend } from 'resend'
 import {
   COACH_MODEL, buildCoachSnapshot, formatSnapshotForPrompt, getAnthropic,
 } from './_coach.js'
+import { fromZonedTime } from 'date-fns-tz'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 export const maxDuration = 300
@@ -46,13 +47,14 @@ function userLocalTime(timezone: string): { hhmm: string; weekday: string; dateS
   return { hhmm: `${hh}:${mm}`, weekday: weekdayMap[wd] ?? '', dateStr }
 }
 
-async function checkAlreadySent(userId: string, slot: Slot, todayDateStr: string): Promise<boolean> {
+async function checkAlreadySent(userId: string, slot: Slot, todayDateStr: string, timezone: string): Promise<boolean> {
   const supabase = getSupabase()
+  const dayStartUtc = fromZonedTime(`${todayDateStr}T00:00:00`, timezone || 'America/Sao_Paulo').toISOString()
   const { data } = await supabase.from('coach_log')
     .select('id')
     .eq('user_id', userId)
     .eq('kind', 'check_in')
-    .gte('created_at', `${todayDateStr}T00:00:00Z`)
+    .gte('created_at', dayStartUtc)
     .like('content_md', `<!-- ${slot} -->%`)
     .limit(1)
   return (data ?? []).length > 0
@@ -123,7 +125,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       continue
     }
 
-    if (await checkAlreadySent(userRow.id, slot, dateStr)) {
+    if (await checkAlreadySent(userRow.id, slot, dateStr, userRow.timezone)) {
       results.push({ userId: userRow.id, slot, status: 'already-sent' })
       continue
     }

@@ -95,6 +95,7 @@ export function useCoach() {
       })
       if (!res.ok || !res.body) {
         const text = await res.text().catch(() => 'erro')
+        setMessages(prev => prev.filter(m => m.id !== tempUser.id && m.id !== tempCoach.id))
         opts.onError(text)
         return
       }

@@ -452,6 +452,8 @@ export interface CoachProfile {
   checkInSchedule: {
     morning?: string
     evening?: string
+    emailMorning?: boolean
+    emailEvening?: boolean
     weeklyDay?: 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU'
     weeklyTime?: string
   }
