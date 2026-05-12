@@ -8,20 +8,44 @@ import { TodayView } from '../components/tasks/TodayView.tsx'
 import { KanbanView } from '../components/tasks/KanbanView.tsx'
 import { ListView } from '../components/tasks/ListView.tsx'
 import { TaskPanel } from '../components/tasks/TaskPanel.tsx'
+import { InboxView } from '../components/inbox/InboxView.tsx'
 import { useTasks } from '../hooks/useTasks.ts'
 import { useProjects } from '../hooks/useProjects.ts'
+import { useAreas } from '../hooks/useAreas.ts'
+import { useInbox } from '../hooks/useInbox.ts'
 import type { Task } from '../types/domain.ts'
 
-const TABS = ['Today', 'Kanban', 'Lista', 'Gantt'] as const
+const TABS = ['Today', 'Inbox', 'Kanban', 'Lista', 'Gantt'] as const
 type Tab = typeof TABS[number]
+
+const EMPTY_TASK: Task = {
+  id: '',
+  userId: '',
+  projectId: '',
+  title: '',
+  notes: '',
+  status: 'next',
+  priority: 'med',
+  tags: [],
+  dependsOn: [],
+  archived: false,
+  synced: false,
+  createdAt: '',
+  updatedAt: '',
+  source: 'manual',
+  aiClassified: false,
+}
 
 export function TasksPage() {
   const [tab, setTab] = useState<Tab>('Today')
   const [selected, setSelected] = useState<Task | null>(null)
+  const [creating, setCreating] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [lastSync, setLastSync] = useState<string | null>(null)
-  const { tasks, loading, save, archive, updateStatus } = useTasks()
+  const { tasks, loading, save, archive, updateStatus, classify, refetch: refetchTasks } = useTasks()
   const { projects, loading: projectsLoading } = useProjects()
+  const { areas, loading: areasLoading } = useAreas()
+  const { entries, loading: inboxLoading, capture, process, fetch: refetchInbox } = useInbox()
 
   useEffect(() => { setLastSync(localStorage.getItem('jp_tasks_last_sync')) }, [])
 
@@ -32,16 +56,30 @@ export function TasksPage() {
       const ts = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
       localStorage.setItem('jp_tasks_last_sync', ts)
       setLastSync(ts)
+      await refetchTasks()
     } finally {
       setSyncing(false)
     }
   }
 
-  const _defaultProject = projects[0]
-  void _defaultProject
+  const defaultProject = projects[0]
 
   const handleToggleDone = (task: Task) => {
     void updateStatus(task.id, task.status === 'done' ? 'next' : 'done')
+  }
+
+  const handleOpenStructured = () => {
+    if (!defaultProject) {
+      window.alert('Crie um projeto primeiro')
+      return
+    }
+    setCreating(true)
+  }
+
+  const handleProcessInbox = async (input: Parameters<typeof process>[0]) => {
+    const r = await process(input)
+    if (input.action === 'to_task') await refetchTasks()
+    return r
   }
 
   const syncActions = (
@@ -56,7 +94,7 @@ export function TasksPage() {
     </div>
   )
 
-  if (loading || projectsLoading) {
+  if (loading || projectsLoading || areasLoading) {
     return (
       <div>
         <Topbar title="Tasks" actions={<ThemeToggle />} />
@@ -65,14 +103,22 @@ export function TasksPage() {
     )
   }
 
+  const inboxCount = entries.length
+  const tabsWithCount = TABS.map(t => t === 'Inbox' && inboxCount > 0 ? `Inbox (${inboxCount})` : t)
+  const handleTabChange = (s: string) => {
+    const cleaned = s.replace(/\s\(\d+\)$/, '') as Tab
+    setTab(cleaned)
+    if (cleaned === 'Inbox') void refetchInbox()
+  }
+
   return (
     <div>
       <Topbar title="Tasks" actions={syncActions} />
-      <Subtabs tabs={[...TABS]} active={tab} onChange={t => setTab(t as Tab)} />
+      <Subtabs tabs={tabsWithCount} active={tab === 'Inbox' && inboxCount > 0 ? `Inbox (${inboxCount})` : tab} onChange={handleTabChange} />
 
       <QuickAdd
-        onCapture={async () => { /* wired in tab Inbox integration */ }}
-        onOpenStructured={() => { /* wired in tab Inbox integration */ }}
+        onCapture={async (text) => { await capture(text) }}
+        onOpenStructured={handleOpenStructured}
       />
 
       {tab === 'Today' && (
@@ -84,11 +130,23 @@ export function TasksPage() {
         />
       )}
 
+      {tab === 'Inbox' && (
+        <InboxView
+          entries={entries}
+          projects={projects}
+          loading={inboxLoading}
+          defaultProjectId={defaultProject?.id}
+          onProcess={handleProcessInbox}
+          onOpenTask={setSelected}
+          onToggleDone={handleToggleDone}
+        />
+      )}
+
       {tab === 'Kanban' && (
         <KanbanView
           tasks={tasks}
           projects={projects}
-          areas={[]}
+          areas={areas}
           onOpen={setSelected}
           onStatusChange={(id, status) => { void updateStatus(id, status) }}
         />
@@ -113,10 +171,23 @@ export function TasksPage() {
         <TaskPanel
           task={selected}
           projects={projects}
-          areas={[]}
+          areas={areas}
           onSave={async input => { await save(input) }}
           onArchive={async id => { await archive(id) }}
+          onClassify={classify}
           onClose={() => setSelected(null)}
+        />
+      )}
+
+      {creating && defaultProject && (
+        <TaskPanel
+          task={{ ...EMPTY_TASK, projectId: defaultProject.id }}
+          projects={projects}
+          areas={areas}
+          isCreate
+          onSave={async input => { await save(input); await refetchTasks() }}
+          onArchive={async () => { /* unreachable in create mode */ }}
+          onClose={() => setCreating(false)}
         />
       )}
     </div>
