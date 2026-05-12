@@ -118,8 +118,13 @@ export interface HabitStreaksResponse { streaks: HabitStreak[] }
 export interface RitualsListResponse { rituals: Ritual[] }
 export interface RitualSaveResponse { ritual: Ritual }
 
-import type { CoachProfile, CoachMemoryEntry } from './domain.ts'
+import type { CoachProfile, CoachMemoryEntry, CoachLogEntry, CoachMemoryCandidate } from './domain.ts'
 
 export interface CoachProfileResponse { profile: CoachProfile | null }
 export interface CoachMemoryListResponse { memories: CoachMemoryEntry[] }
 export interface CoachMemorySaveResponse { memory: CoachMemoryEntry }
+export interface CoachChatHistoryResponse { messages: CoachLogEntry[] }
+export interface CoachUnreadResponse { unread: number }
+export interface CoachMemoryPendingResponse { candidates: CoachMemoryCandidate[] }
+export interface CoachMemoryExtractResponse { candidates: CoachMemoryCandidate[] }
+export interface CoachMemoryAcceptResponse { memory: CoachMemoryEntry }
