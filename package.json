@@ -30,6 +30,7 @@
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.5.2",
     "resend": "^4.5.1",
+    "rrule": "^2.8.1",
     "rss-parser": "^3.13.0",
     "zod": "^3.24.3"
   },
