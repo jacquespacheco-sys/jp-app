@@ -1,4 +1,22 @@
-export type TaskStatus = 'inbox' | 'next' | 'doing' | 'blocked' | 'done'
+import type {
+  Quadrant as QuadrantDB, HorizonLvl as HorizonLvlDB,
+  TaskContext as TaskContextDB, ProjectKind as ProjectKindDB,
+  ProjectStatusAqal, HabitDose as HabitDoseDB,
+  MemoryKind as MemoryKindDB, CaptureSrc as CaptureSrcDB,
+} from './database.ts'
+
+export type Quadrant = QuadrantDB
+export type HorizonLvl = HorizonLvlDB
+export type TaskContext = TaskContextDB
+export type ProjectKind = ProjectKindDB
+export type ProjectStatusType = ProjectStatusAqal
+export type HabitDose = HabitDoseDB
+export type MemoryKind = MemoryKindDB
+export type CaptureSrc = CaptureSrcDB
+
+export type TaskStatus =
+  | 'inbox' | 'next' | 'doing' | 'blocked' | 'done'
+  | 'waiting' | 'scheduled' | 'someday' | 'cancelled'
 export type TaskPriority = 'high' | 'med' | 'low'
 
 export interface Task {
@@ -21,6 +39,22 @@ export interface Task {
   synced: boolean
   createdAt: string
   updatedAt: string
+  // AQAL/GTD (campos opcionais; resolvedQuadrant é só preenchido pela view v_tasks_resolved)
+  areaId?: string
+  quadrantOverride?: Quadrant
+  resolvedQuadrant?: Quadrant
+  context?: TaskContext
+  energy?: number
+  timeEstimateMin?: number
+  dueAt?: string
+  scheduledAt?: string
+  completedAt?: string
+  waitingFor?: string
+  rrule?: string
+  rruleParentId?: string
+  parentTaskId?: string
+  source: CaptureSrc
+  aiClassified: boolean
 }
 
 export interface Project {
@@ -223,24 +257,8 @@ export interface NewsItem {
 }
 
 // =============================================================
-// AQAL/GTD (additivo — não modifica tipos legacy acima)
+// AQAL/GTD (additivo)
 // =============================================================
-
-import type {
-  Quadrant as QuadrantDB, HorizonLvl as HorizonLvlDB,
-  TaskContext as TaskContextDB, ProjectKind as ProjectKindDB,
-  ProjectStatusAqal, HabitDose as HabitDoseDB,
-  MemoryKind as MemoryKindDB, CaptureSrc as CaptureSrcDB,
-} from './database.ts'
-
-export type Quadrant = QuadrantDB
-export type HorizonLvl = HorizonLvlDB
-export type TaskContext = TaskContextDB
-export type ProjectKind = ProjectKindDB
-export type ProjectStatusType = ProjectStatusAqal
-export type HabitDose = HabitDoseDB
-export type MemoryKind = MemoryKindDB
-export type CaptureSrc = CaptureSrcDB
 
 export interface Area {
   id: string
@@ -293,4 +311,41 @@ export const QUADRANT_COLORS: Record<Quadrant, string> = {
   IT: '#34d399',
   WE: '#fb923c',
   ITS: '#60a5fa',
+}
+
+// =============================================================
+// Inbox (GTD captura/triagem)
+// =============================================================
+
+export interface InboxItem {
+  id: string
+  userId: string
+  rawText: string
+  source: CaptureSrc
+  externalRef?: string
+  aiSuggestion?: {
+    areaId?: string
+    context?: TaskContext
+    energy?: number
+    timeEstimateMin?: number
+    rationale: string
+  }
+  processed: boolean
+  processedToTask?: string
+  processedToProject?: string
+  createdAt: string
+  processedAt?: string
+}
+
+export type InboxEntry =
+  | { kind: 'inbox_item'; data: InboxItem }
+  | { kind: 'task'; data: Task }
+
+export interface TaskClassifyResult {
+  areaId: string | null
+  context: TaskContext | null
+  energy: number | null
+  timeEstimateMin: number | null
+  rationale: string
+  confidence: 'high' | 'medium' | 'low'
 }

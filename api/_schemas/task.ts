@@ -32,7 +32,9 @@ export const TaskSaveSchema = z.object({
   source: z.enum(['manual', 'voice', 'email', 'briefing', 'coach', 'google']).default('manual'),
 })
 
-export type TaskSaveInput = z.infer<typeof TaskSaveSchema>
+// z.input para que callers possam omitir campos com .default() (status/priority/source/etc.)
+export type TaskSaveInput = z.input<typeof TaskSaveSchema>
+export type TaskSaveOutput = z.output<typeof TaskSaveSchema>
 
 export const TaskArchiveSchema = z.object({
   id: z.string().uuid(),

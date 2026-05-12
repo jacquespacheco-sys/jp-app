@@ -84,3 +84,23 @@ export interface AqalDashboardResponse {
   byArea: AreaAggregate[]
   totals: AqalTotals
 }
+
+import type { InboxItem, InboxEntry, TaskClassifyResult } from './domain.ts'
+
+export interface TaskClassifyResponse {
+  classification: TaskClassifyResult
+  task?: Task
+}
+
+export interface InboxListResponse {
+  entries: InboxEntry[]
+}
+
+export interface InboxCaptureResponse {
+  item: InboxItem
+}
+
+export interface InboxProcessResponse {
+  item: InboxItem
+  task?: Pick<Task, 'id' | 'title' | 'status'>
+}
