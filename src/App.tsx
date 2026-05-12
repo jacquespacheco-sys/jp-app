@@ -13,6 +13,7 @@ import { NotesPage } from './pages/NotesPage.tsx'
 import { NewsPage } from './pages/NewsPage.tsx'
 import { AreasPage } from './pages/AreasPage.tsx'
 import { DashboardPage } from './pages/DashboardPage.tsx'
+import { ProjectsPage } from './pages/ProjectsPage.tsx'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -72,6 +73,10 @@ function AppRoutes() {
       <Route
         path="/dashboard"
         element={<ProtectedRoute><DashboardPage /></ProtectedRoute>}
+      />
+      <Route
+        path="/projects"
+        element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>}
       />
       <Route path="*" element={<Navigate to="/briefing" replace />} />
     </Routes>
