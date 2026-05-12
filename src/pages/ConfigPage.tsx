@@ -7,6 +7,8 @@ import { useCalendars } from '../hooks/useCalendars.ts'
 import { useSources } from '../hooks/useSources.ts'
 import { api } from '../api.ts'
 import type { Source } from '../types/domain.ts'
+import { CoachProfilePanel } from '../components/coach/CoachProfilePanel.tsx'
+import { CoachMemoryList } from '../components/coach/CoachMemoryList.tsx'
 
 function SourceRow({ source, onToggle, onDelete }: {
   source: Source
@@ -127,6 +129,14 @@ export function ConfigPage() {
   const [syncing, setSyncing] = useState(false)
   const [syncingTasks, setSyncingTasks] = useState(false)
   const [showAddSource, setShowAddSource] = useState(false)
+
+  const initialFocus = searchParams.get('tab') === 'coach' ? 'coach' : null
+
+  useEffect(() => {
+    if (initialFocus !== 'coach') return
+    const el = document.querySelector('[data-coach-section]')
+    if (el) (el as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [initialFocus])
 
   useEffect(() => {
     const connected = searchParams.get('connected')
@@ -306,6 +316,13 @@ export function ConfigPage() {
             Leitura via IMAP — em breve
           </div>
         </div>
+
+        <section data-coach-section className="section" style={{ marginTop: '32px' }}>
+          <h2 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px' }}>coach</h2>
+          <CoachProfilePanel />
+          <h3 style={{ fontSize: '12px', fontWeight: 600, margin: '24px 0 8px', color: 'var(--fg-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>memórias salvas</h3>
+          <CoachMemoryList />
+        </section>
 
       </div>
     </div>
