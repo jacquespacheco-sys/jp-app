@@ -3,6 +3,7 @@ import type { Task, Project, Area, TaskContext, Quadrant } from '../../types/dom
 import type { TaskSaveInput } from '../../../api/_schemas/task.ts'
 import { ConfirmDialog } from '../common/ConfirmDialog.tsx'
 import { Chip } from '../common/Chip.tsx'
+import { IconCalendar, IconClock, IconPause, IconRepeat, IconSparkle, EnergyDots } from '../common/Icon.tsx'
 import { QUADRANT_COLORS } from '../../types/domain.ts'
 
 interface ClassifyResult {
@@ -151,10 +152,8 @@ export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify
     }
   }
 
-  const energyDots = (n?: number) => {
-    if (!n) return '—'
-    return '⚡'.repeat(n)
-  }
+  // EnergyDots component is used inline; keep helper for label fallback
+  const energyLabel = (n?: number): string => n ? `${n}/5` : '+ energia'
 
   return (
     <>
@@ -253,12 +252,13 @@ export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify
                 )}
               />
               <Chip
-                label={energy !== undefined ? energyDots(energy) : '+ energia'}
+                label={energyLabel(energy)}
+                icon={energy ? <EnergyDots value={energy} /> : undefined}
                 popover={(close) => (
                   <div className="popover-row">
                     {[1, 2, 3, 4, 5].map(n => (
                       <button key={n} className="popover-item-small" onClick={() => { setEnergy(n); close() }}>
-                        {energyDots(n)}
+                        <EnergyDots value={n} />
                       </button>
                     ))}
                     <button className="popover-item-small" onClick={() => { setEnergy(undefined); close() }}>—</button>
@@ -291,7 +291,8 @@ export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify
             {/* Linha 3: datas e waiting */}
             <div className="chip-row">
               <Chip
-                label={dueAt ? `📅 ${dueAt.replace('T', ' ')}` : '+ due'}
+                label={dueAt ? dueAt.replace('T', ' ') : '+ due'}
+                icon={<IconCalendar />}
                 popover={(close) => (
                   <div className="popover-input">
                     <input
@@ -305,7 +306,8 @@ export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify
                 )}
               />
               <Chip
-                label={scheduledAt ? `🗓 ${scheduledAt.replace('T', ' ')}` : '+ scheduled'}
+                label={scheduledAt ? scheduledAt.replace('T', ' ') : '+ scheduled'}
+                icon={<IconClock />}
                 popover={(close) => (
                   <div className="popover-input">
                     <input
@@ -319,7 +321,8 @@ export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify
                 )}
               />
               <Chip
-                label={waitingFor ? `⏸ ${waitingFor}` : '+ waiting'}
+                label={waitingFor || '+ waiting'}
+                icon={<IconPause />}
                 popover={(close) => (
                   <div className="popover-input">
                     <input
@@ -343,13 +346,15 @@ export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify
             <div className="chip-row">
               {onClassify && task.id && (
                 <Chip
-                  label={classifying ? 'classificando…' : '✨ classificar AI'}
+                  label={classifying ? 'classificando…' : 'classificar IA'}
+                  icon={<IconSparkle />}
                   variant="ai"
                   onClick={() => { void handleClassify() }}
                 />
               )}
               <Chip
-                label={rrule ? `🔄 ${rruleLabel(rrule)}` : '+ recorrência'}
+                label={rrule ? rruleLabel(rrule) : '+ recorrência'}
+                icon={<IconRepeat />}
                 popover={(close) => (
                   <div className="popover-list">
                     {RRULE_PRESETS.map(p => (
@@ -411,7 +416,7 @@ export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify
 
             {aiRationale && (
               <div className="ai-rationale">
-                ✨ {aiRationale}
+                <IconSparkle size={12} /> {aiRationale}
               </div>
             )}
 

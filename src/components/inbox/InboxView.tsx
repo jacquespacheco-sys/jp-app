@@ -1,6 +1,7 @@
 import type { InboxEntry, InboxItem, Task, Project } from '../../types/domain.ts'
 import type { InboxProcessInput } from '../../../api/_schemas/inbox.ts'
 import { TaskRow } from '../tasks/TaskRow.tsx'
+import { IconArrowRight, IconTrash, IconSparkle } from '../common/Icon.tsx'
 
 interface Props {
   entries: InboxEntry[]
@@ -24,7 +25,7 @@ export function InboxView({ entries, projects, loading, defaultProjectId, onProc
     return (
       <div className="content">
         <div className="empty-state">
-          Inbox limpa ✨<br />
+          Inbox limpa<br />
           <span style={{ fontSize: '11px', opacity: 0.6 }}>capture algo no input acima ou aguarde fontes externas</span>
         </div>
       </div>
@@ -70,12 +71,18 @@ export function InboxView({ entries, projects, loading, defaultProjectId, onProc
               <div className="inbox-item-meta">
                 <span>{item.source}</span>
                 <span>{new Date(item.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
-                {item.aiSuggestion && <span>✨ classificada</span>}
+                {item.aiSuggestion && <span><IconSparkle size={10} /> classificada</span>}
               </div>
               <div className="inbox-item-actions">
-                <button className="inbox-action" onClick={() => { void handleToTask(item) }}>→ task</button>
-                <button className="inbox-action" onClick={() => { void handleToProject(item) }}>→ projeto</button>
-                <button className="inbox-action danger" onClick={() => { void handleTrash(item) }}>🗑</button>
+                <button className="inbox-action" onClick={() => { void handleToTask(item) }}>
+                  <IconArrowRight size={11} /> task
+                </button>
+                <button className="inbox-action" onClick={() => { void handleToProject(item) }}>
+                  <IconArrowRight size={11} /> projeto
+                </button>
+                <button className="inbox-action danger" onClick={() => { void handleTrash(item) }} aria-label="Descartar">
+                  <IconTrash size={12} />
+                </button>
               </div>
             </div>
           ))}

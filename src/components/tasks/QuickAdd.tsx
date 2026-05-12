@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { IconInbox, IconPlus } from '../common/Icon.tsx'
 
 interface Props {
   onCapture: (rawText: string) => Promise<void>
@@ -32,9 +33,10 @@ export function QuickAdd({ onCapture, onOpenStructured }: Props) {
   return (
     <div className="quick-add">
       <form onSubmit={e => { void handleSubmit(e) }} className="quick-add-form">
+        <span className="quick-add-icon"><IconInbox size={16} /></span>
         <input
           className="quick-add-input"
-          placeholder="📥 capturar pra inbox…"
+          placeholder="capturar pra inbox…"
           value={value}
           onChange={e => setValue(e.target.value)}
           disabled={saving}
@@ -46,7 +48,7 @@ export function QuickAdd({ onCapture, onOpenStructured }: Props) {
           onClick={onOpenStructured}
           aria-label="Nova tarefa estruturada"
         >
-          + tarefa
+          <IconPlus size={12} /> tarefa
         </button>
       </form>
       {toast && <div className="quick-add-toast">{toast}</div>}

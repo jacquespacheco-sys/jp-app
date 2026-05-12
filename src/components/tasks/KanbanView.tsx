@@ -3,6 +3,7 @@ import { DndContext, type DragEndEvent, PointerSensor, useSensor, useSensors } f
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import type { Task, Project, Area, Quadrant, TaskContext, HorizonLvl } from '../../types/domain.ts'
 import { QUADRANT_COLORS, QUADRANT_LABELS } from '../../types/domain.ts'
+import { IconRepeat, EnergyDots } from '../common/Icon.tsx'
 
 type Mode = 'quadrant' | 'status' | 'area' | 'horizon' | 'context'
 
@@ -58,12 +59,7 @@ interface CardProps { task: Task; project: Project | undefined; onOpen: (task: T
 const KanbanCard = memo(function KanbanCard({ task, project, onOpen }: CardProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: task.id })
   const q = task.resolvedQuadrant
-  const meta: string[] = []
-  if (task.status !== 'next' && task.status !== 'inbox') meta.push(task.status)
-  if (task.context) meta.push(`@${task.context}`)
-  if (task.energy) meta.push('⚡'.repeat(task.energy))
-  if (task.timeEstimateMin) meta.push(`${task.timeEstimateMin}m`)
-  if (task.rrule) meta.push('🔄')
+  const showStatus = task.status !== 'next' && task.status !== 'inbox'
 
   return (
     <div
@@ -76,11 +72,13 @@ const KanbanCard = memo(function KanbanCard({ task, project, onOpen }: CardProps
     >
       {project && <div className="kanban-card-project">{project.name}</div>}
       <div className="kanban-card-title">{task.title}</div>
-      {meta.length > 0 && (
-        <div className="kanban-card-meta">
-          {meta.map((m, i) => <span key={i}>{m}</span>)}
-        </div>
-      )}
+      <div className="kanban-card-meta">
+        {showStatus && <span>{task.status}</span>}
+        {task.context && <span>@{task.context}</span>}
+        {task.energy && <span style={{ display: 'inline-flex', alignItems: 'center' }}><EnergyDots value={task.energy} size={3} /></span>}
+        {task.timeEstimateMin && <span>{task.timeEstimateMin}m</span>}
+        {task.rrule && <span style={{ display: 'inline-flex', alignItems: 'center' }}><IconRepeat size={10} /></span>}
+      </div>
     </div>
   )
 })
