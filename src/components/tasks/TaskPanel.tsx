@@ -36,9 +36,22 @@ const PRIORITY_LABELS: Record<Task['priority'], string> = {
   high: '!alta', med: '!média', low: '!baixa',
 }
 
+const PRIORITY_COLORS: Record<Task['priority'], string> = {
+  high: '#ef4444', med: '#fbbf24', low: '#94a3b8',
+}
+
 const CONTEXT_LABELS: Record<TaskContext, string> = {
   deep: 'deep', shallow: 'shallow', social: 'social',
   criativo: 'criativo', somatico: 'somático', offline: 'offline',
+}
+
+const CONTEXT_COLORS: Record<TaskContext, string> = {
+  deep: '#a78bfa',
+  shallow: '#9ca3af',
+  social: '#fb923c',
+  criativo: '#f472b6',
+  somatico: '#34d399',
+  offline: '#64748b',
 }
 
 const QUADRANT_LABELS_SHORT: Record<Quadrant, string> = {
@@ -191,10 +204,16 @@ export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify
               />
               <Chip
                 label={PRIORITY_LABELS[priority]}
+                style={{ borderLeft: `3px solid ${PRIORITY_COLORS[priority]}` }}
                 popover={(close) => (
                   <div className="popover-list">
                     {(Object.keys(PRIORITY_LABELS) as Task['priority'][]).map(p => (
-                      <button key={p} className="popover-item" onClick={() => { setPriority(p); close() }}>
+                      <button
+                        key={p}
+                        className="popover-item"
+                        onClick={() => { setPriority(p); close() }}
+                        style={{ borderLeft: `3px solid ${PRIORITY_COLORS[p]}` }}
+                      >
                         {PRIORITY_LABELS[p]}
                       </button>
                     ))}
@@ -240,11 +259,17 @@ export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify
               />
               <Chip
                 label={context ? `@${CONTEXT_LABELS[context]}` : '+ contexto'}
+                {...(context ? { style: { borderLeft: `3px solid ${CONTEXT_COLORS[context]}` } } : {})}
                 popover={(close) => (
                   <div className="popover-list">
                     <button className="popover-item" onClick={() => { setContext(undefined); close() }}>sem contexto</button>
                     {(Object.keys(CONTEXT_LABELS) as TaskContext[]).map(c => (
-                      <button key={c} className="popover-item" onClick={() => { setContext(c); close() }}>
+                      <button
+                        key={c}
+                        className="popover-item"
+                        onClick={() => { setContext(c); close() }}
+                        style={{ borderLeft: `3px solid ${CONTEXT_COLORS[c]}` }}
+                      >
                         @{CONTEXT_LABELS[c]}
                       </button>
                     ))}

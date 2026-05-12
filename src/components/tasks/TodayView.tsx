@@ -24,6 +24,10 @@ const isToday = (iso?: string): boolean => {
 const PRIORITY_ORDER: Record<Task['priority'], number> = { high: 0, med: 1, low: 2 }
 
 const CONTEXTS: TaskContext[] = ['deep', 'shallow', 'social', 'criativo', 'somatico', 'offline']
+const CONTEXT_COLORS: Record<TaskContext, string> = {
+  deep: '#a78bfa', shallow: '#9ca3af', social: '#fb923c',
+  criativo: '#f472b6', somatico: '#34d399', offline: '#64748b',
+}
 
 interface Filter {
   contexts: TaskContext[]
@@ -93,15 +97,19 @@ export function TodayView({ tasks, projects, onOpen, onToggleDone }: Props) {
     <div className="content">
       <div className="today-filter-bar">
         <span className="today-filter-label">eu estou:</span>
-        {CONTEXTS.map(c => (
-          <button
-            key={c}
-            className={`today-filter-chip${filter.contexts.includes(c) ? ' active' : ''}`}
-            onClick={() => toggleContext(c)}
-          >
-            @{c}
-          </button>
-        ))}
+        {CONTEXTS.map(c => {
+          const active = filter.contexts.includes(c)
+          return (
+            <button
+              key={c}
+              className={`today-filter-chip${active ? ' active' : ''}`}
+              onClick={() => toggleContext(c)}
+              style={{ borderLeftWidth: '3px', borderLeftStyle: 'solid', borderLeftColor: CONTEXT_COLORS[c] }}
+            >
+              @{c}
+            </button>
+          )
+        })}
         <span className="today-filter-divider">⚡</span>
         {[1, 2, 3, 4, 5].map(n => (
           <button
