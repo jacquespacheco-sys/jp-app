@@ -88,6 +88,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     messages.push({ role: 'user', content })
   }
 
+  // Anthropic requires: first message is 'user' AND no consecutive same-role messages.
+  // Drop leading assistant messages (can happen at session boundary).
+  while (messages.length > 0 && messages[0]?.role === 'assistant') messages.shift()
+  // Collapse consecutive same-role runs by keeping only the most recent in each run
+  // (can happen if a previous coach response failed mid-stream).
+  const deduped: typeof messages = []
+  for (const m of messages) {
+    const last = deduped[deduped.length - 1]
+    if (last && last.role === m.role) {
+      deduped[deduped.length - 1] = m
+    } else {
+      deduped.push(m)
+    }
+  }
+  messages.length = 0
+  messages.push(...deduped)
+
   // Step 6: System prompt + memory ids
   const systemPrompt = buildSystemPrompt(snapshot, user.name)
   const memoryIds = snapshot.memories.map(m => m.id)
