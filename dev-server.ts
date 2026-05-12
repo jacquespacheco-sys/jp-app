@@ -4,6 +4,9 @@ import authLogin from './api/auth-login.ts'
 import authLogout from './api/auth-logout.ts'
 import authMe from './api/auth-me.ts'
 import projectsList from './api/projects-list.ts'
+import projectsSave from './api/projects-save.ts'
+import projectsArchive from './api/projects-archive.ts'
+import projectsComplete from './api/projects-complete.ts'
 import tasksList from './api/tasks-list.ts'
 import tasksSave from './api/tasks-save.ts'
 import tasksArchive from './api/tasks-archive.ts'
@@ -68,6 +71,9 @@ app.all('/api/auth-me', h(authMe))
 
 // Tasks
 app.all('/api/projects-list', h(projectsList))
+app.all('/api/projects-save', h(projectsSave))
+app.all('/api/projects-archive', h(projectsArchive))
+app.all('/api/projects-complete', h(projectsComplete))
 app.all('/api/tasks-list', h(tasksList))
 app.all('/api/tasks-save', h(tasksSave))
 app.all('/api/tasks-archive', h(tasksArchive))
