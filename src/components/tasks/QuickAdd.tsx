@@ -1,17 +1,15 @@
 import { useState, type FormEvent } from 'react'
-import type { TaskSaveInput } from '../../../api/_schemas/task.ts'
-import type { Project } from '../../types/domain.ts'
-import { parseInput } from '../../lib/taskParser.ts'
 
 interface Props {
-  defaultProject: Project
-  onAdd: (input: TaskSaveInput) => Promise<void>
+  onCapture: (rawText: string) => Promise<void>
+  onOpenStructured: () => void
 }
 
-export function QuickAdd({ defaultProject, onAdd }: Props) {
+export function QuickAdd({ onCapture, onOpenStructured }: Props) {
   const [value, setValue] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [toast, setToast] = useState('')
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -20,11 +18,12 @@ export function QuickAdd({ defaultProject, onAdd }: Props) {
     setSaving(true)
     setError('')
     try {
-      const { title, priority, dueDate, tags } = parseInput(trimmed)
-      await onAdd({ title, priority, dueDate, tags, projectId: defaultProject.id, notes: '', status: 'next', dependsOn: [] })
+      await onCapture(trimmed)
       setValue('')
+      setToast('→ Inbox')
+      setTimeout(() => setToast(''), 2000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao criar tarefa')
+      setError(err instanceof Error ? err.message : 'Erro ao capturar')
     } finally {
       setSaving(false)
     }
@@ -32,22 +31,29 @@ export function QuickAdd({ defaultProject, onAdd }: Props) {
 
   return (
     <div className="quick-add">
-      <form onSubmit={e => { void handleSubmit(e) }}>
+      <form onSubmit={e => { void handleSubmit(e) }} className="quick-add-form">
         <input
           className="quick-add-input"
-          placeholder="Nova tarefa… !alta hoje #tag"
+          placeholder="📥 capturar pra inbox…"
           value={value}
           onChange={e => setValue(e.target.value)}
           disabled={saving}
           autoComplete="off"
         />
+        <button
+          type="button"
+          className="quick-add-structured-btn"
+          onClick={onOpenStructured}
+          aria-label="Nova tarefa estruturada"
+        >
+          + tarefa
+        </button>
       </form>
-      {error && <div style={{ color: 'var(--danger)', fontFamily: 'Space Mono, monospace', fontSize: '10px', marginTop: '6px', letterSpacing: '1px' }}>{error}</div>}
+      {toast && <div className="quick-add-toast">{toast}</div>}
+      {error && <div className="quick-add-error">{error}</div>}
       <div className="quick-add-hints">
-        <span>!alta · !media · !baixa</span>
-        <span>hoje · amanhã</span>
-        <span>#tag</span>
-        <span>↵ para criar</span>
+        <span>↵ vai pra Inbox · organiza depois</span>
+        <span>+ tarefa abre formulário completo</span>
       </div>
     </div>
   )

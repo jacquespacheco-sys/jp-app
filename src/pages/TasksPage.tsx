@@ -37,7 +37,8 @@ export function TasksPage() {
     }
   }
 
-  const defaultProject = projects[0]
+  const _defaultProject = projects[0]
+  void _defaultProject
 
   const handleToggleDone = (task: Task) => {
     void updateStatus(task.id, task.status === 'done' ? 'next' : 'done')
@@ -69,12 +70,10 @@ export function TasksPage() {
       <Topbar title="Tasks" actions={syncActions} />
       <Subtabs tabs={[...TABS]} active={tab} onChange={t => setTab(t as Tab)} />
 
-      {defaultProject && (
-        <QuickAdd
-          defaultProject={defaultProject}
-          onAdd={async input => { await save(input) }}
-        />
-      )}
+      <QuickAdd
+        onCapture={async () => { /* wired in tab Inbox integration */ }}
+        onOpenStructured={() => { /* wired in tab Inbox integration */ }}
+      />
 
       {tab === 'Today' && (
         <TodayView
