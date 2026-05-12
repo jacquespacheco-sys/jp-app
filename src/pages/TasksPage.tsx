@@ -113,6 +113,7 @@ export function TasksPage() {
         <TaskPanel
           task={selected}
           projects={projects}
+          areas={[]}
           onSave={async input => { await save(input) }}
           onArchive={async id => { await archive(id) }}
           onClose={() => setSelected(null)}
