@@ -1,5 +1,6 @@
 import { getSupabase } from './_supabase.js'
 import { fetchAqalContext, type AqalContextSnapshot } from './_briefing-context.js'
+import { COACH_MODEL, buildCoachSnapshot, formatSnapshotForPrompt, getAnthropic } from './_coach.js'
 import Anthropic from '@anthropic-ai/sdk'
 import Parser from 'rss-parser'
 import { Resend } from 'resend'
@@ -58,8 +59,9 @@ function buildEmailHtml(params: {
   agenda: AgendaItem[]
   tasks: TaskItem[]
   ctx?: AqalContextSnapshot
+  coachParagraph?: string | null
 }): string {
-  const { highlight, dateLabel, global, brasil, newsletters, agenda, tasks, ctx } = params
+  const { highlight, dateLabel, global, brasil, newsletters, agenda, tasks, ctx, coachParagraph } = params
 
   function newsBlock(label: string, items: NewsItem[]) {
     if (!items.length) return ''
@@ -80,6 +82,12 @@ function buildEmailHtml(params: {
   const QUAD_COLORS: Record<string, string> = {
     I: '#a78bfa', IT: '#34d399', WE: '#fb923c', ITS: '#60a5fa',
   }
+
+  const coachBlock = !coachParagraph ? '' : `
+  <div style="margin-bottom:28px;padding:20px;border-left:2px solid #7dd3fc">
+    <div style="font-family:monospace;font-size:9px;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:10px">do coach</div>
+    <div style="font-size:14px;line-height:1.65;color:#ddd;white-space:pre-wrap">${coachParagraph.replace(/</g, '&lt;')}</div>
+  </div>`
 
   const aqalBlock = !ctx ? '' : (() => {
     const totalCompleted = ctx.quadrants7d.reduce((s, q) => s + q.completed, 0)
@@ -153,6 +161,7 @@ function buildEmailHtml(params: {
     <div style="font-size:20px;font-weight:700;color:#082f49;line-height:1.35">${highlight}</div>
   </div>
 
+  ${coachBlock}
   ${aqalBlock}
   ${agendaBlock}
   ${tasksBlock}
@@ -185,6 +194,7 @@ export interface GeneratedBriefing {
   model: string
   tokenCount: number
   createdAt: string
+  coachParagraph?: string
 }
 
 export async function generateBriefing(
@@ -243,6 +253,55 @@ export async function generateBriefing(
     .join('\n')
 
   const aqalLines = aqalContextLines(ctx)
+
+  // Fetch user name for coach voice
+  const userRow = await supabase.from('users').select('name').eq('id', userId).single()
+  const userName = (userRow.data as { name: string } | null)?.name ?? 'Jorge'
+
+  // Generate coach paragraph (Sonnet 4.6)
+  let coachParagraph: string | null = null
+  try {
+    const coachSnapshot = await buildCoachSnapshot({ userId, userName })
+    const snapshotText = formatSnapshotForPrompt(coachSnapshot, userName)
+
+    const { data: lastCheckIn } = await supabase
+      .from('coach_log')
+      .select('content_md')
+      .eq('user_id', userId)
+      .eq('kind', 'check_in')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    const lastCheckInText = (lastCheckIn as { content_md: string } | null)?.content_md ?? '(nenhum)'
+
+    const coachClient = getAnthropic()
+    const cpMsg = await coachClient.messages.create({
+      model: COACH_MODEL,
+      max_tokens: 500,
+      messages: [{
+        role: 'user',
+        content: `Você é o sócio sênior de ${userName}.
+
+${snapshotText}
+
+Último check-in recente (NÃO repita o conteúdo):
+${lastCheckInText}
+
+Escreva o parágrafo de abertura do briefing matinal (120-180 palavras).
+Voz: firme, direta, sem rodeios, sem emoji. Letra minúscula no início.
+Estrutura:
+- observação concreta sobre o quadro de 7 dias.
+- uma cobrança OU celebração específica (cite áreas/projetos reais).
+- foco do dia: UMA coisa, não lista.
+
+Responda APENAS o texto do parágrafo, sem aspas, sem cabeçalhos.`,
+      }],
+    })
+    const cpRaw = cpMsg.content[0]?.type === 'text' ? cpMsg.content[0].text.trim() : ''
+    if (cpRaw) coachParagraph = cpRaw
+  } catch (e) {
+    console.error('[briefing] coach paragraph failed:', e instanceof Error ? e.message : e)
+  }
 
   const anthropic = new Anthropic({ apiKey })
 
@@ -316,6 +375,7 @@ Regras:
         agenda: filteredEvents as AgendaItem[],
         tasks: (tasks ?? []) as TaskItem[],
         ctx,
+        coachParagraph,
       })
       const { error: emailError } = await resend.emails.send({
         from: fromEmail,
@@ -334,6 +394,7 @@ Regras:
   const contentMd = buildContentMarkdown({
     highlight, ctx, agenda: filteredEvents, tasks: (tasks ?? []) as TaskItem[],
     global: content.global, brasil: content.brasil,
+    coachParagraph,
   })
 
   const { data: briefing, error: dbError } = await supabase
@@ -353,6 +414,7 @@ Regras:
       context_snapshot: ctx as unknown as import('../src/types/database.ts').Json,
       model_used: MODEL,
       delivered_at: emailSentAt ?? new Date().toISOString(),
+      coach_paragraph: coachParagraph,
     })
     .select()
     .single()
@@ -370,6 +432,7 @@ Regras:
     model: briefing.model,
     tokenCount: briefing.token_count ?? tokenCount,
     createdAt: briefing.created_at,
+    ...(briefing.coach_paragraph ? { coachParagraph: briefing.coach_paragraph } : {}),
   }
 }
 
@@ -378,9 +441,11 @@ function buildContentMarkdown(p: {
   agenda: { summary: string; start_at: string; all_day: boolean }[];
   tasks: TaskItem[];
   global: NewsItem[]; brasil: NewsItem[];
+  coachParagraph?: string | null;
 }): string {
   const parts: string[] = []
   parts.push(`# ${p.highlight}`)
+  if (p.coachParagraph) parts.push(`\n## Coach hoje\n${p.coachParagraph}`)
 
   const quadStr = p.ctx.quadrants7d
     .filter(q => q.completed > 0)
