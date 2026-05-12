@@ -610,6 +610,15 @@ export type Database = {
         }
         Relationships: []
       }
+      v_projects_with_counts: {
+        Row: Database['public']['Tables']['projects']['Row'] & {
+          task_open_count: number
+          task_count: number
+          child_count: number
+          resolved_quadrant: Quadrant | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       seed_default_areas: {
