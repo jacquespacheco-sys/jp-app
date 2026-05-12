@@ -5,7 +5,8 @@
   "functions": {
     "api/briefing-generate.ts": { "maxDuration": 60 },
     "api/briefing-cron.ts": { "maxDuration": 300 },
-    "api/tasks-classify.ts": { "maxDuration": 30 }
+    "api/tasks-classify.ts": { "maxDuration": 30 },
+    "api/coach-chat.ts": { "maxDuration": 60 }
   },
   "crons": [
     {
