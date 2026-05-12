@@ -30,6 +30,7 @@ type UsersInsert = {
   id?: string; email: string; password_hash: string; name: string
   city?: string | null; timezone?: string; google_refresh_token?: string | null
   anthropic_api_key?: string | null; theme?: string
+  coach_last_read_at?: string | null
   created_at?: string; updated_at?: string
 }
 
@@ -92,6 +93,8 @@ type BriefingsInsert = {
   briefed_for?: string | null; content_md?: string | null
   context_snapshot?: Json | null; external_tasks_count?: number
   model_used?: string | null; delivered_at?: string | null; opened_at?: string | null
+  // Coach (0013)
+  coach_paragraph?: string | null
 }
 
 type CalendarsInsert = {
@@ -203,6 +206,7 @@ type IntegrationsInsert = {
   metadata?: Json; created_at?: string; updated_at?: string
 }
 
+// Coach module (0010-0013)
 type CoachProfileInsert = {
   user_id: string; name?: string; tone?: string
   voice_examples?: string | null; values_md?: Json; boundaries?: string | null
@@ -224,6 +228,15 @@ type CoachLogInsert = {
   content_md: string; context_snapshot?: Json | null; resulted_in?: Json | null
   model_used?: string | null; tokens_in?: number | null
   tokens_out?: number | null; created_at?: string
+  conversation_id?: string | null
+}
+
+type CoachMemoryCandidateInsert = {
+  id?: string; user_id: string; source_log_id?: string | null
+  kind: MemoryKind; content: string; relevance?: number
+  expires_at?: string | null
+  status?: 'pending' | 'accepted' | 'dismissed'
+  created_at?: string; decided_at?: string | null
 }
 
 type ReviewsInsert = {
@@ -242,7 +255,8 @@ export type Database = {
           id: string; email: string; password_hash: string; name: string
           city: string | null; timezone: string
           google_refresh_token: string | null; anthropic_api_key: string | null
-          theme: string; created_at: string; updated_at: string
+          theme: string; coach_last_read_at: string | null
+          created_at: string; updated_at: string
         }
         Insert: UsersInsert
         Update: Partial<UsersInsert>
@@ -349,6 +363,8 @@ export type Database = {
           briefed_for: string | null; content_md: string | null
           context_snapshot: Json | null; external_tasks_count: number
           model_used: string | null; delivered_at: string | null; opened_at: string | null
+          // Coach (0013)
+          coach_paragraph: string | null
         }
         Insert: BriefingsInsert
         Update: Partial<BriefingsInsert>
@@ -577,9 +593,22 @@ export type Database = {
           content_md: string; context_snapshot: Json | null; resulted_in: Json | null
           model_used: string | null; tokens_in: number | null
           tokens_out: number | null; created_at: string
+          conversation_id: string | null
         }
         Insert: CoachLogInsert
         Update: Partial<CoachLogInsert>
+        Relationships: []
+      }
+      coach_memory_candidate: {
+        Row: {
+          id: string; user_id: string; source_log_id: string | null
+          kind: MemoryKind; content: string; relevance: number
+          expires_at: string | null
+          status: 'pending' | 'accepted' | 'dismissed'
+          created_at: string; decided_at: string | null
+        }
+        Insert: CoachMemoryCandidateInsert
+        Update: Partial<CoachMemoryCandidateInsert>
         Relationships: []
       }
       reviews: {

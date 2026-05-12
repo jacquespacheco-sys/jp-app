@@ -5,12 +5,19 @@
   "functions": {
     "api/briefing-generate.ts": { "maxDuration": 60 },
     "api/briefing-cron.ts": { "maxDuration": 300 },
-    "api/tasks-classify.ts": { "maxDuration": 30 }
+    "api/tasks-classify.ts": { "maxDuration": 30 },
+    "api/coach-chat.ts": { "maxDuration": 60 },
+    "api/coach-memory-extract.ts": { "maxDuration": 30 },
+    "api/coach-checkin-cron.ts": { "maxDuration": 300 }
   },
   "crons": [
     {
       "path": "/api/briefing-cron",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/coach-checkin-cron",
+      "schedule": "0,30 * * * *"
     }
   ]
 }

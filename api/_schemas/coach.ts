@@ -9,6 +9,8 @@ export const CoachProfileSaveSchema = z.object({
   checkInSchedule: z.object({
     morning: z.string().regex(/^\d{2}:\d{2}$/).optional(),
     evening: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+    emailMorning: z.boolean().default(true),
+    emailEvening: z.boolean().default(false),
     weeklyDay: z.enum(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']).optional(),
     weeklyTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
   }).default({}),
@@ -40,3 +42,37 @@ export type CoachMemorySaveInput = z.input<typeof CoachMemorySaveSchema>
 export const CoachMemoryArchiveSchema = z.object({
   id: z.string().uuid(),
 })
+
+// ---- Chat ----
+
+export const CoachChatSchema = z.object({
+  content: z.string().min(1).max(8000),
+})
+export type CoachChatInput = z.input<typeof CoachChatSchema>
+
+export const CoachChatHistorySchema = z.object({
+  before: z.string().datetime().optional(),
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+})
+export type CoachChatHistoryInput = z.input<typeof CoachChatHistorySchema>
+
+// ---- Memory candidates ----
+
+export const CoachMemoryExtractSchema = z.object({
+  sinceLogId: z.string().uuid().optional(),
+})
+export type CoachMemoryExtractInput = z.input<typeof CoachMemoryExtractSchema>
+
+export const CoachMemoryAcceptSchema = z.object({
+  candidateId: z.string().uuid(),
+  content: z.string().min(1).max(2000).optional(),
+  kind: z.enum(['fact', 'pattern', 'promise', 'concern', 'preference']).optional(),
+  relevance: z.number().int().min(0).max(100).optional(),
+  expiresAt: z.string().datetime().optional(),
+})
+export type CoachMemoryAcceptInput = z.input<typeof CoachMemoryAcceptSchema>
+
+export const CoachMemoryDismissSchema = z.object({
+  candidateId: z.string().uuid(),
+})
+export type CoachMemoryDismissInput = z.input<typeof CoachMemoryDismissSchema>

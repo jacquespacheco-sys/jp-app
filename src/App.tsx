@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { AuthProvider } from './hooks/AuthProvider.tsx'
 import { useAuth } from './hooks/useAuth.ts'
 import { BottomNav } from './components/layout/BottomNav.tsx'
+import { CoachFab } from './components/coach/CoachFab.tsx'
 import { ErrorBoundary } from './components/common/ErrorBoundary.tsx'
 import { LoginPage } from './pages/LoginPage.tsx'
 import { BriefingPage } from './pages/BriefingPage.tsx'
@@ -17,11 +18,13 @@ import { ProjectsPage } from './pages/ProjectsPage.tsx'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
+  const navigate = useNavigate()
   if (loading) return <div className="empty-state" style={{ paddingTop: '40vh' }}>Carregando…</div>
   if (!user) return <Navigate to="/login" replace />
   return (
     <div className="app">
       {children}
+      <CoachFab onOpenProfile={() => navigate('/config?tab=coach')} />
       <BottomNav />
     </div>
   )

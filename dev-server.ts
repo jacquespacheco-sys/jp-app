@@ -19,6 +19,15 @@ import coachProfile from './api/coach-profile.ts'
 import coachMemoryList from './api/coach-memory-list.ts'
 import coachMemorySave from './api/coach-memory-save.ts'
 import coachMemoryArchive from './api/coach-memory-archive.ts'
+import coachChat from './api/coach-chat.ts'
+import coachChatHistory from './api/coach-chat-history.ts'
+import coachUnread from './api/coach-unread.ts'
+import coachMarkRead from './api/coach-mark-read.ts'
+import coachMemoryExtract from './api/coach-memory-extract.ts'
+import coachMemoryPending from './api/coach-memory-pending.ts'
+import coachMemoryAccept from './api/coach-memory-accept.ts'
+import coachMemoryDismiss from './api/coach-memory-dismiss.ts'
+import coachCheckinCron from './api/coach-checkin-cron.ts'
 import tasksList from './api/tasks-list.ts'
 import tasksSave from './api/tasks-save.ts'
 import tasksArchive from './api/tasks-archive.ts'
@@ -102,6 +111,15 @@ app.all('/api/coach-profile', h(coachProfile))
 app.all('/api/coach-memory-list', h(coachMemoryList))
 app.all('/api/coach-memory-save', h(coachMemorySave))
 app.all('/api/coach-memory-archive', h(coachMemoryArchive))
+app.all('/api/coach-chat', h(coachChat))
+app.all('/api/coach-chat-history', h(coachChatHistory))
+app.all('/api/coach-unread', h(coachUnread))
+app.all('/api/coach-mark-read', h(coachMarkRead))
+app.all('/api/coach-memory-extract', h(coachMemoryExtract))
+app.all('/api/coach-memory-pending', h(coachMemoryPending))
+app.all('/api/coach-memory-accept', h(coachMemoryAccept))
+app.all('/api/coach-memory-dismiss', h(coachMemoryDismiss))
+app.all('/api/coach-checkin-cron', h(coachCheckinCron))
 app.all('/api/tasks-list', h(tasksList))
 app.all('/api/tasks-save', h(tasksSave))
 app.all('/api/tasks-archive', h(tasksArchive))

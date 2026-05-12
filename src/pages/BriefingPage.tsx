@@ -31,6 +31,30 @@ function BriefingView({ briefing }: { briefing: Briefing }) {
         <div className="highlight-text">{briefing.highlight}</div>
       </div>
 
+      {/* Coach paragraph */}
+      {briefing.coachParagraph && (
+        <section style={{
+          borderLeft: '2px solid var(--accent)',
+          paddingLeft: '16px',
+          margin: '20px 0',
+        }}>
+          <div style={{
+            fontFamily: 'Space Mono, monospace',
+            fontSize: '9px',
+            letterSpacing: '2px',
+            color: 'var(--fg-dim)',
+            textTransform: 'uppercase',
+            marginBottom: '8px',
+          }}>do coach</div>
+          <div style={{
+            fontSize: '14px',
+            lineHeight: 1.65,
+            whiteSpace: 'pre-wrap',
+            color: 'var(--fg)',
+          }}>{briefing.coachParagraph}</div>
+        </section>
+      )}
+
       {/* Agenda */}
       {Array.isArray(content.agenda) && content.agenda.length > 0 && (
         <div className="section">

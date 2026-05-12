@@ -170,6 +170,7 @@ export interface Briefing {
   tokenCount?: number
   cost?: number
   createdAt: string
+  coachParagraph?: string
 }
 
 export interface BriefingContent {
@@ -451,6 +452,8 @@ export interface CoachProfile {
   checkInSchedule: {
     morning?: string
     evening?: string
+    emailMorning?: boolean
+    emailEvening?: boolean
     weeklyDay?: 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU'
     weeklyTime?: string
   }
@@ -472,5 +475,26 @@ export interface CoachMemoryEntry {
   relevance: number
   expiresAt?: string
   lastReferencedAt?: string
+  createdAt: string
+}
+
+export type CoachMessageDirection = 'user_to_coach' | 'coach_to_user'
+export type CoachMessageKind = 'chat' | 'check_in' | 'callout' | 'celebration'
+
+export interface CoachLogEntry {
+  id: string
+  direction: CoachMessageDirection
+  kind: CoachMessageKind
+  contentMd: string
+  createdAt: string
+}
+
+export interface CoachMemoryCandidate {
+  id: string
+  kind: MemoryKind
+  content: string
+  relevance: number
+  expiresAt?: string
+  sourceLogId?: string
   createdAt: string
 }
