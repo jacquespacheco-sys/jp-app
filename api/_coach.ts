@@ -1,5 +1,6 @@
 import './_env.js'
 import Anthropic from '@anthropic-ai/sdk'
+import { fromZonedTime } from 'date-fns-tz'
 import { getSupabase } from './_supabase.js'
 import { fetchAqalContext, type AqalContextSnapshot } from './_briefing-context.js'
 
@@ -38,7 +39,6 @@ export interface CoachSnapshot {
   tasksTop: Array<{
     title: string
     status: string
-    areaName?: string
     quadrant?: string
     dueAt?: string
   }>
@@ -49,11 +49,18 @@ export interface CoachSnapshot {
 export interface BuildSnapshotOpts {
   userId: string
   userName: string
+  userTimezone?: string  // defaults to 'America/Sao_Paulo'
 }
 
 export async function buildCoachSnapshot(opts: BuildSnapshotOpts): Promise<CoachSnapshot> {
   const supabase = getSupabase()
-  const todayDateStr = new Date().toISOString().slice(0, 10)
+  const tz = opts.userTimezone ?? 'America/Sao_Paulo'
+  // local YYYY-MM-DD via Intl (avoids extra deps; matches pattern used in checkin-cron plan)
+  const todayDateStr = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(new Date())
+  const dayStartUtc = fromZonedTime(`${todayDateStr}T00:00:00`, tz).toISOString()
+  const dayEndUtc = fromZonedTime(`${todayDateStr}T23:59:59`, tz).toISOString()
   const nowIso = new Date().toISOString()
 
   const [profileRes, memRes, aqal, tasksRes, eventsRes, habitsRes, logsRes] = await Promise.all([
@@ -75,8 +82,8 @@ export async function buildCoachSnapshot(opts: BuildSnapshotOpts): Promise<Coach
     supabase.from('calendar_events')
       .select('summary,start_at,all_day')
       .eq('user_id', opts.userId)
-      .gte('start_at', `${todayDateStr}T00:00:00Z`)
-      .lte('start_at', `${todayDateStr}T23:59:59Z`)
+      .gte('start_at', dayStartUtc)
+      .lte('start_at', dayEndUtc)
       .neq('status', 'cancelled')
       .order('start_at', { ascending: true }),
     supabase.from('habits')
@@ -90,16 +97,23 @@ export async function buildCoachSnapshot(opts: BuildSnapshotOpts): Promise<Coach
       .eq('done_on', todayDateStr),
   ])
 
+  for (const [label, res] of [
+    ['profile', profileRes], ['memories', memRes], ['tasks', tasksRes],
+    ['events', eventsRes], ['habits', habitsRes], ['habit_logs', logsRes],
+  ] as const) {
+    if (res.error) console.error(`[coach.snapshot] ${label} error:`, res.error.message)
+  }
+
   const profileRow = profileRes.data as Record<string, unknown> | null
-  const profile = profileRow
+  const profile: CoachSnapshot['profile'] = profileRow
     ? {
-        name: (profileRow['name'] as string) ?? 'Coach',
-        tone: (profileRow['tone'] as string) ?? 'firme-mas-gentil',
-        valuesMd: (profileRow['values_md'] as string[]) ?? [],
-        boundaries: (profileRow['boundaries'] as string | null) ?? undefined,
-        northStarMd: (profileRow['north_star_md'] as string | null) ?? undefined,
-        h3Goals: (profileRow['h3_goals'] as CoachSnapshot['profile']['h3Goals']) ?? [],
-        systemPromptOverride: (profileRow['system_prompt_override'] as string | null) ?? undefined,
+        name: (profileRow['name'] as string | null) ?? 'Coach',
+        tone: (profileRow['tone'] as string | null) ?? 'firme-mas-gentil',
+        valuesMd: (profileRow['values_md'] as string[] | null) ?? [],
+        h3Goals: (profileRow['h3_goals'] as CoachSnapshot['profile']['h3Goals'] | null) ?? [],
+        ...(profileRow['boundaries'] ? { boundaries: profileRow['boundaries'] as string } : {}),
+        ...(profileRow['north_star_md'] ? { northStarMd: profileRow['north_star_md'] as string } : {}),
+        ...(profileRow['system_prompt_override'] ? { systemPromptOverride: profileRow['system_prompt_override'] as string } : {}),
       }
     : { name: 'Coach', tone: 'firme-mas-gentil', valuesMd: [], h3Goals: [] }
 
@@ -211,10 +225,13 @@ REGRAS:
 - Se ele pergunta "o que faço", responda direto.`
 }
 
+let _anthropic: Anthropic | null = null
 export function getAnthropic(): Anthropic {
+  if (_anthropic) return _anthropic
   const apiKey = process.env['ANTHROPIC_API_KEY']
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY não configurada')
-  return new Anthropic({ apiKey })
+  _anthropic = new Anthropic({ apiKey })
+  return _anthropic
 }
 
 /**
