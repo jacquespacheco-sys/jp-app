@@ -39,7 +39,12 @@ export function TaskRow({ task, projects, onOpen, onToggleDone }: Props) {
       <div className="task-body">
         <div className="task-title">{task.title}</div>
         <div className="task-meta">
-          {project && <span className="task-project">{project.name}</span>}
+          {project && (
+            <span className="task-project">
+              <span className="task-project-dot" style={{ background: project.color }} />
+              {project.name}
+            </span>
+          )}
           {dueLabel && <span>{dueLabel}</span>}
           {task.context && <span>@{task.context}</span>}
           {task.energy && <span style={{ display: 'inline-flex', alignItems: 'center' }}><EnergyDots value={task.energy} size={3} /></span>}

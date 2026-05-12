@@ -9,13 +9,15 @@ import { KanbanView } from '../components/tasks/KanbanView.tsx'
 import { ListView } from '../components/tasks/ListView.tsx'
 import { TaskPanel } from '../components/tasks/TaskPanel.tsx'
 import { InboxView } from '../components/inbox/InboxView.tsx'
+import { ProjectsView } from '../components/projects/ProjectsView.tsx'
+import { ProjectPanel } from '../components/projects/ProjectPanel.tsx'
 import { useTasks } from '../hooks/useTasks.ts'
 import { useProjects } from '../hooks/useProjects.ts'
 import { useAreas } from '../hooks/useAreas.ts'
 import { useInbox } from '../hooks/useInbox.ts'
-import type { Task } from '../types/domain.ts'
+import type { Task, Project } from '../types/domain.ts'
 
-const TABS = ['Today', 'Inbox', 'Kanban', 'Lista', 'Gantt'] as const
+const TABS = ['Today', 'Inbox', 'Kanban', 'Lista', 'Projetos', 'Gantt'] as const
 type Tab = typeof TABS[number]
 
 const EMPTY_TASK: Task = {
@@ -36,14 +38,27 @@ const EMPTY_TASK: Task = {
   aiClassified: false,
 }
 
+const EMPTY_PROJECT: Project = {
+  id: '', userId: '', name: '', color: '#7dd3fc',
+  archived: false, createdAt: '', updatedAt: '',
+  kind: 'outcome', status: 'active', horizon: 'H1',
+  position: 0, taskCount: 0, taskOpenCount: 0, childCount: 0,
+}
+
 export function TasksPage() {
   const [tab, setTab] = useState<Tab>('Today')
   const [selected, setSelected] = useState<Task | null>(null)
   const [creating, setCreating] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  const [creatingProject, setCreatingProject] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [lastSync, setLastSync] = useState<string | null>(null)
   const { tasks, loading, save, archive, updateStatus, classify, refetch: refetchTasks } = useTasks()
-  const { projects, loading: projectsLoading } = useProjects()
+  const {
+    projects, loading: projectsLoading,
+    save: saveProject, archive: archiveProject, complete: completeProject,
+    refetch: refetchProjects,
+  } = useProjects()
   const { areas, loading: areasLoading } = useAreas()
   const { entries, loading: inboxLoading, capture, process, fetch: refetchInbox } = useInbox()
 
@@ -173,6 +188,15 @@ export function TasksPage() {
         />
       )}
 
+      {tab === 'Projetos' && (
+        <ProjectsView
+          projects={projects}
+          areas={areas}
+          mode="horizon"
+          onSelect={setSelectedProject}
+        />
+      )}
+
       {tab === 'Gantt' && (
         <div className="content">
           <div className="empty-state">Gantt — em breve</div>
@@ -187,6 +211,7 @@ export function TasksPage() {
           onSave={async input => { await save(input) }}
           onArchive={async id => { await archive(id) }}
           onClassify={classify}
+          onCreateProject={() => setCreatingProject(true)}
           onClose={() => setSelected(null)}
         />
       )}
@@ -199,7 +224,32 @@ export function TasksPage() {
           isCreate
           onSave={async input => { await save(input); await refetchTasks() }}
           onArchive={async () => { /* unreachable in create mode */ }}
+          onCreateProject={() => setCreatingProject(true)}
           onClose={() => setCreating(false)}
+        />
+      )}
+
+      {selectedProject && (
+        <ProjectPanel
+          project={selectedProject}
+          areas={areas}
+          allProjects={projects}
+          onSave={async input => { await saveProject(input) }}
+          onArchive={async id => { await archiveProject(id); await refetchProjects() }}
+          onComplete={async id => { await completeProject(id) }}
+          onClose={() => setSelectedProject(null)}
+        />
+      )}
+
+      {creatingProject && (
+        <ProjectPanel
+          project={EMPTY_PROJECT}
+          areas={areas}
+          allProjects={projects}
+          isCreate
+          onSave={async input => { await saveProject(input); await refetchProjects(); setCreatingProject(false) }}
+          onArchive={async () => { /* unreachable */ }}
+          onClose={() => setCreatingProject(false)}
         />
       )}
     </div>

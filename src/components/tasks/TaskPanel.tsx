@@ -30,6 +30,7 @@ interface Props {
   onSave: (input: TaskSaveInput) => Promise<void>
   onArchive: (id: string) => Promise<void>
   onClassify?: (taskId: string) => Promise<ClassifyResult>
+  onCreateProject?: () => void
   onClose: () => void
   isCreate?: boolean
 }
@@ -81,7 +82,7 @@ function localInputToIso(local: string): string | undefined {
   return d.toISOString()
 }
 
-export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify, onClose, isCreate }: Props) {
+export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify, onCreateProject, onClose, isCreate }: Props) {
   const [title, setTitle] = useState(task.title)
   const [notes, setNotes] = useState(task.notes)
   const [status, setStatus] = useState(task.status)
@@ -237,6 +238,17 @@ export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify
                         {p.name}
                       </button>
                     ))}
+                    {onCreateProject && (
+                      <>
+                        <div className="popover-divider" />
+                        <button
+                          className="popover-item popover-item-add"
+                          onClick={() => { close(); onCreateProject() }}
+                        >
+                          + novo projeto
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
               />
