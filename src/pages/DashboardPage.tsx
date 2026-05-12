@@ -6,6 +6,9 @@ import { api } from '../api.ts'
 import type { AqalDashboardResponse } from '../types/api.ts'
 import { QUADRANT_COLORS, QUADRANT_LABELS } from '../types/domain.ts'
 import type { Quadrant } from '../types/domain.ts'
+import { ProjectsCard } from '../components/projects/ProjectsCard.tsx'
+import { useProjects } from '../hooks/useProjects.ts'
+import { useAreas } from '../hooks/useAreas.ts'
 
 const QUADRANT_POSITION: Record<Quadrant, { row: 0 | 1; col: 0 | 1; corner: string }> = {
   I:   { row: 0, col: 0, corner: 'UL' },
@@ -57,6 +60,8 @@ export function DashboardPage() {
   const navigate = useNavigate()
   const [data, setData] = useState<AqalDashboardResponse | null>(null)
   const [loading, setLoading] = useState(true)
+  const { projects } = useProjects()
+  const { areas } = useAreas()
 
   useEffect(() => {
     let cancelled = false
@@ -139,6 +144,8 @@ export function DashboardPage() {
             />
           ))}
         </div>
+
+        <ProjectsCard projects={projects} areas={areas} />
 
         <div className="section">
           <div className="section-title">Por área</div>
