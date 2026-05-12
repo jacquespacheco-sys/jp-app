@@ -170,6 +170,7 @@ export interface Briefing {
   tokenCount?: number
   cost?: number
   createdAt: string
+  coachParagraph?: string
 }
 
 export interface BriefingContent {

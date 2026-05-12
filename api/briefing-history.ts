@@ -26,6 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       emailSent: b.email_sent, emailSentAt: b.email_sent_at ?? undefined,
       model: b.model, tokenCount: b.token_count ?? undefined,
       cost: b.cost ?? undefined, createdAt: b.created_at,
+      ...(b.coach_paragraph ? { coachParagraph: b.coach_paragraph } : {}),
     })),
   })
 }
