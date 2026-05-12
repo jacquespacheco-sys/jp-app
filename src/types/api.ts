@@ -104,3 +104,7 @@ export interface InboxProcessResponse {
   item: InboxItem
   task?: Pick<Task, 'id' | 'title' | 'status'>
 }
+
+export interface ProjectSaveResponse {
+  project: Project
+}

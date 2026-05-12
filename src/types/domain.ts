@@ -66,6 +66,24 @@ export interface Project {
   archived: boolean
   createdAt: string
   updatedAt: string
+  // AQAL (campos novos opcionais — vêm da view v_projects_with_counts)
+  title?: string
+  outcome?: string
+  kind: ProjectKind
+  status: ProjectStatusType
+  horizon: HorizonLvl
+  areaId?: string
+  parentId?: string
+  quadrantOverride?: Quadrant
+  resolvedQuadrant?: Quadrant
+  targetDate?: string
+  position: number
+  completedAt?: string
+  archivedAt?: string
+  // Agregados (preenchidos pelo endpoint, não enviados no save)
+  taskCount: number
+  taskOpenCount: number
+  childCount: number
 }
 
 export interface Contact {
