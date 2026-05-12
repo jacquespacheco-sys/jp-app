@@ -56,8 +56,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  // 2. Sync tasks per list
-  const taskUpserts: object[] = []
+  // 2. Sync tasks per list — collect all rows from Google
+  type GoogleTaskRow = {
+    user_id: string
+    project_id: string
+    title: string
+    notes: string
+    status: 'inbox' | 'done'
+    due_date: string | null
+    google_tasks_id: string
+    synced: boolean
+    updated_at: string
+  }
+
+  const taskRows: GoogleTaskRow[] = []
 
   for (const list of taskLists) {
     if (!list.id) continue
@@ -76,8 +88,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       for (const t of page.items ?? []) {
         if (!t.id || !t.title) continue
-
-        taskUpserts.push({
+        taskRows.push({
           user_id: user.id,
           project_id: projectId,
           title: t.title,
@@ -94,19 +105,60 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } while (pageToken)
   }
 
-  if (taskUpserts.length > 0) {
-    const { error: taskErr } = await supabase
-      .from('tasks')
-      .upsert(taskUpserts as never[], { onConflict: 'user_id,google_tasks_id' })
-
-    if (taskErr) {
-      console.error('[tasks-sync] task upsert error:', taskErr.message)
-      return res.status(500).json({ error: taskErr.message })
-    }
+  if (taskRows.length === 0) {
+    return res.status(200).json({ projects: listUpserts.length, tasks_inserted: 0, tasks_updated: 0 })
   }
+
+  // PASS 1: insert NEW tasks only — ignoreDuplicates evita sobrescrever existentes.
+  // Tasks novas vindas do Google entram com title, notes, status, due_date completos.
+  const { error: insertErr } = await supabase
+    .from('tasks')
+    .upsert(taskRows as never[], { onConflict: 'user_id,google_tasks_id', ignoreDuplicates: true })
+
+  if (insertErr) {
+    console.error('[tasks-sync] task insert error:', insertErr.message)
+    return res.status(500).json({ error: insertErr.message })
+  }
+
+  // PASS 2: update EXISTING tasks — só campos que Google é a fonte da verdade.
+  // Preserva: areaId, quadrantOverride, context, energy, timeEstimateMin, scheduledAt,
+  //          waitingFor, rrule, parentTaskId, ai_classified, tags, priority, contactId.
+  // Atualiza:  status (done/inbox), due_date, synced. NÃO sobrescreve title nem notes
+  //           — usuário pode ter editado essas coisas localmente.
+  let updated = 0
+  for (const row of taskRows) {
+    const { error: updErr, count } = await supabase
+      .from('tasks')
+      .update(
+        {
+          status: row.status,
+          due_date: row.due_date,
+          synced: true,
+          updated_at: row.updated_at,
+        },
+        { count: 'exact' }
+      )
+      .eq('user_id', row.user_id)
+      .eq('google_tasks_id', row.google_tasks_id)
+      // só atualiza tasks que NÃO foram tocadas localmente recentemente
+      // (heurística: se updated_at local > 60s no futuro de quando o Google foi consultado,
+      // assume que o usuário editou agora e não sobrescreve status/due)
+      // — implementação simples: sempre atualiza, mas só os campos seguros acima
+
+    if (updErr) {
+      console.error('[tasks-sync] task update error:', updErr.message, row.google_tasks_id)
+      continue
+    }
+    if (count) updated += count
+  }
+
+  // Insertions: count rows that are now in DB but weren't before — não temos contagem direta.
+  // Reportamos quantas eram pra inserir vs quantas foram atualizadas.
+  const inserted = Math.max(0, taskRows.length - updated)
 
   return res.status(200).json({
     projects: listUpserts.length,
-    tasks: taskUpserts.length,
+    tasks_inserted: inserted,
+    tasks_updated: updated,
   })
 }
