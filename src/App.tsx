@@ -1,20 +1,29 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { AuthProvider } from './hooks/AuthProvider.tsx'
+import { CoachProvider } from './hooks/CoachProvider.tsx'
+import { ContactsProvider } from './hooks/ContactsProvider.tsx'
 import { useAuth } from './hooks/useAuth.ts'
 import { BottomNav } from './components/layout/BottomNav.tsx'
 import { CoachFab } from './components/coach/CoachFab.tsx'
 import { ErrorBoundary } from './components/common/ErrorBoundary.tsx'
-import { LoginPage } from './pages/LoginPage.tsx'
-import { BriefingPage } from './pages/BriefingPage.tsx'
-import { TasksPage } from './pages/TasksPage.tsx'
-import { CalendarPage } from './pages/CalendarPage.tsx'
-import { ContactsPage } from './pages/ContactsPage.tsx'
-import { ConfigPage } from './pages/ConfigPage.tsx'
-import { NotesPage } from './pages/NotesPage.tsx'
-import { NewsPage } from './pages/NewsPage.tsx'
-import { AreasPage } from './pages/AreasPage.tsx'
-import { DashboardPage } from './pages/DashboardPage.tsx'
-import { ProjectsPage } from './pages/ProjectsPage.tsx'
+
+const LoginPage = lazy(() => import('./pages/LoginPage.tsx').then(m => ({ default: m.LoginPage })))
+const BriefingPage = lazy(() => import('./pages/BriefingPage.tsx').then(m => ({ default: m.BriefingPage })))
+const TasksPage = lazy(() => import('./pages/TasksPage.tsx').then(m => ({ default: m.TasksPage })))
+const CalendarPage = lazy(() => import('./pages/CalendarPage.tsx').then(m => ({ default: m.CalendarPage })))
+const ContactsPage = lazy(() => import('./pages/ContactsPage.tsx').then(m => ({ default: m.ContactsPage })))
+const ContactsOnboardingPage = lazy(() => import('./pages/ContactsOnboardingPage.tsx').then(m => ({ default: m.ContactsOnboardingPage })))
+const ConfigPage = lazy(() => import('./pages/ConfigPage.tsx').then(m => ({ default: m.ConfigPage })))
+const NotesPage = lazy(() => import('./pages/NotesPage.tsx').then(m => ({ default: m.NotesPage })))
+const NewsPage = lazy(() => import('./pages/NewsPage.tsx').then(m => ({ default: m.NewsPage })))
+const AreasPage = lazy(() => import('./pages/AreasPage.tsx').then(m => ({ default: m.AreasPage })))
+const DashboardPage = lazy(() => import('./pages/DashboardPage.tsx').then(m => ({ default: m.DashboardPage })))
+const ProjectsPage = lazy(() => import('./pages/ProjectsPage.tsx').then(m => ({ default: m.ProjectsPage })))
+
+const PageFallback = () => (
+  <div className="empty-state" style={{ paddingTop: '40vh' }}>Carregando…</div>
+)
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -23,7 +32,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   if (!user) return <Navigate to="/login" replace />
   return (
     <div className="app">
-      {children}
+      <Suspense fallback={<PageFallback />}>{children}</Suspense>
       <CoachFab onOpenProfile={() => navigate('/config?tab=coach')} />
       <BottomNav />
     </div>
@@ -39,7 +48,7 @@ function AppRoutes() {
     <Routes>
       <Route
         path="/login"
-        element={user ? <Navigate to="/briefing" replace /> : <LoginPage />}
+        element={user ? <Navigate to="/briefing" replace /> : <Suspense fallback={<PageFallback />}><LoginPage /></Suspense>}
       />
       <Route
         path="/briefing"
@@ -56,6 +65,10 @@ function AppRoutes() {
       <Route
         path="/contacts"
         element={<ProtectedRoute><ContactsPage /></ProtectedRoute>}
+      />
+      <Route
+        path="/onboarding-contatos"
+        element={<ProtectedRoute><ContactsOnboardingPage /></ProtectedRoute>}
       />
       <Route
         path="/config"
@@ -91,7 +104,11 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <ErrorBoundary>
-          <AppRoutes />
+          <CoachProvider>
+            <ContactsProvider>
+              <AppRoutes />
+            </ContactsProvider>
+          </CoachProvider>
         </ErrorBoundary>
       </AuthProvider>
     </BrowserRouter>

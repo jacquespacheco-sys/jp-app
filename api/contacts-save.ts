@@ -17,34 +17,56 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: parsed.error.issues[0]?.message ?? 'dados inválidos' })
   }
 
-  const { id, firstName, lastName, company, role, email, phone, address, birthday, tags, phase, nextContact, notes } = parsed.data
+  const d = parsed.data
   const supabase = getSupabase()
   const now = new Date().toISOString()
 
   const payload = {
-    first_name: firstName,
-    last_name: lastName ?? null,
-    company: company ?? null,
-    role: role ?? null,
-    email: email ?? null,
-    phone: phone ?? null,
-    address: address ?? null,
-    birthday: birthday ?? null,
-    tags,
-    phase: phase ?? null,
-    next_contact: nextContact ?? null,
-    notes,
+    first_name: d.firstName,
+    last_name: d.lastName ?? null,
+    company: d.company ?? null,
+    role: d.role ?? null,
+    email: d.email ?? null,
+    phone: d.phone ?? null,
+    address: d.address ?? null,
+    birthday: d.birthday ?? null,
+    tags: d.tags,
+    phase: d.phase ?? null,
+    next_contact: d.nextContact ?? null,
+    notes: d.notes,
+
+    tier: d.tier ?? null,
+    cadence_days: d.cadenceDays ?? null,
+    preferred_name: d.preferredName ?? null,
+    pronunciation: d.pronunciation ?? null,
+    interests: d.interests ?? null,
+    conversation_hooks: d.conversationHooks ?? null,
+    what_they_value: d.whatTheyValue ?? null,
+    their_goals: d.theirGoals ?? null,
+    family: d.family ?? null,
+    first_met_at: d.firstMetAt ?? null,
+    company_start_date: d.companyStartDate ?? null,
+    preferred_channel: d.preferredChannel ?? null,
+    favor_balance: d.favorBalance ?? null,
+    linkedin_url: d.linkedinUrl ?? null,
+    twitter_handle: d.twitterHandle ?? null,
+    instagram_handle: d.instagramHandle ?? null,
+    last_signal: d.lastSignal ?? null,
+    last_signal_at: d.lastSignalAt ?? null,
+    source_contact_id: d.sourceContactId ?? null,
+    source_context: d.sourceContext ?? null,
+
     user_id: user.id,
     updated_at: now,
   }
 
   let data: Record<string, unknown>
 
-  if (id) {
+  if (d.id) {
     const { data: row, error } = await supabase
       .from('contacts')
       .update(payload)
-      .eq('id', id)
+      .eq('id', d.id)
       .eq('user_id', user.id)
       .select()
       .single()
@@ -60,9 +82,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     data = row as Record<string, unknown>
   }
 
-  // Push update back to Google Contacts (best-effort, updates only)
   const googleContactId = data['google_contact_id'] as string | null
-  if (id && googleContactId) {
+  if (d.id && googleContactId) {
     try {
       const { data: userData } = await supabase
         .from('users')
@@ -74,17 +95,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const authClient = await getAuthedClient(userData.google_refresh_token)
         const peopleApi = google.people({ version: 'v1', auth: authClient })
 
-        // Fetch current person to get required etag
         const { data: current } = await peopleApi.people.get({
           resourceName: googleContactId,
           personFields: 'names,emailAddresses,phoneNumbers,birthdays,organizations',
         })
 
         if (current?.etag) {
-          // Parse birthday "DD/MM" → { day, month }
           let birthdayDate: { day: number; month: number } | undefined
-          if (birthday) {
-            const parts = birthday.split('/')
+          if (d.birthday) {
+            const parts = d.birthday.split('/')
             const day = parseInt(parts[0] ?? '0', 10)
             const month = parseInt(parts[1] ?? '0', 10)
             if (day > 0 && month > 0) birthdayDate = { day, month }
@@ -95,11 +114,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             updatePersonFields: 'names,emailAddresses,phoneNumbers,birthdays,organizations',
             requestBody: {
               etag: current.etag,
-              names: [{ givenName: firstName, familyName: lastName ?? undefined }],
-              emailAddresses: email ? [{ value: email }] : [],
-              phoneNumbers: phone ? [{ value: phone }] : [],
+              names: [{ givenName: d.firstName, familyName: d.lastName ?? undefined }],
+              emailAddresses: d.email ? [{ value: d.email }] : [],
+              phoneNumbers: d.phone ? [{ value: d.phone }] : [],
               birthdays: birthdayDate ? [{ date: birthdayDate }] : [],
-              organizations: (company || role) ? [{ name: company ?? undefined, title: role ?? undefined }] : [],
+              organizations: (d.company || d.role) ? [{ name: d.company ?? undefined, title: d.role ?? undefined }] : [],
             },
           })
         }
@@ -109,5 +128,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  return res.status(id ? 200 : 201).json({ contact: mapContact(data) })
+  return res.status(d.id ? 200 : 201).json({ contact: mapContact(data) })
 }

@@ -2,7 +2,8 @@ import './_env.js'
 import { requireAuth } from './_middleware.js'
 import { getSupabase } from './_supabase.js'
 import { CoachMemoryExtractSchema } from './_schemas/coach.js'
-import { COACH_EXTRACTION_MODEL, getAnthropic } from './_coach.js'
+import { COACH_EXTRACTION_MODEL } from './_coach.js'
+import { getAnthropic, parseJsonFromLlm } from './_anthropic.js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 export const maxDuration = 30
@@ -89,14 +90,8 @@ ${dialog}`,
   })
 
   const raw = message.content[0]?.type === 'text' ? message.content[0].text : '{}'
-  let extracted: ExtractedItem[] = []
-  try {
-    const m = raw.match(/\{[\s\S]*\}/)
-    if (m) {
-      const parsedJson = JSON.parse(m[0]) as { memories?: ExtractedItem[] }
-      extracted = (parsedJson.memories ?? []).slice(0, 3)
-    }
-  } catch { /* keep empty */ }
+  const parsedJson = parseJsonFromLlm<{ memories?: ExtractedItem[] }>(raw)
+  const extracted = (parsedJson?.memories ?? []).slice(0, 3)
 
   if (extracted.length === 0) {
     return res.status(200).json({ candidates: [] })

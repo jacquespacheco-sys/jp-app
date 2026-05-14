@@ -1,24 +1,8 @@
 import { requireAuth } from './_middleware.js'
 import { getSupabase } from './_supabase.js'
 import { CoachMemorySaveSchema } from './_schemas/coach.js'
+import { mapCoachMemoryRow, type CoachMemoryRow } from './_coach.js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-
-function mapMemory(r: Record<string, unknown>) {
-  return {
-    id: r['id'],
-    userId: r['user_id'],
-    kind: r['kind'],
-    content: r['content'],
-    source: r['source'] ?? undefined,
-    relatedAreaId: r['related_area_id'] ?? undefined,
-    relatedProjectId: r['related_project_id'] ?? undefined,
-    relatedTaskId: r['related_task_id'] ?? undefined,
-    relevance: r['relevance'],
-    expiresAt: r['expires_at'] ?? undefined,
-    lastReferencedAt: r['last_referenced_at'] ?? undefined,
-    createdAt: r['created_at'],
-  }
-}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST' && req.method !== 'PATCH') return res.status(405).end()
@@ -45,24 +29,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     expires_at: d.expiresAt ?? null,
   }
 
-  let row: Record<string, unknown>
-  let httpStatus: number
-
   if (d.id) {
     const { data, error } = await supabase
       .from('coach_memory').update(payload)
       .eq('id', d.id).eq('user_id', user.id)
-      .select().single()
+      .select().maybeSingle()
     if (error) return res.status(500).json({ error: error.message })
-    row = data as unknown as Record<string, unknown>
-    httpStatus = 200
-  } else {
-    const { data, error } = await supabase
-      .from('coach_memory').insert(payload).select().single()
-    if (error) return res.status(500).json({ error: error.message })
-    row = data as unknown as Record<string, unknown>
-    httpStatus = 201
+    if (!data) return res.status(404).json({ error: 'memória não encontrada' })
+    return res.status(200).json({ memory: mapCoachMemoryRow(data as unknown as CoachMemoryRow) })
   }
 
-  return res.status(httpStatus).json({ memory: mapMemory(row) })
+  const { data, error } = await supabase
+    .from('coach_memory').insert(payload).select().single()
+  if (error) return res.status(500).json({ error: error.message })
+  return res.status(201).json({ memory: mapCoachMemoryRow(data as unknown as CoachMemoryRow) })
 }

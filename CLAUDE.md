@@ -1,50 +1,57 @@
 # CLAUDE.md — JP App
 
-## Visão geral
+> Operacional do dia-a-dia. Para visão completa de módulos, schema, endpoints e integrações ver **[SPEC.md](./SPEC.md)** (espinha do app). Para débitos técnicos abertos ver **[REVIEW.md](./REVIEW.md)**.
 
-Assistente pessoal do Jorge (founder do STATE Innovation Center) com 7 módulos: Briefing matinal automatizado, Tasks (sync Google Tasks), Calendar (sync Google Calendar), Contatos (CRM pessoal), Notas (post-it / texto / áudio / link), News (RSS reader), Configurações. PWA mobile-first com identidade STATE forte.
+## Visão (1 parágrafo)
+
+Assistente pessoal do Jorge (founder do STATE Innovation Center). PWA mobile-first com identidade STATE. **AQAL** como espinha (4 quadrantes I/IT/WE/ITS), **GTD** como engine operacional (capture → process → engage), **Coach** como sócio sênior (Sonnet streaming + memória aprovada), **Briefing matinal** automatizado por email. 15 módulos, 84+ endpoints, 13 migrations, ~140 testes.
+
+## Antes de criar feature nova
+
+1. Leia **SPEC.md §3** (mapa de módulos) — o conceito já existe?
+2. Leia **SPEC.md §6** (Reusar antes de criar) — checklist do que reaproveitar
+3. Leia **SPEC.md §4** (Como módulos conversam) — sua feature integra com o quê?
 
 ## Stack final (não negociável)
 
 ```
-Frontend:    Vite + React 19 + React Router DOM 7
-Linguagem:   TypeScript em strict mode (desde commit 0)
-Estilo:      CSS variables + CSS puro (sem Tailwind, sem shadcn)
-Backend:     Funções serverless em /api/*.ts (Vercel)
-Validação:   Zod (schemas em todo handler /api/*, schemas compartilhados em api/_schemas/)
-Banco:       Supabase (PostgreSQL) — SQL puro, sem ORM
-Storage:     Supabase Storage — bucket note-audio (criar no dashboard)
+Frontend:    Vite 6 + React 19 + React Router DOM 7
+Linguagem:   TypeScript strict (noUncheckedIndexedAccess, exactOptionalPropertyTypes)
+Estilo:      CSS variables + CSS puro (sem Tailwind/shadcn)
+Backend:     Funções serverless em api/*.ts (Vercel, NodeNext, ESM)
+Validação:   Zod em todo handler (schemas em api/_schemas/)
+Banco:       Supabase PostgreSQL — SQL puro, sem ORM
 Tipos DB:    supabase gen types typescript → src/types/database.ts
-Auth:        JWT próprio + cookie httpOnly + bcrypt
-IA:          @anthropic-ai/sdk — Haiku para parsing/curadoria, Sonnet para raciocínio pesado
-Email:       Resend
-Cron:        Vercel Cron (vercel.json)
-RSS:         rss-parser
-IMAP:        imapflow
-Google:      googleapis (Tasks, Calendar, People) — escopos: calendar, tasks, contacts, directory.readonly
-Editor:      Tiptap (@tiptap/react + @tiptap/pm + @tiptap/starter-kit)
-Estado:      Context API + hooks tipados
-Drag&Drop:   @dnd-kit/core
-Datas:       date-fns + date-fns-tz (timezone-aware)
+Auth:        JWT próprio + cookie httpOnly + bcrypt (sem Supabase Auth)
+IA:          @anthropic-ai/sdk — Haiku 4.5 (parsing/classificação), Sonnet 4.6 (chat/escrita)
+Streaming:   SSE para chat do coach
+Email:       Resend · RSS: rss-parser · IMAP: imapflow (não impl.)
+Google:      googleapis (Tasks/Calendar/People)
+Editor:      Tiptap (StarterKit)
+Estado:      Context API + hooks tipados (AuthProvider, CoachProvider canônicos)
+Drag&Drop:   @dnd-kit/core · Datas: date-fns + date-fns-tz
 ```
 
-## O que NÃO usar
+## Anti-padrões (lista negra)
 
-- ❌ Next.js — usar Vite + serverless
-- ❌ Prisma — usar Supabase client + tipos gerados
-- ❌ Tailwind / shadcn/ui — identidade autoral, CSS variables do protótipo
-- ❌ Supabase Auth — JWT próprio; OAuth Google é só para escopos de API
-- ❌ localStorage para auth — cookie httpOnly obrigatório
-- ❌ Chamar IA em sequência — Promise.all para chamadas paralelas
-- ❌ `.catch()` no Supabase JS — usar `await + try/catch` ou `.then(null, fn)`
-- ❌ Funções de IA sem `maxDuration` no vercel.json
-- ❌ Estado global espalhado — centralizar em hooks
-- ❌ Validar só no frontend — Zod no backend é obrigatório
-- ❌ Commitar .env.local — nunca no git
-- ❌ Strings duplicadas em JSX — extrair para variável antes do return (ex: `syncActions`)
-- ❌ Props opcionais com valor undefined explícito — usar spread condicional com exactOptionalPropertyTypes
+| ❌ | ✅ |
+|---|---|
+| `new Anthropic({apiKey})` ad-hoc | `getAnthropic()` de `_anthropic.ts` |
+| `raw.match(/\{[\s\S]*\}/) + JSON.parse` | `parseJsonFromLlm<T>(raw)` |
+| `str.replace(/</g, '&lt;')` em email | `htmlEscape(str)` |
+| `key: value ?? undefined` em literal | `...(value != null ? { key: value } : {})` |
+| Hook stateful em N componentes | Provider único + hook consumer (modelo `CoachProvider`) |
+| Refetch lista após mutação pra pegar IDs | Retornar IDs no response + setState in-place |
+| `supabase.from(...).catch(fn)` | `await + try/catch` ou `.then(null, fn)` |
+| Sequential `await` em N fontes independentes | `Promise.all([...])` |
+| Função de IA sem `maxDuration` no vercel.json | Sempre setar (chat=60, briefing/cron=300) |
+| `localStorage` para auth token | Cookie httpOnly via `Set-Cookie` |
+| Validar só no frontend | Zod no backend obrigatório |
+| Calcular `resolved_quadrant` no app | `v_tasks_resolved` |
+| Push pra Google bloqueando o save | Local-first + try/catch best-effort |
+| Comentário "// Step 1:" / "// Insere" | Sem comentário (nome diz o quê; comentário é só pro porquê) |
 
-## TypeScript
+## TypeScript strict
 
 ```json
 {
@@ -55,25 +62,131 @@ Datas:       date-fns + date-fns-tz (timezone-aware)
 }
 ```
 
-- `.ts` para lógica pura, `.tsx` para JSX. Vite com oxc não compila JSX em `.ts`
-- Sem `any` salvo casos justificados com comentário inline
-- Tipos compartilhados em `src/types/`: `database.ts` (gerado), `api.ts` (z.infer), `domain.ts`
-- **exactOptionalPropertyTypes**: nunca `{ key: value | undefined }` — usar spread condicional: `...(val != null ? { key: val } : {})`
-- Imports em `api/` obrigatoriamente com extensão `.js` (NodeNext module resolution)
+- `.ts` para lógica, `.tsx` para JSX. Vite com oxc não compila JSX em `.ts`
+- Sem `any` salvo justificativa explícita inline
+- Imports em `api/` obrigatoriamente terminam com `.js` (NodeNext)
+- **exactOptionalPropertyTypes:** nunca `key: value | undefined` — use spread-conditional `...(val != null ? { key: val } : {})`
+- Tipos compartilhados: `src/types/database.ts` (gerado), `src/types/api.ts` (responses), `src/types/domain.ts` (negócio)
 
 ## Zod nos handlers
 
 Todo handler `/api/*.ts`:
-1. Define schema Zod no topo
-2. `safeParse(req.body)` — retorna 400 se inválido
-3. Exporta `z.infer<typeof Schema>` como tipo
+1. Schema em `api/_schemas/` (ou no topo se one-off)
+2. `safeParse(req.body)` — retorna `400 { error: issues[0].message }` se inválido
+3. Exporta `z.input<typeof Schema>` como tipo
 
-Schemas compartilhados em `api/_schemas/`.
+## Primitivos canônicos (use estes, não recrie)
 
-## Padrões de código
+### Backend
+- `api/_anthropic.ts` → `getAnthropic()`, `parseJsonFromLlm<T>()`, `htmlEscape()`
+- `api/_supabase.ts` → `getSupabase()` (service key)
+- `api/_google.ts` → `getAuthedClient(refreshToken)`, `getOAuthUrl(state)`, `GOOGLE_COLORS`
+- `api/_middleware.ts` → `requireAuth`, `requireAdmin`, `requireCron`
+- `api/_briefing-context.ts` → `fetchAqalContext(userId)` (compartilhado briefing+coach)
+- `api/_coach.ts` → `buildCoachSnapshot`, `buildSystemPrompt`, `generateCoachParagraph`, `mapCoachMemoryRow`, `touchMemories`
+- `api/_lib/rrule.ts` → `nextOccurrence(rrule, after)` (RRULE recurrence)
 
-### Topbar com ações complexas
-Sempre extrair para variável antes do return:
+### Frontend
+- `src/api.ts` → `api.get/post/patch/delete<T>()` (com `credentials: 'include'`)
+- `src/hooks/AuthProvider.tsx` + `useAuth.ts`
+- `src/hooks/CoachProvider.tsx` + `useCoach.ts` — **modelo canônico** de Provider+consumer (streaming, polling, optimistic updates)
+- `src/components/layout/` → Topbar, BottomNav, Subtabs
+- `src/components/common/` → ConfirmDialog (sempre em ação destrutiva), ThemeToggle, ErrorBoundary, Chip, Icon, SyncStatus
+- `src/lib/` → `dates.ts` (timezone helpers), `colors.ts` (QUADRANT_COLORS/LABELS), `coach.ts` (COACH_KIND_LABEL), `taskParser.ts` (NLP quick-add)
+- `src/styles/globals.css` → CSS variables + classes utilitárias (`.task-panel`, `.btn`, `.section`, etc.)
+
+## Padrões de código (recap)
+
+### Anthropic
+```typescript
+import { getAnthropic, parseJsonFromLlm, htmlEscape } from './_anthropic.js'
+const msg = await getAnthropic().messages.create({
+  model: 'claude-haiku-4-5-20251001',  // ou claude-sonnet-4-6
+  max_tokens: 512,
+  system: SYSTEM_PROMPT,
+  messages: [{ role: 'user', content: prompt }],
+})
+const raw = msg.content[0]?.type === 'text' ? msg.content[0].text : ''
+const parsed = parseJsonFromLlm<{ items: Item[] }>(raw)
+```
+
+**Quando usar qual modelo:** Haiku para classificar/parsing/extrair JSON. Sonnet para chat/escrita criativa/raciocínio.
+
+### Google write-back (best-effort)
+```typescript
+// Local save sempre sucede
+const { data: row } = await supabase.from('events').insert(...).select().single()
+
+// Google é separado, try/catch, não falha o request
+try {
+  if (!refreshToken) { console.warn('[save] no refresh_token'); return res.status(200).json({ event: row }) }
+  await google.calendar({...}).events.insert({...})
+} catch (e) {
+  console.error('[save] google push failed:', e instanceof Error ? e.message : e)
+}
+return res.status(200).json({ event: row })
+```
+
+### Upsert dual-pass (Google sync)
+Tabela precisa ter UNIQUE CONSTRAINT (não partial index) como arbiter.
+```typescript
+// Pass 1: insere novos
+await supabase.from('contacts').upsert(rows, { onConflict: 'user_id,google_contact_id', ignoreDuplicates: true })
+// Pass 2: atualiza existentes com subset de campos (preserva edits locais)
+await supabase.from('contacts').upsert(rowsSubset, { onConflict: 'user_id,google_contact_id', ignoreDuplicates: false })
+```
+
+### Provider único + hook consumer
+Quando estado é compartilhado entre múltiplos componentes:
+```tsx
+// hooks/XxxProvider.tsx
+export const XxxContext = createContext<XxxContextValue | null>(null)
+export function XxxProvider({ children }) {
+  const { user } = useAuth()  // gate por auth
+  const [state, setState] = useState(...)
+  // mutações, polling com change-detection (setX(prev => prev === next ? prev : next))
+  return <XxxContext.Provider value={...}>{children}</XxxContext.Provider>
+}
+
+// hooks/useXxx.ts (consumer only)
+export function useXxx() {
+  const ctx = useContext(XxxContext)
+  if (!ctx) throw new Error('useXxx must be used within XxxProvider')
+  return ctx
+}
+
+// App.tsx
+<AuthProvider><XxxProvider><AppRoutes /></XxxProvider></AuthProvider>
+```
+
+### Cron
+```typescript
+// vercel.json
+{ "crons": [{ "path": "/api/foo-cron", "schedule": "*/15 * * * *" }] }
+
+// api/foo-cron.ts
+export const maxDuration = 300
+export default async function handler(req, res) {
+  if (!requireCron(req, res)) return
+  // itera users; idempotência via marker no content_md ou (user_id, date) check
+}
+```
+
+### Mapping snake_case → camelCase
+```typescript
+interface XxxRow { id: string; user_id: string; ...; expires_at: string | null }
+export function mapXxx(r: Partial<XxxRow>): XxxDto {
+  return {
+    id: r.id as string,
+    userId: r.user_id as string,
+    relevance: r.relevance,
+    ...(r.expires_at != null ? { expiresAt: r.expires_at } : {}),
+  }
+}
+```
+
+### Topbar com ações
+Sempre extrair antes do return:
 ```tsx
 const actions = (
   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -81,138 +194,131 @@ const actions = (
     <ThemeToggle />
   </div>
 )
-// depois: <Topbar actions={actions} />
+return <Topbar title="Tasks" actions={actions} />
 ```
 
-### Google write-back (best-effort)
-Local save sempre sucede; push Google é try/catch:
-```typescript
-try {
-  const googleCalId = calRes.data?.google_calendar_id
-  if (!googleCalId) { console.warn('[save] no google_calendar_id', calendarId); return }
-  await gcal.events.patch(...)
-} catch (e) {
-  console.error('[save] google push failed:', e instanceof Error ? e.message : e)
-}
-```
-
-### Upsert Supabase
-Requer UNIQUE CONSTRAINT (não partial index) como arbiter. Para merge semantics:
-- Pass 1: `ignoreDuplicates: true` — insere novos com todos os campos
-- Pass 2: sem ignoreDuplicates — atualiza existentes com subset de campos (preserva edições locais)
-
-### Props opcionais com exactOptionalPropertyTypes
+### Props opcionais
 ```tsx
-// ❌ ERRADO
-<EventPanel prefill={prefill} />  // prefill: T | undefined não é compatível com prefill?: T
+// ❌ ERRADO (exactOptionalPropertyTypes barra)
+<EventPanel prefill={prefill} />  // prefill: T | undefined
 
 // ✅ CORRETO
 <EventPanel {...(prefill !== undefined ? { prefill } : {})} />
 ```
 
+### Confirm dialog em destrutivo
+```tsx
+const [confirming, setConfirming] = useState(false)
+<>
+  <button onClick={() => setConfirming(true)}>Arquivar</button>
+  {confirming && (
+    <ConfirmDialog
+      title="Arquivar tarefa?"
+      message="Você pode restaurar depois."
+      dangerous
+      onConfirm={async () => { await archive(id); setConfirming(false) }}
+      onCancel={() => setConfirming(false)}
+    />
+  )}
+</>
+```
+
 ## Comandos
 
 ```bash
-npm run dev          # servidor de desenvolvimento (Vite)
-npm run build        # build de produção (tsc + vite build)
-npm run preview      # testar build local
-npm run db:types     # gerar src/types/database.ts via supabase CLI
-npm run test         # rodar Vitest
-vercel env pull      # baixar env vars do Vercel para .env.local
-vercel dev           # servidor local com funções serverless
+npm run dev          # Vite dev (frontend)
+npm run dev:api      # serverless local (tsx dev-server.ts)
+npm run build        # tsc -b && vite build
+npm run preview      # serve build
+npm run test         # vitest
+npm run db:types     # supabase gen types → src/types/database.ts
+vercel env pull      # baixa env vars
 ```
 
-## Estrutura de pastas
+## Variáveis de ambiente
+
+```
+# Obrigatórias
+JWT_SECRET                       # 32+ chars
+SUPABASE_URL
+SUPABASE_SERVICE_KEY
+ANTHROPIC_API_KEY
+RESEND_API_KEY
+CRON_SECRET
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+GOOGLE_REDIRECT_URI
+
+# Opcionais
+RESEND_FROM_EMAIL                # default briefing@state.is
+IMAP_HOST / IMAP_USER / IMAP_PASSWORD  # newsletter ingest (não impl.)
+```
+
+## Estrutura de pastas (resumo)
 
 ```
 jp-app/
-├── api/                    # Backend serverless
-│   ├── _supabase.ts        # Cliente singleton (service key)
-│   ├── _middleware.ts      # requireAuth, requireAdmin
-│   ├── _google.ts          # OAuth2 client + getAuthedClient
-│   ├── _briefing.ts        # Lógica de geração do briefing
-│   ├── _schemas/           # Schemas Zod compartilhados
-│   │   ├── event.ts
-│   │   └── note.ts         # NoteSaveSchema, NoteTagSaveSchema, NoteFolderSaveSchema
-│   ├── auth-login.ts / auth-logout.ts / auth-me.ts
-│   ├── briefing-*.ts       # Briefing (generate, cron, history)
-│   ├── calendars-*.ts      # Calendar (list, sync, toggle)
-│   ├── contacts-*.ts       # Contacts (list, save, sync, archive)
-│   ├── events-*.ts         # Calendar events (list, save, delete, sync, parse)
-│   ├── google-oauth.ts     # OAuth flow
-│   ├── interactions-*.ts   # Contact interactions
-│   ├── news-*.ts           # News (list, fetch, favorite, read)
-│   ├── note-folders-*.ts   # Note folders (list, save, delete)
-│   ├── note-tags-*.ts      # Note tags (list, save, delete)
-│   ├── notes-*.ts          # Notes (list, save, delete, upload)
-│   ├── projects-list.ts    # Projects
-│   ├── sources-*.ts        # RSS sources (list, save, delete)
-│   ├── tasks-*.ts          # Tasks (list, save, sync, archive)
+├── api/                          # 87 arquivos
+│   ├── _anthropic.ts             # Singleton + parseJsonFromLlm + htmlEscape
+│   ├── _briefing.ts              # Pipeline do briefing
+│   ├── _briefing-context.ts      # fetchAqalContext (compartilhado coach+briefing)
+│   ├── _coach.ts                 # Coach helpers (snapshot, prompt, paragraph, memory mapper)
+│   ├── _env.ts / _google.ts / _middleware.ts / _supabase.ts
+│   ├── _lib/                     # rrule.ts (recurrence) + tests
+│   ├── _schemas/                 # area/coach/contact/event/habit/inbox/note/project/task/task-classify + tests
+│   ├── auth-*.ts                 # login, logout, me
+│   ├── areas-*.ts                # AQAL areas
+│   ├── briefing-*.ts             # generate, cron, history
+│   ├── calendars-*.ts            # Google Calendar
+│   ├── coach-*.ts                # 13 endpoints (chat SSE, history, memory, profile, checkin-cron)
+│   ├── contacts-*.ts             # CRM + Google People sync
+│   ├── dashboard-aqal.ts         # Mandala AQAL
+│   ├── events-*.ts               # Calendar events + NLP parse
+│   ├── google-oauth.ts           # OAuth flow
+│   ├── habits-*.ts + habit-logs-save.ts + habits-streaks.ts
+│   ├── inbox-*.ts                # GTD inbox
+│   ├── interactions-*.ts         # Contact interactions
+│   ├── news-*.ts + sources-*.ts  # RSS + News
+│   ├── notes-*.ts + note-folders-*.ts + note-tags-*.ts
+│   ├── projects-*.ts             # H1 projects
+│   ├── rituals-*.ts              # Habit sequences
+│   ├── tasks-*.ts + tasks-classify.ts + tasks-sync.ts
 │   └── tsconfig.json
 ├── src/
-│   ├── main.tsx
-│   ├── App.tsx             # Roteamento + AuthProvider (7 módulos)
-│   ├── api.ts              # Wrapper fetch tipado
-│   ├── pages/              # Uma página por rota
-│   │   ├── BriefingPage.tsx
-│   │   ├── CalendarPage.tsx
-│   │   ├── ConfigPage.tsx
-│   │   ├── ContactsPage.tsx
-│   │   ├── LoginPage.tsx
-│   │   ├── NewsPage.tsx
-│   │   ├── NotesPage.tsx
-│   │   └── TasksPage.tsx
+│   ├── App.tsx                   # <AuthProvider><CoachProvider><AppRoutes/>
+│   ├── api.ts                    # fetch wrapper tipado
+│   ├── pages/                    # 11 páginas (Briefing, Tasks, Calendar, Contatos, Notas, News, Areas, Projects, Dashboard, Config, Login)
 │   ├── components/
-│   │   ├── layout/         # Topbar, Subtabs, BottomNav
-│   │   ├── briefing/
-│   │   ├── calendar/       # AgendaView, WeekView, MonthView, EventPanel, CalendarPicker
-│   │   ├── contacts/
-│   │   ├── common/         # ThemeToggle, ErrorBoundary
-│   │   ├── notes/          # NoteCard, NotePanel, NoteEditor, AudioRecorder, FolderTree, TagManager
-│   │   ├── tasks/          # TodayView, KanbanView (Flow+Groups), ListView, TaskPanel, QuickAdd
-│   │   └── news/           # (inline no NewsPage)
-│   ├── hooks/
-│   │   ├── AuthProvider.tsx
-│   │   ├── useAuth.ts / useTheme.ts
-│   │   ├── useCalendars.ts / useEvents.ts
-│   │   ├── useContacts.ts
-│   │   ├── useNews.ts
-│   │   ├── useNoteFolders.ts / useNoteTags.ts / useNotes.ts
-│   │   ├── useProjects.ts / useTasks.ts
-│   │   └── useSources.ts
-│   ├── lib/                # dates.ts, colors.ts
-│   ├── types/
-│   │   ├── database.ts     # gerado via supabase CLI
-│   │   ├── api.ts          # tipos das respostas de API
-│   │   └── domain.ts       # tipos de negócio (Task, Note, NewsItem, etc.)
-│   └── styles/globals.css  # CSS variables + estilos globais (fonte da verdade)
-├── supabase/migrations/
-│   ├── 0001_initial.sql    # users, projects, contacts, tasks, sources, newsletters, briefings
-│   ├── 0002_calendar.sql   # calendars, calendar_events
-│   ├── 0003_calendar_events_unique.sql
-│   ├── 0004_contacts_google_unique.sql
-│   ├── 0005_contacts_unique_constraint.sql  # UNIQUE CONSTRAINT (não partial index)
-│   ├── 0006_tasks_google_unique.sql
-│   ├── 0007_sync_contacts_fn.sql            # obsoleto — função não usada
-│   ├── 0008_notes.sql                       # note_folders, note_tags, notes, note_tag_map
-│   └── 0009_news.sql                        # news_items
+│   │   ├── layout/               # Topbar, BottomNav, Subtabs
+│   │   ├── common/               # ConfirmDialog, ThemeToggle, ErrorBoundary, Chip, Icon, SyncStatus
+│   │   ├── calendar/             # AgendaView, WeekView, MonthView, EventPanel, CalendarPicker, etc.
+│   │   ├── coach/                # CoachFab, CoachSheet, CoachMessage, CoachInput, CoachMemoryCandidates, CoachMemoryList, CoachProfilePanel
+│   │   ├── contacts/             # ContactsList, FollowupsView, PipelineView, RelationshipsView, ContactPanel, InteractionModal
+│   │   ├── inbox/                # InboxView
+│   │   ├── notes/                # NoteCard, NotePanel, NoteEditor (Tiptap), AudioRecorder, FolderTree, TagManager
+│   │   ├── projects/             # ProjectsView, ProjectRow, ProjectPanel, ProjectsCard
+│   │   └── tasks/                # TodayView, KanbanView, ListView, TaskPanel, TaskRow, QuickAdd
+│   ├── hooks/                    # AuthProvider, CoachProvider, useTheme + 16 hooks domain (useTasks, useAreas, useProjects, useHabits, useRituals, useInbox, useCalendars, useEvents, useContacts, useNotes, useNoteFolders, useNoteTags, useNews, useSources)
+│   ├── lib/                      # dates.ts, colors.ts, coach.ts, taskParser.ts (+ test)
+│   ├── types/                    # database.ts (gerado), api.ts (responses), domain.ts (negócio)
+│   └── styles/globals.css        # CSS variables + classes utilitárias
+├── supabase/migrations/          # 0001..0013
 ├── public/
-├── vercel.json             # rewrites + functions maxDuration + crons
+├── dev-server.ts                 # Serverless local (tsx)
+├── vercel.json                   # crons + maxDuration
 ├── .env.example
-└── CLAUDE.md
+├── CLAUDE.md                     # este arquivo
+├── SPEC.md                       # espinha completa do app
+└── REVIEW.md                     # débitos técnicos abertos
 ```
-
-## Setup Supabase Storage
-
-Criar bucket `note-audio` no dashboard Supabase:
-1. Storage → New Bucket → nome: `note-audio`, Public: sim (para URLs públicas de áudio)
-2. Ou via SQL: `insert into storage.buckets (id, name, public) values ('note-audio', 'note-audio', true);`
 
 ## Hierarquia de autoridade quando em dúvida
 
-1. CLAUDE.md (este arquivo)
-2. Stack → este arquivo seção "Stack final"
-3. Visual → prototipo.html
-4. Padrões → seção "Padrões de código"
+1. **CLAUDE.md** (este arquivo) — regras operacionais
+2. **SPEC.md** — espinha do app: módulos, schema, endpoints, integrações
+3. **REVIEW.md** — débitos abertos
+4. **Stack** → seção "Stack final" deste arquivo
+5. **Visual** → `prototipo.html` (identidade) + `src/styles/globals.css` (verdade aplicada)
+6. **Padrões** → seção "Padrões de código" deste arquivo
 
 Quando algo não estiver coberto, **pergunte antes de codar**.

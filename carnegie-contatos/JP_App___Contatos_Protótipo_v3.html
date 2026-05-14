@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>JP App — Contatos v3 (Carnegie + Categorias + Filtros)</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+:root{
+  --bg:#fafaf7;
+  --bg-elevated:#ffffff;
+  --fg:#0a0a0a;
+  --fg-muted:#6b6b6b;
+  --fg-dim:#a0a0a0;
+  --accent:#a8ff00;
+  --accent-ink:#0a0a0a;
+  --border:#e8e8e3;
+  --border-light:#f0f0eb;
+  --danger:#d9342b;
+  --warning:#e88c00;
+  --caution:#d4b300;
+  --shadow:0 2px 12px rgba(0,0,0,0.04);
+  --overlay-bg:rgba(0,0,0,0.5);
+
+  /* Paleta de chips de categoria — light mode */
+  --chip-gray-bg:#ededeb;       --chip-gray-fg:#3d3d3d;
+  --chip-red-bg:#fde4e2;        --chip-red-fg:#a02018;
+  --chip-orange-bg:#fde6cf;     --chip-orange-fg:#9c5006;
+  --chip-yellow-bg:#fbf3c8;     --chip-yellow-fg:#7d6600;
+  --chip-green-bg:#d8f0d2;      --chip-green-fg:#23691b;
+  --chip-teal-bg:#cfeae6;       --chip-teal-fg:#0e5e57;
+  --chip-blue-bg:#d6e6f9;       --chip-blue-fg:#1a4d8a;
+  --chip-purple-bg:#e4d8f3;     --chip-purple-fg:#4d2b85;
+  --chip-pink-bg:#f8d8e5;       --chip-pink-fg:#962548;
+  --chip-accent-bg:var(--accent); --chip-accent-fg:var(--accent-ink);
+}
+
+body.dark{
+  --bg:#0a0a0a;
+  --bg-elevated:#141414;
+  --fg:#f5f5f0;
+  --fg-muted:#888888;
+  --fg-dim:#555555;
+  --border:#222222;
+  --border-light:#2a2a2a;
+  --shadow:0 2px 12px rgba(0,0,0,0.3);
+  --overlay-bg:rgba(0,0,0,0.85);
+
+  /* Chips dark mode */
+  --chip-gray-bg:#2a2a2a;        --chip-gray-fg:#c8c8c8;
+  --chip-red-bg:#3a1a18;         --chip-red-fg:#e88883;
+  --chip-orange-bg:#3a2810;      --chip-orange-fg:#e8a868;
+  --chip-yellow-bg:#332e0d;      --chip-yellow-fg:#d6c45a;
+  --chip-green-bg:#1a3014;       --chip-green-fg:#90c886;
+  --chip-teal-bg:#143230;        --chip-teal-fg:#7ec8c0;
+  --chip-blue-bg:#15243a;        --chip-blue-fg:#7fb0e8;
+  --chip-purple-bg:#221833;      --chip-purple-fg:#b09cd8;
+  --chip-pink-bg:#2e1421;        --chip-pink-fg:#e088a4;
+}
+
+html,body{
+  font-family:'Space Grotesk',sans-serif;
+  background:var(--bg);
+  color:var(--fg);
+  line-height:1.5;
+  overflow-x:hidden;
+  min-height:100vh;
+  transition:background 0.25s,color 0.25s;
+  -webkit-font-smoothing:antialiased;
+}
+
+.app{min-height:100vh;padding-bottom:72px;max-width:1400px;margin:0 auto}
+.page{display:none}
+.page.active{display:block}
+.hidden{display:none !important}
+.content{padding:24px 20px}
+
+/* ---------- Topbar ---------- */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  background:var(--bg);position:sticky;top:0;z-index:20;gap:12px;
+}
+.topbar-left{display:flex;align-items:center;gap:12px;min-width:0}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.logo-mark{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2.5px;line-height:1}
+.dot{display:inline-block;width:6px;height:6px;background:var(--accent);margin-left:2px;transform:translateY(-2px)}
+.page-title{
+  font-family:'Space Mono',monospace;font-size:10px;color:var(--fg-muted);
+  letter-spacing:2.5px;padding-left:12px;border-left:1px solid var(--border);
+  text-transform:uppercase;
+}
+
+.icon-btn{
+  width:36px;height:36px;border:1px solid var(--border);background:transparent;
+  color:var(--fg);cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.icon-btn:hover{border-color:var(--fg)}
+.icon-btn svg{width:15px;height:15px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+.btn{
+  font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;
+  padding:10px 16px;border:1px solid var(--fg);background:var(--fg);
+  color:var(--bg);cursor:pointer;letter-spacing:1.5px;text-transform:uppercase;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.btn-accent{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn-ghost{background:transparent;color:var(--fg)}
+.btn-sm{padding:7px 12px;font-size:10px}
+
+.sync-status{
+  font-family:'Space Mono',monospace;font-size:9px;color:var(--fg-muted);
+  letter-spacing:1px;text-transform:uppercase;padding:4px 8px;border:1px solid var(--border);
+}
+
+/* ---------- Subtabs ---------- */
+.subtabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg);overflow-x:auto;position:sticky;top:69px;z-index:18}
+.subtab{
+  flex:1;min-width:80px;padding:14px 8px;text-align:center;
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;
+  color:var(--fg-muted);cursor:pointer;border-bottom:1px solid transparent;
+  text-transform:uppercase;white-space:nowrap;
+}
+.subtab.active{color:var(--fg);border-bottom-color:var(--fg)}
+.subtab:hover{color:var(--fg)}
+
+/* ---------- Bottom nav ---------- */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;display:flex;
+  background:var(--bg);border-top:1px solid var(--border);z-index:30;
+}
+.nav-item{
+  flex:1;padding:14px 8px;text-align:center;cursor:pointer;
+  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;
+  color:var(--fg-muted);text-transform:uppercase;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+}
+.nav-item svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.nav-item.active{color:var(--fg)}
+
+/* ============================================================
+   ⭐ CHIP COMPONENT
+   ============================================================ */
+.chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 8px;font-size:11px;font-weight:500;
+  border:1px solid transparent;
+  font-family:'Space Grotesk',sans-serif;letter-spacing:0;
+  background:var(--chip-gray-bg);color:var(--chip-gray-fg);
+  border-radius:0;
+  line-height:1.3;
+}
+.chip.sm{padding:2px 6px;font-size:10px}
+.chip.md{padding:4px 10px;font-size:12px}
+.chip.removable{cursor:default}
+.chip-x{
+  cursor:pointer;font-size:14px;line-height:1;margin-left:2px;
+  opacity:0.5;font-weight:700;transition:opacity 0.15s;
+}
+.chip-x:hover{opacity:1}
+
+.chip.gray{background:var(--chip-gray-bg);color:var(--chip-gray-fg)}
+.chip.red{background:var(--chip-red-bg);color:var(--chip-red-fg)}
+.chip.orange{background:var(--chip-orange-bg);color:var(--chip-orange-fg)}
+.chip.yellow{background:var(--chip-yellow-bg);color:var(--chip-yellow-fg)}
+.chip.green{background:var(--chip-green-bg);color:var(--chip-green-fg)}
+.chip.teal{background:var(--chip-teal-bg);color:var(--chip-teal-fg)}
+.chip.blue{background:var(--chip-blue-bg);color:var(--chip-blue-fg)}
+.chip.purple{background:var(--chip-purple-bg);color:var(--chip-purple-fg)}
+.chip.pink{background:var(--chip-pink-bg);color:var(--chip-pink-fg)}
+.chip.accent{background:var(--chip-accent-bg);color:var(--chip-accent-fg)}
+
+.chips-row{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.chip-overflow{
+  font-family:'Space Mono',monospace;font-size:10px;color:var(--fg-muted);
+  letter-spacing:0.5px;padding:3px 4px;
+}
+
+/* ============================================================
+   ⭐ FILTERBAR COMPONENT
+   ============================================================ */
+.filterbar{
+  border-bottom:1px solid var(--border);background:var(--bg);
+  padding:10px 20px;
+  position:sticky;top:114px;z-index:15;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.filterbar-empty{color:var(--fg-muted);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase}
+.filterbar-add{
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.2px;
+  padding:5px 10px;border:1px dashed var(--border);background:transparent;
+  color:var(--fg-muted);cursor:pointer;text-transform:uppercase;display:inline-flex;align-items:center;gap:4px;
+}
+.filterbar-add:hover{border-color:var(--fg);color:var(--fg)}
+.filterbar-clear{
+  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.2px;
+  padding:4px 8px;background:transparent;color:var(--fg-muted);cursor:pointer;
+  text-transform:uppercase;border:none;text-decoration:underline;margin-left:auto;
+}
+.filterbar-clear:hover{color:var(--fg)}
+.filterbar-count{
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--fg-muted);
+  text-transform:uppercase;
+}
+
+/* Filter dropdown */
+.filter-dropdown{
+  position:absolute;top:100%;left:0;right:0;background:var(--bg-elevated);
+  border:1px solid var(--fg);box-shadow:0 8px 24px rgba(0,0,0,0.12);
+  max-height:480px;overflow-y:auto;z-index:25;display:none;
+  margin-top:1px;
+}
+.filter-dropdown.open{display:block}
+.filter-dim-group{padding:14px 16px;border-bottom:1px solid var(--border-light)}
+.filter-dim-group:last-child{border-bottom:none}
+.filter-dim-label{
+  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;
+  color:var(--fg-muted);text-transform:uppercase;margin-bottom:8px;
+}
+.filter-dim-options{display:flex;flex-wrap:wrap;gap:5px}
+.filter-option{
+  cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+  padding:4px 9px;border:1px solid var(--border);background:transparent;
+  font-size:11px;color:var(--fg);transition:all 0.15s;
+}
+.filter-option:hover{border-color:var(--fg)}
+.filter-option.selected{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.filter-option .chip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
+.filter-option .chip-dot.gray{background:var(--chip-gray-fg)}
+.filter-option .chip-dot.red{background:var(--chip-red-fg)}
+.filter-option .chip-dot.orange{background:var(--chip-orange-fg)}
+.filter-option .chip-dot.green{background:var(--chip-green-fg)}
+.filter-option .chip-dot.blue{background:var(--chip-blue-fg)}
+.filter-option .chip-dot.purple{background:var(--chip-purple-fg)}
+.filter-option .chip-dot.pink{background:var(--chip-pink-fg)}
+.filter-option .chip-dot.accent{background:var(--accent)}
+
+.filterbar-wrap{position:relative}
+
+/* ============================================================
+   PRINCÍPIO DO MÊS
+   ============================================================ */
+.principle-banner{
+  background:var(--fg);color:var(--bg);
+  padding:18px 20px;display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;
+  border-bottom:1px solid var(--border);
+}
+.principle-mark{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:0;line-height:0.9;color:var(--accent)}
+.principle-info{min-width:0}
+.principle-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--bg);opacity:0.6;text-transform:uppercase;margin-bottom:3px}
+.principle-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;line-height:1.1;margin-bottom:4px}
+.principle-desc{font-size:11px;color:var(--bg);opacity:0.75;line-height:1.4}
+.principle-progress{text-align:right;display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+.principle-count{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:0;line-height:1;color:var(--accent)}
+.principle-meta{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;opacity:0.6;text-transform:uppercase}
+
+/* ============================================================
+   PULSO
+   ============================================================ */
+.pulse-hero{padding:20px;border-bottom:1px solid var(--border);background:var(--bg)}
+.pulse-greeting{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--fg-muted);margin-bottom:8px}
+.pulse-headline{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;line-height:1.1;margin-bottom:14px}
+.pulse-headline .pct{color:var(--accent);background:var(--fg);padding:0 8px}
+
+.pulse-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border)}
+.pulse-stat{background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:4px}
+.pulse-stat-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--fg-muted);text-transform:uppercase}
+.pulse-stat-value{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px}
+.pulse-stat-value.danger{color:var(--danger)}
+.pulse-stat-value.warning{color:var(--warning)}
+.pulse-stat-value.accent{color:var(--fg);background:var(--accent);padding:0 6px;display:inline-block;width:fit-content}
+
+.pulse-section{padding:20px;border-bottom:1px solid var(--border)}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.section-title{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--fg);display:flex;align-items:center;gap:8px}
+.tier-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.tier-dot.inner{background:var(--danger)}
+.tier-dot.strong{background:var(--warning)}
+.tier-dot.network{background:var(--caution)}
+.section-count{font-family:'Space Mono',monospace;font-size:10px;color:var(--fg-muted);letter-spacing:1.5px}
+
+.pulse-cards{display:flex;flex-direction:column;gap:1px;background:var(--border);border:1px solid var(--border)}
+.pulse-card{background:var(--bg);padding:14px 16px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:flex-start;cursor:pointer;transition:background 0.15s}
+.pulse-card:hover{background:var(--bg-elevated)}
+
+.pulse-avatar{
+  width:38px;height:38px;border:1px solid var(--fg);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Space Mono',monospace;font-size:13px;font-weight:700;
+  background:var(--bg-elevated);flex-shrink:0;
+}
+
+.pulse-info{min-width:0}
+.pulse-name{font-weight:600;font-size:14px;letter-spacing:-0.2px;margin-bottom:2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pulse-meta{font-family:'Space Mono',monospace;font-size:10px;color:var(--fg-muted);letter-spacing:0.5px;margin-bottom:6px}
+.pulse-hook{font-size:12px;color:var(--fg-muted);font-style:italic;line-height:1.4;margin-bottom:8px}
+.pulse-hook::before{content:"„ ";color:var(--fg-dim);font-style:normal}
+
+.pulse-actions{display:flex;gap:6px;flex-shrink:0;margin-top:4px}
+.action-btn{
+  width:32px;height:32px;border:1px solid var(--border);background:var(--bg-elevated);cursor:pointer;display:flex;
+  align-items:center;justify-content:center;transition:all 0.15s;
+}
+.action-btn:hover{border-color:var(--fg);background:var(--fg);color:var(--bg)}
+.action-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ============================================================
+   LISTA DE CONTATOS — view com FilterBar
+   ============================================================ */
+.contact-list{padding:0}
+.contact-row{
+  display:grid;grid-template-columns:auto 1fr auto;gap:14px;
+  padding:14px 20px;border-bottom:1px solid var(--border-light);
+  cursor:pointer;align-items:center;
+}
+.contact-row:hover{background:var(--bg-elevated)}
+.contact-row-info{min-width:0}
+.contact-row-name{font-weight:600;font-size:14px;margin-bottom:2px}
+.contact-row-meta{font-family:'Space Mono',monospace;font-size:10px;color:var(--fg-muted);letter-spacing:0.5px;margin-bottom:6px;text-transform:uppercase}
+.contact-row-tier{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:2px 7px;border:1px solid var(--fg);font-family:'Space Mono',monospace;
+  font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-right:8px;
+}
+.contact-row-tier.inner{border-color:var(--danger);color:var(--danger)}
+.contact-row-tier.strong{border-color:var(--warning);color:var(--warning)}
+
+/* ============================================================
+   CONTACT PANEL
+   ============================================================ */
+.panel-overlay{position:fixed;inset:0;background:var(--overlay-bg);z-index:50;display:none;align-items:flex-end;justify-content:flex-end}
+.panel-overlay.active{display:flex}
+.panel{background:var(--bg);width:100%;max-width:560px;height:100%;display:flex;flex-direction:column;overflow:hidden}
+
+.panel-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.panel-title-block{display:flex;align-items:center;gap:14px;min-width:0}
+.panel-avatar{width:48px;height:48px;border:1px solid var(--fg);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:15px;font-weight:700;background:var(--bg-elevated)}
+.panel-name-block{min-width:0}
+.panel-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;line-height:1}
+.panel-role{font-family:'Space Mono',monospace;font-size:10px;color:var(--fg-muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
+.panel-close{width:32px;height:32px;border:1px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.panel-close svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.5;fill:none}
+
+.panel-meta{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--fg-muted);text-transform:uppercase}
+.panel-meta-item{display:flex;align-items:center;gap:5px}
+.tier-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border:1px solid var(--fg);font-weight:700;letter-spacing:1.5px;color:var(--fg)}
+
+/* Chips no header do panel (sumário visual) */
+.panel-chips-strip{
+  padding:10px 20px;border-bottom:1px solid var(--border);
+  display:flex;gap:5px;flex-wrap:wrap;align-items:center;
+}
+
+.panel-tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;background:var(--bg);position:sticky;top:0;z-index:5}
+.panel-tab{padding:12px 13px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--fg-muted);cursor:pointer;border-bottom:1px solid transparent;text-transform:uppercase;white-space:nowrap}
+.panel-tab.active{color:var(--fg);border-bottom-color:var(--fg)}
+
+.panel-body{flex:1;overflow-y:auto}
+
+.carnegie-block{padding:18px 20px;border-bottom:1px solid var(--border-light)}
+.carnegie-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--fg-muted);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.carnegie-ref{display:inline-block;padding:2px 6px;border:1px solid var(--border);font-size:8px;letter-spacing:1.5px;color:var(--fg-dim)}
+.carnegie-value{font-size:14px;line-height:1.5;color:var(--fg)}
+.carnegie-value strong{font-weight:600}
+
+/* Categorias agrupadas por dimensão */
+.cat-dim-group{margin-bottom:18px}
+.cat-dim-group:last-child{margin-bottom:0}
+.cat-dim-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border-light);
+}
+.cat-dim-title{
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.5px;
+  color:var(--fg);text-transform:uppercase;
+}
+.cat-dim-count{font-family:'Space Mono',monospace;font-size:9px;color:var(--fg-muted);letter-spacing:1px}
+.cat-dim-chips{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.cat-add-btn{
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;
+  padding:3px 8px;border:1px dashed var(--border);background:transparent;
+  color:var(--fg-muted);cursor:pointer;text-transform:uppercase;
+}
+.cat-add-btn:hover{border-color:var(--fg);color:var(--fg)}
+
+/* Mini-picker inline para adicionar categoria */
+.cat-picker{
+  margin-top:8px;padding:10px;border:1px solid var(--fg);
+  background:var(--bg-elevated);display:none;
+}
+.cat-picker.open{display:block}
+.cat-picker-title{
+  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;
+  color:var(--fg-muted);text-transform:uppercase;margin-bottom:8px;
+}
+.cat-picker-options{display:flex;flex-wrap:wrap;gap:5px}
+
+.panel-actions-bar{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;background:var(--bg)}
+.panel-actions-bar .btn{flex:1;justify-content:center}
+
+/* ============================================================
+   CONFIG · gestão de categorias
+   ============================================================ */
+.config-section{padding:24px 20px;border-bottom:1px solid var(--border)}
+.config-title{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;margin-bottom:6px}
+.config-subtitle{font-size:14px;color:var(--fg-muted);line-height:1.5;margin-bottom:20px;max-width:560px}
+
+.dim-card{
+  border:1px solid var(--border);margin-bottom:14px;background:var(--bg-elevated);
+}
+.dim-card-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;cursor:pointer;
+}
+.dim-card-head:hover{background:var(--bg)}
+.dim-card-title-block{display:flex;align-items:center;gap:14px}
+.dim-card-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px}
+.dim-card-meta{font-family:'Space Mono',monospace;font-size:10px;color:var(--fg-muted);letter-spacing:1.5px;text-transform:uppercase}
+.dim-card-actions{display:flex;gap:6px}
+
+.dim-card-body{padding:0 18px 18px;display:none}
+.dim-card.expanded .dim-card-body{display:block}
+
+.cat-list{display:flex;flex-direction:column;gap:1px;background:var(--border);border:1px solid var(--border)}
+.cat-row{
+  background:var(--bg-elevated);padding:12px 14px;
+  display:grid;grid-template-columns:auto 1fr auto auto;gap:14px;align-items:center;
+}
+.cat-row-meta{font-family:'Space Mono',monospace;font-size:9px;color:var(--fg-muted);letter-spacing:1px;text-transform:uppercase}
+.cat-row-actions{display:flex;gap:5px}
+.cat-row-action-btn{
+  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;
+  padding:4px 7px;border:1px solid var(--border);background:transparent;
+  color:var(--fg-muted);cursor:pointer;text-transform:uppercase;
+}
+.cat-row-action-btn:hover{border-color:var(--fg);color:var(--fg)}
+
+.cat-new-row{
+  padding:14px;border:1px dashed var(--border);margin-top:8px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1.5px;
+  color:var(--fg-muted);text-transform:uppercase;
+}
+.cat-new-row:hover{border-color:var(--fg);color:var(--fg)}
+
+/* Color palette picker */
+.color-palette{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.color-swatch{
+  width:22px;height:22px;cursor:pointer;border:1px solid var(--border);
+  position:relative;transition:transform 0.1s;
+}
+.color-swatch:hover{transform:scale(1.1)}
+.color-swatch.selected{border:2px solid var(--fg)}
+.color-swatch.gray{background:var(--chip-gray-bg)}
+.color-swatch.red{background:var(--chip-red-bg)}
+.color-swatch.orange{background:var(--chip-orange-bg)}
+.color-swatch.yellow{background:var(--chip-yellow-bg)}
+.color-swatch.green{background:var(--chip-green-bg)}
+.color-swatch.teal{background:var(--chip-teal-bg)}
+.color-swatch.blue{background:var(--chip-blue-bg)}
+.color-swatch.purple{background:var(--chip-purple-bg)}
+.color-swatch.pink{background:var(--chip-pink-bg)}
+.color-swatch.accent{background:var(--chip-accent-bg)}
+.color-swatch.none{background:transparent;border:1px dashed var(--border-light)}
+.color-swatch.none::before{
+  content:"×";position:absolute;inset:0;display:flex;
+  align-items:center;justify-content:center;color:var(--fg-dim);font-size:14px;
+}
+
+/* ============================================================
+   Helpers
+   ============================================================ */
+.empty{padding:40px 20px;text-align:center;color:var(--fg-muted);font-size:13px}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:var(--overlay-bg);z-index:60;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.active{display:flex}
+.modal{background:var(--bg);max-width:520px;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border)}
+.modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px}
+.modal-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px}
+.modal-actions{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+
+.form-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--fg-muted);text-transform:uppercase;margin-bottom:6px;display:block}
+.form-input{
+  font-family:'Space Grotesk',sans-serif;font-size:14px;padding:10px 12px;
+  border:1px solid var(--border);background:var(--bg-elevated);color:var(--fg);width:100%;
+}
+.form-input:focus{outline:none;border-color:var(--fg)}
+.form-row{display:flex;flex-direction:column}
+
+/* Responsive */
+@media (max-width:640px){
+  .pulse-stats{grid-template-columns:repeat(2,1fr)}
+  .pulse-card{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
+  .pulse-actions{grid-column:1/-1;justify-content:flex-end}
+  .pulse-headline{font-size:26px}
+  .principle-banner{grid-template-columns:1fr;text-align:left}
+  .principle-progress{text-align:left;align-items:flex-start;flex-direction:row;gap:12px}
+  .filterbar{padding:10px 14px;position:sticky;top:auto}
+  .subtabs{top:auto}
+}
+@media (max-width:480px){.sync-status{display:none}.subtab{font-size:9px;padding:13px 6px;min-width:70px}}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="logo-mark">JP<span class="dot"></span></div>
+      <div class="page-title">Contatos / Carnegie</div>
+    </div>
+    <div class="topbar-actions">
+      <div class="sync-status">Sync · 2min</div>
+      <button class="icon-btn" onclick="toggleTheme()" title="Tema">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Subtabs -->
+  <div class="subtabs">
+    <div class="subtab active" data-view="pulse" onclick="goTo('pulse')">Pulso</div>
+    <div class="subtab" data-view="lista" onclick="goTo('lista')">Lista</div>
+    <div class="subtab" data-view="pipeline" onclick="goTo('pipeline')">Pipeline</div>
+    <div class="subtab" data-view="promises" onclick="goTo('promises')">Promessas</div>
+    <div class="subtab" data-view="rituals" onclick="goTo('rituals')">Rituais</div>
+    <div class="subtab" data-view="config" onclick="goTo('config')">⚙ Config</div>
+  </div>
+
+  <!-- ====================================================
+       PAGE: PULSO
+       ==================================================== -->
+  <div class="page active" id="page-pulse">
+
+    <!-- Princípio do mês -->
+    <div class="principle-banner">
+      <div class="principle-mark">P7</div>
+      <div class="principle-info">
+        <div class="principle-label">Princípio do mês · Maio 2026</div>
+        <div class="principle-title">Seja um bom ouvinte</div>
+        <div class="principle-desc">Encoraje os outros a falarem sobre si mesmos. Pessoas adoram ser ouvidas — e raramente são.</div>
+      </div>
+      <div class="principle-progress">
+        <div class="principle-count">8/12</div>
+        <div class="principle-meta">Aplicações</div>
+      </div>
+    </div>
+
+    <!-- FilterBar -->
+    <div class="filterbar-wrap">
+      <div class="filterbar" id="pulse-filterbar">
+        <span class="chip md blue removable">Cliente <span class="chip-x" onclick="removeFilter(this)">×</span></span>
+        <span class="chip md green removable">Impacto <span class="chip-x" onclick="removeFilter(this)">×</span></span>
+        <button class="filterbar-add" onclick="toggleFilterDropdown('pulse')">+ Filtro</button>
+        <span class="filterbar-count">3 contatos no Pulso</span>
+        <button class="filterbar-clear">Limpar</button>
+      </div>
+      <div class="filter-dropdown" id="pulse-filter-dropdown">
+        <div class="filter-dim-group">
+          <div class="filter-dim-label">Perfil</div>
+          <div class="filter-dim-options">
+            <button class="filter-option selected"><span class="chip-dot blue"></span>Cliente</button>
+            <button class="filter-option"><span class="chip-dot green"></span>Investidor</button>
+            <button class="filter-option"><span class="chip-dot orange"></span>Fornecedor</button>
+            <button class="filter-option"><span class="chip-dot purple"></span>Parceiro</button>
+          </div>
+        </div>
+        <div class="filter-dim-group">
+          <div class="filter-dim-label">Assunto</div>
+          <div class="filter-dim-options">
+            <button class="filter-option selected"><span class="chip-dot green"></span>Impacto</button>
+            <button class="filter-option"><span class="chip-dot blue"></span>Tecnologia</button>
+            <button class="filter-option"><span class="chip-dot accent"></span>Eventos</button>
+            <button class="filter-option"><span class="chip-dot pink"></span>Cultura</button>
+          </div>
+        </div>
+        <div class="filter-dim-group">
+          <div class="filter-dim-label">Aproximação</div>
+          <div class="filter-dim-options">
+            <button class="filter-option"><span class="chip-dot accent"></span>Amigo</button>
+            <button class="filter-option"><span class="chip-dot red"></span>Família</button>
+            <button class="filter-option"><span class="chip-dot gray"></span>Colega</button>
+            <button class="filter-option"><span class="chip-dot purple"></span>Mentor</button>
+          </div>
+        </div>
+        <div class="filter-dim-group">
+          <div class="filter-dim-label">Tier</div>
+          <div class="filter-dim-options">
+            <button class="filter-option">● Inner</button>
+            <button class="filter-option">● Strong</button>
+            <button class="filter-option">● Network</button>
+            <button class="filter-option">● Weak</button>
+          </div>
+        </div>
+        <div class="filter-dim-group">
+          <div class="filter-dim-label">Setor (custom)</div>
+          <div class="filter-dim-options">
+            <button class="filter-option">FMCG</button>
+            <button class="filter-option">Tecnologia</button>
+            <button class="filter-option">Mídia</button>
+            <button class="filter-option">Educação</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero compacto -->
+    <div class="pulse-hero">
+      <div class="pulse-greeting">Segunda · 14 mai 2026 · 09:14</div>
+      <div class="pulse-headline">Bom dia, Jorge. <span class="pct">87%</span> em dia.</div>
+      <div class="pulse-stats">
+        <div class="pulse-stat"><div class="pulse-stat-label">Inner atraso</div><div class="pulse-stat-value danger">2</div></div>
+        <div class="pulse-stat"><div class="pulse-stat-label">Strong atraso</div><div class="pulse-stat-value warning">5</div></div>
+        <div class="pulse-stat"><div class="pulse-stat-label">Promessas</div><div class="pulse-stat-value danger">3</div></div>
+        <div class="pulse-stat"><div class="pulse-stat-label">Streak</div><div class="pulse-stat-value"><span class="accent">14d</span></div></div>
+      </div>
+    </div>
+
+    <!-- Strong em atraso (filtrado) -->
+    <div class="pulse-section">
+      <div class="section-head">
+        <div class="section-title"><span class="tier-dot strong"></span> Resultados do filtro</div>
+        <div class="section-count">3 pessoas</div>
+      </div>
+      <div class="pulse-cards">
+
+        <!-- Marina Costa -->
+        <div class="pulse-card" onclick="openPanel('marina')">
+          <div class="pulse-avatar">MC</div>
+          <div class="pulse-info">
+            <div class="pulse-name">
+              Marina Costa
+              <div class="chips-row">
+                <span class="chip sm blue">Cliente</span>
+                <span class="chip sm green">Impacto</span>
+                <span class="chip sm accent">Amigo</span>
+              </div>
+            </div>
+            <div class="pulse-meta">Bimbo · VP Marketing LATAM · 38d sem contato · cadência 30d</div>
+            <div class="pulse-hook">Helena (filha) começou Letras na USP — perguntar como está a adaptação.</div>
+          </div>
+          <div class="pulse-actions">
+            <button class="action-btn" title="WhatsApp"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.83 7.3L3 21l2.2-5.17A8.5 8.5 0 1 1 21 11.5z"/></svg></button>
+            <button class="action-btn" title="Sugerir"><svg viewBox="0 0 24 24"><path d="M9.66 7.35l-1.91-.32a2 2 0 0 0-2.31 2.31l.32 1.91M14.34 16.65l1.91.32a2 2 0 0 0 2.31-2.31l-.32-1.91M5 19l14-14"/></svg></button>
+          </div>
+        </div>
+
+        <!-- Carolina Vieira -->
+        <div class="pulse-card">
+          <div class="pulse-avatar">CV</div>
+          <div class="pulse-info">
+            <div class="pulse-name">
+              Carolina Vieira
+              <div class="chips-row">
+                <span class="chip sm blue">Cliente</span>
+                <span class="chip sm green">Impacto</span>
+                <span class="chip sm purple">Mentor</span>
+              </div>
+            </div>
+            <div class="pulse-meta">Brazil Journal · Editora-chefe · 45d sem contato · cadência 30d</div>
+            <div class="pulse-hook">Mencionada em entrevista no Estadão sobre futuro do jornalismo.</div>
+          </div>
+          <div class="pulse-actions">
+            <button class="action-btn" title="WhatsApp"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.83 7.3L3 21l2.2-5.17A8.5 8.5 0 1 1 21 11.5z"/></svg></button>
+            <button class="action-btn" title="Sugerir"><svg viewBox="0 0 24 24"><path d="M9.66 7.35l-1.91-.32a2 2 0 0 0-2.31 2.31l.32 1.91M14.34 16.65l1.91.32a2 2 0 0 0 2.31-2.31l-.32-1.91M5 19l14-14"/></svg></button>
+          </div>
+        </div>
+
+        <!-- Pedro Eluf -->
+        <div class="pulse-card">
+          <div class="pulse-avatar">PE</div>
+          <div class="pulse-info">
+            <div class="pulse-name">
+              Pedro Eluf
+              <div class="chips-row">
+                <span class="chip sm blue">Cliente</span>
+                <span class="chip sm green">Impacto</span>
+                <span class="chip sm purple">Mentor</span>
+              </div>
+            </div>
+            <div class="pulse-meta">Yunus Negócios Sociais · Diretor · 36d sem contato · cadência 30d</div>
+            <div class="pulse-hook">Está aberto a parceria pro Innovation Day — devo voltar com proposta.</div>
+          </div>
+          <div class="pulse-actions">
+            <button class="action-btn" title="WhatsApp"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.83 7.3L3 21l2.2-5.17A8.5 8.5 0 1 1 21 11.5z"/></svg></button>
+            <button class="action-btn" title="Sugerir"><svg viewBox="0 0 24 24"><path d="M9.66 7.35l-1.91-.32a2 2 0 0 0-2.31 2.31l.32 1.91M14.34 16.65l1.91.32a2 2 0 0 0 2.31-2.31l-.32-1.91M5 19l14-14"/></svg></button>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="margin-top:14px;padding:10px 0;font-family:'Space Mono',monospace;font-size:10px;color:var(--fg-muted);letter-spacing:1px;text-align:center;text-transform:uppercase">
+        💡 Limpe os filtros pra ver toda a rede em atraso (7 pessoas)
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ====================================================
+       PAGE: LISTA (com FilterBar funcional)
+       ==================================================== -->
+  <div class="page" id="page-lista">
+
+    <div class="filterbar-wrap">
+      <div class="filterbar" id="lista-filterbar">
+        <span class="chip md green removable">Investidor <span class="chip-x" onclick="removeFilter(this)">×</span></span>
+        <button class="filterbar-add" onclick="toggleFilterDropdown('lista')">+ Filtro</button>
+        <span class="filterbar-count">12 de 187 contatos</span>
+        <button class="filterbar-clear">Limpar</button>
+      </div>
+      <div class="filter-dropdown" id="lista-filter-dropdown">
+        <div class="filter-dim-group">
+          <div class="filter-dim-label">Perfil</div>
+          <div class="filter-dim-options">
+            <button class="filter-option"><span class="chip-dot blue"></span>Cliente</button>
+            <button class="filter-option selected"><span class="chip-dot green"></span>Investidor</button>
+            <button class="filter-option"><span class="chip-dot orange"></span>Fornecedor</button>
+            <button class="filter-option"><span class="chip-dot purple"></span>Parceiro</button>
+          </div>
+        </div>
+        <div class="filter-dim-group">
+          <div class="filter-dim-label">Assunto</div>
+          <div class="filter-dim-options">
+            <button class="filter-option"><span class="chip-dot green"></span>Impacto</button>
+            <button class="filter-option"><span class="chip-dot blue"></span>Tecnologia</button>
+            <button class="filter-option"><span class="chip-dot accent"></span>Eventos</button>
+            <button class="filter-option"><span class="chip-dot pink"></span>Cultura</button>
+          </div>
+        </div>
+        <div class="filter-dim-group">
+          <div class="filter-dim-label">Aproximação</div>
+          <div class="filter-dim-options">
+            <button class="filter-option"><span class="chip-dot accent"></span>Amigo</button>
+            <button class="filter-option"><span class="chip-dot red"></span>Família</button>
+            <button class="filter-option"><span class="chip-dot gray"></span>Colega</button>
+            <button class="filter-option"><span class="chip-dot purple"></span>Mentor</button>
+          </div>
+        </div>
+        <div class="filter-dim-group">
+          <div class="filter-dim-label">Tier</div>
+          <div class="filter-dim-options">
+            <button class="filter-option">● Inner</button>
+            <button class="filter-option">● Strong</button>
+            <button class="filter-option">● Network</button>
+            <button class="filter-option">● Weak</button>
+            <button class="filter-option">● Dormant</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="contact-list">
+
+      <div class="contact-row" onclick="openPanel('marina')">
+        <div class="pulse-avatar">FB</div>
+        <div class="contact-row-info">
+          <div class="contact-row-name">
+            <span class="contact-row-tier strong">Strong</span>
+            Fernando Bracher
+          </div>
+          <div class="contact-row-meta">Itaú · Sócio · há 12d</div>
+          <div class="chips-row">
+            <span class="chip sm green">Investidor</span>
+            <span class="chip sm blue">Tecnologia</span>
+            <span class="chip sm purple">Mentor</span>
+          </div>
+        </div>
+        <button class="action-btn" title="Abrir"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+
+      <div class="contact-row">
+        <div class="pulse-avatar">RD</div>
+        <div class="contact-row-info">
+          <div class="contact-row-name">
+            <span class="contact-row-tier strong">Strong</span>
+            Renata Dias
+          </div>
+          <div class="contact-row-meta">Monashees · Partner · há 19d</div>
+          <div class="chips-row">
+            <span class="chip sm green">Investidor</span>
+            <span class="chip sm blue">Tecnologia</span>
+            <span class="chip sm green">Impacto</span>
+          </div>
+        </div>
+        <button class="action-btn" title="Abrir"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+
+      <div class="contact-row">
+        <div class="pulse-avatar">FA</div>
+        <div class="contact-row-info">
+          <div class="contact-row-name">
+            <span class="contact-row-tier inner">Inner</span>
+            Fabio Andrade
+          </div>
+          <div class="contact-row-meta">Investidor anjo · sócio antigo · há 8d</div>
+          <div class="chips-row">
+            <span class="chip sm green">Investidor</span>
+            <span class="chip sm accent">Amigo</span>
+            <span class="chip sm purple">Mentor</span>
+            <span class="chip-overflow">+2</span>
+          </div>
+        </div>
+        <button class="action-btn" title="Abrir"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+
+      <div class="contact-row">
+        <div class="pulse-avatar">LV</div>
+        <div class="contact-row-info">
+          <div class="contact-row-name">
+            <span class="contact-row-tier strong">Strong</span>
+            Luiza Vasconcelos
+          </div>
+          <div class="contact-row-meta">Kaszek · VC · há 34d</div>
+          <div class="chips-row">
+            <span class="chip sm green">Investidor</span>
+            <span class="chip sm blue">Tecnologia</span>
+            <span class="chip sm gray">Colega</span>
+          </div>
+        </div>
+        <button class="action-btn" title="Abrir"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+
+      <div class="contact-row">
+        <div class="pulse-avatar">DG</div>
+        <div class="contact-row-info">
+          <div class="contact-row-name">Daniela Gabbai</div>
+          <div class="contact-row-meta">SP Ventures · Diretora · há 58d</div>
+          <div class="chips-row">
+            <span class="chip sm green">Investidor</span>
+            <span class="chip sm green">Impacto</span>
+            <span class="chip sm gray">Colega</span>
+          </div>
+        </div>
+        <button class="action-btn" title="Abrir"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+
+      <div class="contact-row">
+        <div class="pulse-avatar">RM</div>
+        <div class="contact-row-info">
+          <div class="contact-row-name">Ricardo Mansur</div>
+          <div class="contact-row-meta">Anjo individual · há 76d</div>
+          <div class="chips-row">
+            <span class="chip sm green">Investidor</span>
+            <span class="chip sm pink">Cultura</span>
+          </div>
+        </div>
+        <button class="action-btn" title="Abrir"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+
+      <div class="contact-row">
+        <div class="pulse-avatar">JS</div>
+        <div class="contact-row-info">
+          <div class="contact-row-name">João Silva</div>
+          <div class="contact-row-meta">Astella Investimentos · há 92d</div>
+          <div class="chips-row">
+            <span class="chip sm green">Investidor</span>
+            <span class="chip sm blue">Tecnologia</span>
+          </div>
+        </div>
+        <button class="action-btn" title="Abrir"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+
+      <div style="padding:24px 20px;text-align:center;font-family:'Space Mono',monospace;font-size:10px;color:var(--fg-muted);letter-spacing:1px;text-transform:uppercase">
+        Mostrando 7 de 12 · <span style="text-decoration:underline;cursor:pointer">carregar mais</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ====================================================
+       PAGE: PIPELINE (placeholder com filterbar)
+       ==================================================== -->
+  <div class="page" id="page-pipeline">
+    <div class="filterbar-wrap">
+      <div class="filterbar">
+        <span class="chip md blue removable">Cliente <span class="chip-x" onclick="removeFilter(this)">×</span></span>
+        <span class="chip md green removable">Impacto <span class="chip-x" onclick="removeFilter(this)">×</span></span>
+        <button class="filterbar-add">+ Filtro</button>
+        <span class="filterbar-count">14 deals no pipeline</span>
+        <button class="filterbar-clear">Limpar</button>
+      </div>
+    </div>
+    <div class="empty">
+      <div style="margin-bottom:12px;font-size:16px">Kanban CRM filtrado</div>
+      <div style="font-size:12px">prospect → first → talking → proposal → active → dormant</div>
+      <div style="margin-top:16px;font-size:11px">Os filtros aplicam às colunas do kanban — você só vê deals de clientes em impacto.</div>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       PAGE: PROMESSAS (placeholder com filterbar)
+       ==================================================== -->
+  <div class="page" id="page-promises">
+    <div class="filterbar-wrap">
+      <div class="filterbar">
+        <span class="chip md green removable">Investidor <span class="chip-x" onclick="removeFilter(this)">×</span></span>
+        <button class="filterbar-add">+ Filtro</button>
+        <span class="filterbar-count">5 promessas filtradas</span>
+        <button class="filterbar-clear">Limpar</button>
+      </div>
+    </div>
+    <div class="empty">
+      <div style="margin-bottom:12px;font-size:16px">Promessas filtradas</div>
+      <div style="font-size:12px">Tasks com tag #promessa + categoria do contato vinculado</div>
+      <div style="margin-top:16px;font-size:11px">Útil pra ver "o que eu prometi pros meus investidores" sem ruído.</div>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       PAGE: RITUAIS
+       ==================================================== -->
+  <div class="page" id="page-rituals">
+    <div class="empty">
+      <div style="margin-bottom:12px;font-size:16px">Rituais (mantido da v2)</div>
+      <div style="font-size:12px">Thank You Tour · Reflexão semanal · Diário · Princípio do mês</div>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       PAGE: CONFIG · Gestão de categorias
+       ==================================================== -->
+  <div class="page" id="page-config">
+    <div class="config-section">
+      <div class="config-title">Categorias</div>
+      <div class="config-subtitle">
+        Crie dimensões pra organizar seus contatos. Cada dimensão tem categorias (com cor opcional).
+        Um contato pode ter múltiplas categorias por dimensão.
+      </div>
+
+      <!-- Dimensão Perfil -->
+      <div class="dim-card expanded">
+        <div class="dim-card-head" onclick="this.parentElement.classList.toggle('expanded')">
+          <div class="dim-card-title-block">
+            <div class="dim-card-title">Perfil</div>
+            <div class="dim-card-meta">4 categorias · 142 atribuições</div>
+          </div>
+          <div class="dim-card-actions">
+            <button class="cat-row-action-btn">Editar</button>
+          </div>
+        </div>
+        <div class="dim-card-body">
+          <div class="cat-list">
+            <div class="cat-row">
+              <span class="chip md blue">Cliente</span>
+              <span class="cat-row-meta">slug: cliente · azul</span>
+              <span class="cat-row-meta">52 contatos</span>
+              <div class="cat-row-actions">
+                <button class="cat-row-action-btn" onclick="openModal('cat-edit')">Editar</button>
+              </div>
+            </div>
+            <div class="cat-row">
+              <span class="chip md green">Investidor</span>
+              <span class="cat-row-meta">slug: investidor · verde</span>
+              <span class="cat-row-meta">12 contatos</span>
+              <div class="cat-row-actions">
+                <button class="cat-row-action-btn">Editar</button>
+              </div>
+            </div>
+            <div class="cat-row">
+              <span class="chip md orange">Fornecedor</span>
+              <span class="cat-row-meta">slug: fornecedor · laranja</span>
+              <span class="cat-row-meta">38 contatos</span>
+              <div class="cat-row-actions">
+                <button class="cat-row-action-btn">Editar</button>
+              </div>
+            </div>
+            <div class="cat-row">
+              <span class="chip md purple">Parceiro</span>
+              <span class="cat-row-meta">slug: parceiro · roxo</span>
+              <span class="cat-row-meta">40 contatos</span>
+              <div class="cat-row-actions">
+                <button class="cat-row-action-btn">Editar</button>
+              </div>
+            </div>
+          </div>
+          <div class="cat-new-row">+ Nova categoria em Perfil</div>
+        </div>
+      </div>
+
+      <!-- Dimensão Assunto -->
+      <div class="dim-card">
+        <div class="dim-card-head" onclick="this.parentElement.classList.toggle('expanded')">
+          <div class="dim-card-title-block">
+            <div class="dim-card-title">Assunto</div>
+            <div class="dim-card-meta">4 categorias · 89 atribuições</div>
+          </div>
+          <div class="dim-card-actions">
+            <button class="cat-row-action-btn">Editar</button>
+          </div>
+        </div>
+        <div class="dim-card-body">
+          <div class="cat-list">
+            <div class="cat-row">
+              <span class="chip md green">Impacto</span>
+              <span class="cat-row-meta">verde · 34 contatos</span>
+              <span></span>
+              <div class="cat-row-actions"><button class="cat-row-action-btn">Editar</button></div>
+            </div>
+            <div class="cat-row">
+              <span class="chip md blue">Tecnologia</span>
+              <span class="cat-row-meta">azul · 28 contatos</span>
+              <span></span>
+              <div class="cat-row-actions"><button class="cat-row-action-btn">Editar</button></div>
+            </div>
+            <div class="cat-row">
+              <span class="chip md accent">Eventos</span>
+              <span class="cat-row-meta">verde-lima · 17 contatos</span>
+              <span></span>
+              <div class="cat-row-actions"><button class="cat-row-action-btn">Editar</button></div>
+            </div>
+            <div class="cat-row">
+              <span class="chip md pink">Cultura</span>
+              <span class="cat-row-meta">rosa · 10 contatos</span>
+              <span></span>
+              <div class="cat-row-actions"><button class="cat-row-action-btn">Editar</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dimensão Aproximação -->
+      <div class="dim-card">
+        <div class="dim-card-head" onclick="this.parentElement.classList.toggle('expanded')">
+          <div class="dim-card-title-block">
+            <div class="dim-card-title">Aproximação</div>
+            <div class="dim-card-meta">4 categorias · 153 atribuições</div>
+          </div>
+          <div class="dim-card-actions">
+            <button class="cat-row-action-btn">Editar</button>
+          </div>
+        </div>
+        <div class="dim-card-body">
+          <div class="cat-list">
+            <div class="cat-row">
+              <span class="chip md accent">Amigo</span>
+              <span class="cat-row-meta">verde-lima · 23 contatos</span>
+              <span></span>
+              <div class="cat-row-actions"><button class="cat-row-action-btn">Editar</button></div>
+            </div>
+            <div class="cat-row">
+              <span class="chip md red">Família</span>
+              <span class="cat-row-meta">vermelho · 12 contatos</span>
+              <span></span>
+              <div class="cat-row-actions"><button class="cat-row-action-btn">Editar</button></div>
+            </div>
+            <div class="cat-row">
+              <span class="chip md gray">Colega</span>
+              <span class="cat-row-meta">cinza · 78 contatos</span>
+              <span></span>
+              <div class="cat-row-actions"><button class="cat-row-action-btn">Editar</button></div>
+            </div>
+            <div class="cat-row">
+              <span class="chip md purple">Mentor</span>
+              <span class="cat-row-meta">roxo · 8 contatos</span>
+              <span></span>
+              <div class="cat-row-actions"><button class="cat-row-action-btn">Editar</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cat-new-row" style="margin-top:14px">+ Nova dimensão (ex: Setor, Cidade, Status do Convite)</div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ====================================================
+     CONTACT PANEL — Marina com aba Categorias
+     ==================================================== -->
+<div class="panel-overlay" id="panel-overlay" onclick="closePanel(event)">
+  <div class="panel" onclick="event.stopPropagation()">
+
+    <div class="panel-header">
+      <div class="panel-title-block">
+        <div class="panel-avatar">MC</div>
+        <div class="panel-name-block">
+          <div class="panel-name">Marina Costa</div>
+          <div class="panel-role">VP Marketing LATAM · Bimbo</div>
+        </div>
+      </div>
+      <button class="panel-close" onclick="closePanel()">
+        <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="panel-meta">
+      <div class="panel-meta-item"><span class="tier-pill">● Strong</span></div>
+      <div class="panel-meta-item">38d sem contato</div>
+      <div class="panel-meta-item">Saldo +3</div>
+    </div>
+
+    <!-- Strip de chips no header (sumário rápido) -->
+    <div class="panel-chips-strip">
+      <span class="chip blue">Cliente</span>
+      <span class="chip green">Impacto</span>
+      <span class="chip accent">Amigo</span>
+      <span class="chip teal">FMCG</span>
+    </div>
+
+    <div class="panel-tabs" id="panel-tabs">
+      <div class="panel-tab active" onclick="setPanelTab(this,'tab-carnegie')">Carnegie</div>
+      <div class="panel-tab" onclick="setPanelTab(this,'tab-categories')">Categorias</div>
+      <div class="panel-tab" onclick="setPanelTab(this,'tab-dates')">Datas (5)</div>
+      <div class="panel-tab" onclick="setPanelTab(this,'tab-compliments')">Elogios (2)</div>
+      <div class="panel-tab" onclick="setPanelTab(this,'tab-interactions')">Interações</div>
+      <div class="panel-tab" onclick="setPanelTab(this,'tab-promises')">Promessas (3)</div>
+    </div>
+
+    <div class="panel-body">
+
+      <!-- TAB: CARNEGIE -->
+      <div id="tab-carnegie" class="panel-tab-content">
+        <div class="carnegie-block">
+          <div class="carnegie-label">O que ela quer<span class="carnegie-ref">P3 · desejo</span></div>
+          <div class="carnegie-value">Posicionar a Bimbo como referência em <strong>sustentabilidade e inovação</strong> no setor de panificação industrial na LATAM.</div>
+        </div>
+        <div class="carnegie-block">
+          <div class="carnegie-label">Como ela se sente importante<span class="carnegie-ref">P9 · sinceridade</span></div>
+          <div class="carnegie-value">Reconhecimento dos pares e visibilidade em mídia especializada. <strong>Evitar:</strong> tratá-la como executiva de FMCG genérica.</div>
+        </div>
+        <div class="carnegie-block">
+          <div class="carnegie-label">Hooks de conversa<span class="carnegie-ref">P8</span></div>
+          <div class="carnegie-value">
+            → Helena (filha) entrou em Letras na USP em fev/26<br>
+            → Treinando para meia maratona de SP em set/26<br>
+            → Apaixonada por vinhos do Vale dos Vinhedos
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: CATEGORIAS — a estrela do PR 8 -->
+      <div id="tab-categories" class="panel-tab-content hidden">
+        <div class="carnegie-block">
+          <div class="carnegie-label">Categorias atribuídas a Marina</div>
+          <div style="font-size:13px;color:var(--fg-muted);line-height:1.5;margin-bottom:18px">
+            Use múltiplas categorias por dimensão. Crie novas dimensões em <a href="#" onclick="event.preventDefault();goTo('config')" style="color:var(--fg);text-decoration:underline">Config &gt; Categorias</a>.
+          </div>
+
+          <!-- Dimensão: Perfil -->
+          <div class="cat-dim-group">
+            <div class="cat-dim-head">
+              <div class="cat-dim-title">Perfil</div>
+              <div class="cat-dim-count">1 selecionada</div>
+            </div>
+            <div class="cat-dim-chips">
+              <span class="chip blue removable">Cliente <span class="chip-x" onclick="removeChipFromCat(this)">×</span></span>
+              <button class="cat-add-btn" onclick="toggleCatPicker('perfil')">+ Adicionar</button>
+            </div>
+            <div class="cat-picker" id="cat-picker-perfil">
+              <div class="cat-picker-title">Selecione mais categorias de Perfil</div>
+              <div class="cat-picker-options">
+                <span class="chip green" onclick="addChipToCat(this,'perfil')" style="cursor:pointer">+ Investidor</span>
+                <span class="chip orange" onclick="addChipToCat(this,'perfil')" style="cursor:pointer">+ Fornecedor</span>
+                <span class="chip purple" onclick="addChipToCat(this,'perfil')" style="cursor:pointer">+ Parceiro</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dimensão: Assunto -->
+          <div class="cat-dim-group">
+            <div class="cat-dim-head">
+              <div class="cat-dim-title">Assunto</div>
+              <div class="cat-dim-count">1 selecionada</div>
+            </div>
+            <div class="cat-dim-chips">
+              <span class="chip green removable">Impacto <span class="chip-x" onclick="removeChipFromCat(this)">×</span></span>
+              <button class="cat-add-btn" onclick="toggleCatPicker('assunto')">+ Adicionar</button>
+            </div>
+            <div class="cat-picker" id="cat-picker-assunto">
+              <div class="cat-picker-title">Selecione mais categorias de Assunto</div>
+              <div class="cat-picker-options">
+                <span class="chip blue" onclick="addChipToCat(this,'assunto')" style="cursor:pointer">+ Tecnologia</span>
+                <span class="chip accent" onclick="addChipToCat(this,'assunto')" style="cursor:pointer">+ Eventos</span>
+                <span class="chip pink" onclick="addChipToCat(this,'assunto')" style="cursor:pointer">+ Cultura</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dimensão: Aproximação -->
+          <div class="cat-dim-group">
+            <div class="cat-dim-head">
+              <div class="cat-dim-title">Aproximação</div>
+              <div class="cat-dim-count">1 selecionada</div>
+            </div>
+            <div class="cat-dim-chips">
+              <span class="chip accent removable">Amigo <span class="chip-x" onclick="removeChipFromCat(this)">×</span></span>
+              <button class="cat-add-btn" onclick="toggleCatPicker('aproximacao')">+ Adicionar</button>
+            </div>
+            <div class="cat-picker" id="cat-picker-aproximacao">
+              <div class="cat-picker-title">Selecione mais categorias de Aproximação</div>
+              <div class="cat-picker-options">
+                <span class="chip red" onclick="addChipToCat(this,'aproximacao')" style="cursor:pointer">+ Família</span>
+                <span class="chip gray" onclick="addChipToCat(this,'aproximacao')" style="cursor:pointer">+ Colega</span>
+                <span class="chip purple" onclick="addChipToCat(this,'aproximacao')" style="cursor:pointer">+ Mentor</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dimensão custom: Setor -->
+          <div class="cat-dim-group">
+            <div class="cat-dim-head">
+              <div class="cat-dim-title">Setor</div>
+              <div class="cat-dim-count">1 selecionada</div>
+            </div>
+            <div class="cat-dim-chips">
+              <span class="chip teal removable">FMCG <span class="chip-x" onclick="removeChipFromCat(this)">×</span></span>
+              <button class="cat-add-btn" onclick="toggleCatPicker('setor')">+ Adicionar</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Outras tabs (resumidas) -->
+      <div id="tab-dates" class="panel-tab-content hidden">
+        <div class="carnegie-block"><div class="carnegie-label">Datas (5)</div><div class="carnegie-value">— igual à v2 —</div></div>
+      </div>
+      <div id="tab-compliments" class="panel-tab-content hidden">
+        <div class="carnegie-block"><div class="carnegie-label">Elogios (2)</div><div class="carnegie-value">— igual à v2 —</div></div>
+      </div>
+      <div id="tab-interactions" class="panel-tab-content hidden">
+        <div class="carnegie-block"><div class="carnegie-label">Histórico</div><div class="carnegie-value">— mantido —</div></div>
+      </div>
+      <div id="tab-promises" class="panel-tab-content hidden">
+        <div class="carnegie-block"><div class="carnegie-label">Promessas (3)</div><div class="carnegie-value">— mantido —</div></div>
+      </div>
+
+    </div>
+
+    <div class="panel-actions-bar">
+      <button class="btn btn-accent">Registrar interação</button>
+      <button class="btn btn-ghost">+ Data</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ====================================================
+     MODAL — editar categoria
+     ==================================================== -->
+<div class="modal-overlay" id="modal-cat-edit" onclick="closeModal(event,'cat-edit')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title">Editar categoria · Cliente</div>
+      <button class="panel-close" onclick="closeModal(null,'cat-edit')">
+        <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label class="form-label">Label</label>
+        <input type="text" class="form-input" value="Cliente">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Slug (id estável usado em URLs)</label>
+        <input type="text" class="form-input" value="cliente">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Cor do chip</label>
+        <div class="color-palette">
+          <div class="color-swatch none" title="Sem cor"></div>
+          <div class="color-swatch gray"></div>
+          <div class="color-swatch red"></div>
+          <div class="color-swatch orange"></div>
+          <div class="color-swatch yellow"></div>
+          <div class="color-swatch green"></div>
+          <div class="color-swatch teal"></div>
+          <div class="color-swatch blue selected"></div>
+          <div class="color-swatch purple"></div>
+          <div class="color-swatch pink"></div>
+          <div class="color-swatch accent"></div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Descrição (opcional)</label>
+        <input type="text" class="form-input" placeholder="Ex: paga pela STATE">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Preview</label>
+        <div><span class="chip md blue">Cliente</span></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal(null,'cat-edit')">Cancelar</button>
+      <button class="btn btn-accent" onclick="closeModal(null,'cat-edit')">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+    <div>Briefing</div>
+  </div>
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <div>Tasks</div>
+  </div>
+  <div class="nav-item active">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <div>Contatos</div>
+  </div>
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <div>Config</div>
+  </div>
+</div>
+
+<script>
+function goTo(view){
+  document.querySelectorAll('.subtab').forEach(t=>t.classList.remove('active'));
+  document.querySelector('[data-view="'+view+'"]').classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+view).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function openPanel(id){
+  document.getElementById('panel-overlay').classList.add('active');
+  document.body.style.overflow='hidden';
+}
+function closePanel(e){
+  if(e && e.target!==e.currentTarget) return;
+  document.getElementById('panel-overlay').classList.remove('active');
+  document.body.style.overflow='';
+}
+
+function setPanelTab(el, tabId){
+  document.querySelectorAll('.panel-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.panel-tab-content').forEach(c=>c.classList.add('hidden'));
+  document.getElementById(tabId).classList.remove('hidden');
+  document.querySelector('.panel-body').scrollTo({top:0,behavior:'smooth'});
+}
+
+function openModal(name){
+  document.getElementById('modal-'+name).classList.add('active');
+  document.body.style.overflow='hidden';
+}
+function closeModal(e, name){
+  if(e && e.target!==e.currentTarget) return;
+  document.getElementById('modal-'+name).classList.remove('active');
+  document.body.style.overflow='';
+}
+
+function toggleTheme(){
+  document.body.classList.toggle('dark');
+}
+
+function toggleFilterDropdown(view){
+  // Fecha todos
+  document.querySelectorAll('.filter-dropdown').forEach(d=>{
+    if(d.id !== view+'-filter-dropdown') d.classList.remove('open');
+  });
+  // Toggle o que foi clicado
+  document.getElementById(view+'-filter-dropdown').classList.toggle('open');
+  event.stopPropagation();
+}
+
+// Fecha dropdown ao clicar fora
+document.addEventListener('click', function(e){
+  if(!e.target.closest('.filterbar-wrap')){
+    document.querySelectorAll('.filter-dropdown').forEach(d=>d.classList.remove('open'));
+  }
+});
+
+// Toggle de opção no filtro
+document.querySelectorAll('.filter-option').forEach(btn=>{
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    this.classList.toggle('selected');
+  });
+});
+
+function removeFilter(el){
+  event.stopPropagation();
+  el.closest('.chip').remove();
+}
+
+function toggleCatPicker(dim){
+  document.querySelectorAll('.cat-picker').forEach(p=>{
+    if(p.id !== 'cat-picker-'+dim) p.classList.remove('open');
+  });
+  const el = document.getElementById('cat-picker-'+dim);
+  if(el) el.classList.toggle('open');
+}
+
+function addChipToCat(el, dim){
+  const label = el.textContent.replace('+ ','');
+  const cls = el.className.replace(/\bchip\b/,'').trim();
+  // Remove o + clicado
+  el.remove();
+  // Adiciona chip na linha de chips da dim
+  const group = document.querySelector('#cat-picker-'+dim).previousElementSibling;
+  const newChip = document.createElement('span');
+  newChip.className = 'chip ' + cls + ' removable';
+  newChip.innerHTML = label + ' <span class="chip-x" onclick="removeChipFromCat(this)">×</span>';
+  // Insere antes do botão "+ Adicionar"
+  const addBtn = group.querySelector('.cat-add-btn');
+  group.insertBefore(newChip, addBtn);
+  // Atualiza contagem
+  updateCatCount(group);
+}
+
+function removeChipFromCat(el){
+  const chip = el.closest('.chip');
+  const group = chip.closest('.cat-dim-group');
+  chip.remove();
+  if(group) updateCatCount(group.querySelector('.cat-dim-chips'));
+}
+
+function updateCatCount(group){
+  const dimGroup = group.closest('.cat-dim-group');
+  if(!dimGroup) return;
+  const count = group.querySelectorAll('.chip.removable').length;
+  const countEl = dimGroup.querySelector('.cat-dim-count');
+  if(countEl) countEl.textContent = count + ' selecionada' + (count!==1?'s':'');
+}
+</script>
+
+</body>
+</html>

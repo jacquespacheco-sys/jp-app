@@ -9,6 +9,7 @@ import { api } from '../api.ts'
 import type { Source } from '../types/domain.ts'
 import { CoachProfilePanel } from '../components/coach/CoachProfilePanel.tsx'
 import { CoachMemoryList } from '../components/coach/CoachMemoryList.tsx'
+import { CategoriesConfigSection } from '../components/contacts/CategoriesConfigSection.tsx'
 
 function SourceRow({ source, onToggle, onDelete }: {
   source: Source
@@ -130,12 +131,18 @@ export function ConfigPage() {
   const [syncingTasks, setSyncingTasks] = useState(false)
   const [showAddSource, setShowAddSource] = useState(false)
 
-  const initialFocus = searchParams.get('tab') === 'coach' ? 'coach' : null
+  const initialFocus = searchParams.get('tab') === 'coach' ? 'coach'
+    : searchParams.get('tab') === 'categories' ? 'categories'
+    : null
 
   useEffect(() => {
-    if (initialFocus !== 'coach') return
-    const el = document.querySelector('[data-coach-section]')
-    if (el) (el as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (initialFocus === 'coach') {
+      const el = document.querySelector('[data-coach-section]')
+      if (el) (el as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' })
+    } else if (initialFocus === 'categories') {
+      const el = document.querySelector('[data-categories-section]')
+      if (el) (el as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   }, [initialFocus])
 
   useEffect(() => {
@@ -314,6 +321,26 @@ export function ConfigPage() {
           <div className="section-title">Newsletters</div>
           <div style={{ fontSize: '12px', color: 'var(--fg-dim)', fontFamily: 'Space Mono, monospace', letterSpacing: '0.5px', padding: '4px 0' }}>
             Leitura via IMAP — em breve
+          </div>
+        </div>
+
+        <section data-categories-section className="section">
+          <div className="section-title">Categorias de contatos</div>
+          <CategoriesConfigSection />
+        </section>
+
+        <div className="section">
+          <div className="section-title">Carnegie</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--border-light)' }}>
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '3px' }}>Classificação inicial</div>
+              <div style={{ fontSize: '11px', color: 'var(--fg-muted)', fontFamily: 'Space Mono, monospace', letterSpacing: '0.5px' }}>
+                Passar pela base e definir tier + hooks
+              </div>
+            </div>
+            <button className="btn btn-ghost" onClick={() => navigate('/onboarding-contatos')} style={{ fontSize: '10px' }}>
+              Abrir
+            </button>
           </div>
         </div>
 

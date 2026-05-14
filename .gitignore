@@ -33,6 +33,9 @@ coverage/
 .vercel
 .env*.local
 
+# Supabase CLI temp files
+supabase/.temp/
+
 # Brainstorming companion
 .superpowers/
 

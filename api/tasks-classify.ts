@@ -1,6 +1,6 @@
 import { requireAuth } from './_middleware.js'
 import { getSupabase } from './_supabase.js'
-import Anthropic from '@anthropic-ai/sdk'
+import { getAnthropic, parseJsonFromLlm } from './_anthropic.js'
 import { TaskClassifyRequestSchema, TaskClassifyResponseSchema } from './_schemas/task-classify.js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
@@ -67,14 +67,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .map(a => `- ${a.id} | ${a.name} (quadrante ${a.quadrant})`)
     .join('\n') || '(nenhuma área cadastrada)'
 
-  const apiKey = process.env['ANTHROPIC_API_KEY']
-  if (!apiKey) return res.status(500).json({ error: 'ANTHROPIC_API_KEY não configurada' })
-
-  const anthropic = new Anthropic({ apiKey })
-
   let raw: string
   try {
-    const resp = await anthropic.messages.create({
+    const resp = await getAnthropic().messages.create({
       model: MODEL,
       max_tokens: 400,
       system: SYSTEM_PROMPT.replace('{{AREAS}}', areasText),
@@ -89,11 +84,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(502).json({ error: 'Haiku indisponível' })
   }
 
-  let parsedJson: unknown
-  try {
-    const stripped = raw.trim().replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
-    parsedJson = JSON.parse(stripped)
-  } catch {
+  const parsedJson = parseJsonFromLlm(raw)
+  if (parsedJson == null) {
     console.error('[tasks-classify] resposta não-JSON:', raw)
     return res.status(200).json({
       classification: {

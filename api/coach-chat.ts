@@ -28,19 +28,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const supabase = getSupabase()
 
-  // Step 3: Insert user message BEFORE building snapshot (so it appears in history)
-  const nowIso = new Date().toISOString()
-  const { error: insertErr } = await supabase.from('coach_log').insert({
+  // Insert user msg first so it appears in history shown to the model.
+  const { data: userMsgRow, error: insertErr } = await supabase.from('coach_log').insert({
     user_id: user.id,
     kind: 'chat',
     direction: 'user_to_coach',
     content_md: content,
-  })
-  if (insertErr) {
-    return res.status(500).json({ error: insertErr.message })
+  }).select('id').single()
+  if (insertErr || !userMsgRow) {
+    return res.status(500).json({ error: insertErr?.message ?? 'erro' })
   }
+  const userMsgId = userMsgRow.id
 
-  // Step 4: Load snapshot + history concurrently
   const [snapshot, historyRes] = await Promise.all([
     buildCoachSnapshot({
       userId: user.id,
@@ -56,17 +55,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .limit(CHAT_CONTEXT_MSGS + 1),
   ])
 
-  // Step 5: Build messages array
   type LogRow = { id: string; direction: 'user_to_coach' | 'coach_to_user'; content_md: string; created_at: string }
 
   const historyRaw = ((historyRes.data ?? []) as LogRow[])
-    .filter(m => !(
-      m.direction === 'user_to_coach' &&
-      m.content_md === content &&
-      Math.abs(new Date(m.created_at).getTime() - new Date(nowIso).getTime()) < 2000
-    ))
+    .filter(m => m.id !== userMsgId)
     .slice(0, CHAT_CONTEXT_MSGS)
-    .reverse() // ascending order
+    .reverse()
 
   const sessionMsgs: LogRow[] = []
   for (let i = historyRaw.length - 1; i >= 0; i--) {
@@ -105,39 +99,44 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   messages.length = 0
   messages.push(...deduped)
 
-  // Step 6: System prompt + memory ids
   const systemPrompt = buildSystemPrompt(snapshot, user.name)
   const memoryIds = snapshot.memories.map(m => m.id)
 
-  // Step 7: Open SSE response
   res.setHeader('Content-Type', 'text/event-stream')
   res.setHeader('Cache-Control', 'no-cache, no-transform')
   res.setHeader('Connection', 'keep-alive')
   res.setHeader('X-Accel-Buffering', 'no')
   res.flushHeaders?.()
 
-  // Step 8: SSE helper
   const send = (type: string, data: Record<string, unknown>) => {
     res.write(`data: ${JSON.stringify({ type, ...data })}\n\n`)
   }
 
-  // Steps 9-12: Stream from Anthropic, insert response, touch memories, send done
   let assembled = ''
   let inputTokens = 0
   let outputTokens = 0
+  let aborted = false
+
+  const anthropic = getAnthropic()
+  const stream = anthropic.messages.stream({
+    model: COACH_MODEL,
+    max_tokens: 1024,
+    system: systemPrompt,
+    messages,
+  })
+
+  // If client disconnects mid-stream, abort the Anthropic call and persist
+  // whatever was assembled so far instead of throwing away the partial.
+  const onClose = () => {
+    aborted = true
+    try { stream.controller.abort() } catch { /* noop */ }
+  }
+  req.on('close', onClose)
 
   try {
-    const anthropic = getAnthropic()
-    const stream = anthropic.messages.stream({
-      model: COACH_MODEL,
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages,
-    })
-
     for await (const event of stream) {
       if (event.type === 'message_start') {
-        send('start', {})
+        send('start', { userMsgId })
       } else if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
         assembled += event.delta.text
         send('delta', { text: event.delta.text })
@@ -148,8 +147,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     inputTokens = final.usage.input_tokens
     outputTokens = final.usage.output_tokens
 
-    // Step 10: Insert coach response
-    await supabase.from('coach_log').insert({
+    const { data: coachRow } = await supabase.from('coach_log').insert({
       user_id: user.id,
       kind: 'chat',
       direction: 'coach_to_user',
@@ -158,18 +156,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       model_used: COACH_MODEL,
       tokens_in: inputTokens,
       tokens_out: outputTokens,
-    })
+    }).select('id,created_at').single()
 
-    // Step 11: Fire-and-forget touch memories
     void touchMemories(user.id, memoryIds)
 
-    // Step 12: Done event
-    send('done', { tokensIn: inputTokens, tokensOut: outputTokens })
+    send('done', {
+      userMsgId,
+      coachMsgId: coachRow?.id ?? null,
+      coachCreatedAt: coachRow?.created_at ?? null,
+      tokensIn: inputTokens,
+      tokensOut: outputTokens,
+    })
     res.end()
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err)
-    console.error('[coach-chat] error:', msg)
-    send('error', { message: msg })
-    res.end()
+    console.error('[coach-chat] error:', err instanceof Error ? err.message : err)
+    // Persist partial if any text was streamed before the abort/error.
+    if (assembled.length > 0) {
+      await supabase.from('coach_log').insert({
+        user_id: user.id,
+        kind: 'chat',
+        direction: 'coach_to_user',
+        content_md: assembled,
+        context_snapshot: { memoryIds, partial: true },
+        model_used: COACH_MODEL,
+      }).then(null, () => {})
+    }
+    if (!aborted) {
+      send('error', { message: 'erro no coach' })
+      res.end()
+    }
+  } finally {
+    req.off('close', onClose)
   }
 }

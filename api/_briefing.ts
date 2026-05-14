@@ -1,6 +1,7 @@
 import { getSupabase } from './_supabase.js'
-import { fetchAqalContext, type AqalContextSnapshot } from './_briefing-context.js'
-import { COACH_MODEL, buildCoachSnapshot, formatSnapshotForPrompt, getAnthropic } from './_coach.js'
+import { fetchAqalContext, fetchCarnegieContext, type AqalContextSnapshot, type CarnegieContextSnapshot } from './_briefing-context.js'
+import { generateCoachParagraph } from './_coach.js'
+import { getAnthropic, parseJsonFromLlm, htmlEscape } from './_anthropic.js'
 import Parser from 'rss-parser'
 import { Resend } from 'resend'
 import { format, parseISO } from 'date-fns'
@@ -58,9 +59,10 @@ function buildEmailHtml(params: {
   agenda: AgendaItem[]
   tasks: TaskItem[]
   ctx?: AqalContextSnapshot
+  carnegie?: CarnegieContextSnapshot
   coachParagraph?: string | null
 }): string {
-  const { highlight, dateLabel, global, brasil, newsletters, agenda, tasks, ctx, coachParagraph } = params
+  const { highlight, dateLabel, global, brasil, newsletters, agenda, tasks, ctx, carnegie, coachParagraph } = params
 
   function newsBlock(label: string, items: NewsItem[]) {
     if (!items.length) return ''
@@ -85,7 +87,7 @@ function buildEmailHtml(params: {
   const coachBlock = !coachParagraph ? '' : `
   <div style="margin-bottom:28px;padding:20px;border-left:2px solid #7dd3fc">
     <div style="font-family:monospace;font-size:9px;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:10px">do coach</div>
-    <div style="font-size:14px;line-height:1.65;color:#ddd;white-space:pre-wrap">${coachParagraph.replace(/</g, '&lt;')}</div>
+    <div style="font-size:14px;line-height:1.65;color:#ddd;white-space:pre-wrap">${htmlEscape(coachParagraph)}</div>
   </div>`
 
   const aqalBlock = !ctx ? '' : (() => {
@@ -118,6 +120,53 @@ function buildEmailHtml(params: {
           ${ctx.totals.completedThisWeek} concluídas · ${ctx.totals.openTasks} abertas
         </div>
         ${projectsBlock}
+      </div>`
+  })()
+
+  const carnegieBlock = (() => {
+    if (!carnegie) return ''
+    const hasBirthdays = carnegie.birthdaysToday.length > 0
+    const hasSpecial = carnegie.specialDatesToday.length > 0
+    const hasLoops = carnegie.loopsToClose.length > 0
+    const hasPrinciple = carnegie.principleOfMonth !== null
+    if (!hasBirthdays && !hasSpecial && !hasLoops && !hasPrinciple) return ''
+
+    const fullName = (f: string, l: string | null) => l ? `${f} ${l}` : f
+
+    const principleHtml = !hasPrinciple ? '' : `
+      <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #1c1c1c">
+        <div style="font-family:monospace;font-size:8px;letter-spacing:1.5px;color:#666;text-transform:uppercase;margin-bottom:4px">princípio do mês · ${htmlEscape(carnegie.principleOfMonth!.month)}</div>
+        <div style="font-size:14px;color:#ddd">${htmlEscape(carnegie.principleOfMonth!.principle)}${carnegie.principleOfMonth!.reflection ? ` — <span style="color:#888;font-style:italic">${htmlEscape(carnegie.principleOfMonth!.reflection)}</span>` : ''}</div>
+      </div>`
+
+    const birthdaysHtml = !hasBirthdays ? '' : `
+      <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #1c1c1c">
+        <div style="font-family:monospace;font-size:8px;letter-spacing:1.5px;color:#666;text-transform:uppercase;margin-bottom:6px">aniversários hoje</div>
+        ${carnegie.birthdaysToday.map(b =>
+          `<div style="font-size:13px;color:#ccc;padding:3px 0">🎂 ${htmlEscape(fullName(b.firstName, b.lastName))}</div>`
+        ).join('')}
+      </div>`
+
+    const specialHtml = !hasSpecial ? '' : `
+      <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #1c1c1c">
+        <div style="font-family:monospace;font-size:8px;letter-spacing:1.5px;color:#666;text-transform:uppercase;margin-bottom:6px">datas especiais</div>
+        ${carnegie.specialDatesToday.map(s =>
+          `<div style="font-size:13px;color:#ccc;padding:3px 0">${s.type === 'check_in' ? '🌱' : '✨'} ${htmlEscape(s.label)} · <span style="color:#888">${htmlEscape(fullName(s.contactFirstName, s.contactLastName))}</span></div>`
+        ).join('')}
+      </div>`
+
+    const loopsHtml = !hasLoops ? '' : `
+      <div>
+        <div style="font-family:monospace;font-size:8px;letter-spacing:1.5px;color:#666;text-transform:uppercase;margin-bottom:6px">loops a fechar</div>
+        ${carnegie.loopsToClose.slice(0, 5).map(l =>
+          `<div style="font-size:12px;color:#ccc;padding:3px 0">↻ ${htmlEscape(fullName(l.fromFirstName, l.fromLastName))} — ${htmlEscape(l.context)} <span style="color:#666;font-family:monospace;font-size:9px">${l.ageDays}d</span></div>`
+        ).join('')}
+      </div>`
+
+    return `
+      <div style="margin-bottom:28px;padding:16px;background:#0e0e0e;border:1px solid #1c1c1c">
+        <div style="font-family:monospace;font-size:9px;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:12px">Relacionamentos</div>
+        ${principleHtml}${birthdaysHtml}${specialHtml}${loopsHtml}
       </div>`
   })()
 
@@ -162,6 +211,7 @@ function buildEmailHtml(params: {
 
   ${coachBlock}
   ${aqalBlock}
+  ${carnegieBlock}
   ${agendaBlock}
   ${tasksBlock}
   ${newsBlock('Mundial', global)}
@@ -206,7 +256,7 @@ export async function generateBriefing(
 
   const supabase = getSupabase()
 
-  const [{ data: sources }, { data: tasks }, { data: visibleCals }, { data: events }, ctx] = await Promise.all([
+  const [{ data: sources }, { data: tasks }, { data: visibleCals }, { data: events }, ctx, carnegie] = await Promise.all([
     supabase.from('sources').select('*').eq('user_id', userId).eq('active', true),
     supabase.from('tasks')
       .select('title,status,due_date')
@@ -224,6 +274,7 @@ export async function generateBriefing(
       .neq('status', 'cancelled')
       .order('start_at', { ascending: true }),
     fetchAqalContext(userId),
+    fetchCarnegieContext(userId),
   ])
 
   type EventRow = { summary: string; start_at: string; end_at: string; all_day: boolean; calendar_id: string }
@@ -253,54 +304,10 @@ export async function generateBriefing(
 
   const aqalLines = aqalContextLines(ctx)
 
-  // Fetch user name for coach voice
   const userRow = await supabase.from('users').select('name').eq('id', userId).single()
   const userName = (userRow.data as { name: string } | null)?.name ?? 'Jorge'
 
-  // Generate coach paragraph (Sonnet 4.6)
-  let coachParagraph: string | null = null
-  try {
-    const coachSnapshot = await buildCoachSnapshot({ userId, userName })
-    const snapshotText = formatSnapshotForPrompt(coachSnapshot, userName)
-
-    const { data: lastCheckIn } = await supabase
-      .from('coach_log')
-      .select('content_md')
-      .eq('user_id', userId)
-      .eq('kind', 'check_in')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    const lastCheckInText = (lastCheckIn as { content_md: string } | null)?.content_md ?? '(nenhum)'
-
-    const coachClient = getAnthropic()
-    const cpMsg = await coachClient.messages.create({
-      model: COACH_MODEL,
-      max_tokens: 500,
-      messages: [{
-        role: 'user',
-        content: `Você é o sócio sênior de ${userName}.
-
-${snapshotText}
-
-Último check-in recente (NÃO repita o conteúdo):
-${lastCheckInText}
-
-Escreva o parágrafo de abertura do briefing matinal (120-180 palavras).
-Voz: firme, direta, sem rodeios, sem emoji. Letra minúscula no início.
-Estrutura:
-- observação concreta sobre o quadro de 7 dias.
-- uma cobrança OU celebração específica (cite áreas/projetos reais).
-- foco do dia: UMA coisa, não lista.
-
-Responda APENAS o texto do parágrafo, sem aspas, sem cabeçalhos.`,
-      }],
-    })
-    const cpRaw = cpMsg.content[0]?.type === 'text' ? cpMsg.content[0].text.trim() : ''
-    if (cpRaw) coachParagraph = cpRaw
-  } catch (e) {
-    console.error('[briefing] coach paragraph failed:', e instanceof Error ? e.message : e)
-  }
+  const coachParagraph = await generateCoachParagraph(userId, userName)
 
   const anthropic = getAnthropic()
 
@@ -340,11 +347,7 @@ Regras:
   })
 
   const raw = message.content[0]?.type === 'text' ? message.content[0].text : '{}'
-  let parsed: { highlight?: string; global?: NewsItem[]; brasil?: NewsItem[]; newsletters?: NewsItem[] } = {}
-  try {
-    const m = raw.match(/\{[\s\S]*\}/)
-    parsed = m ? (JSON.parse(m[0]) as typeof parsed) : {}
-  } catch { /* keep empty */ }
+  const parsed = parseJsonFromLlm<{ highlight?: string; global?: NewsItem[]; brasil?: NewsItem[]; newsletters?: NewsItem[] }>(raw) ?? {}
 
   const content = {
     global: (parsed.global ?? []).slice(0, 3),
@@ -374,6 +377,7 @@ Regras:
         agenda: filteredEvents as AgendaItem[],
         tasks: (tasks ?? []) as TaskItem[],
         ctx,
+        carnegie,
         coachParagraph,
       })
       const { error: emailError } = await resend.emails.send({
@@ -391,7 +395,7 @@ Regras:
 
   // Markdown summary for content_md (compact text version)
   const contentMd = buildContentMarkdown({
-    highlight, ctx, agenda: filteredEvents, tasks: (tasks ?? []) as TaskItem[],
+    highlight, ctx, carnegie, agenda: filteredEvents, tasks: (tasks ?? []) as TaskItem[],
     global: content.global, brasil: content.brasil,
     coachParagraph,
   })
@@ -437,6 +441,7 @@ Regras:
 
 function buildContentMarkdown(p: {
   highlight: string; ctx: AqalContextSnapshot;
+  carnegie?: CarnegieContextSnapshot;
   agenda: { summary: string; start_at: string; all_day: boolean }[];
   tasks: TaskItem[];
   global: NewsItem[]; brasil: NewsItem[];
@@ -445,6 +450,29 @@ function buildContentMarkdown(p: {
   const parts: string[] = []
   parts.push(`# ${p.highlight}`)
   if (p.coachParagraph) parts.push(`\n## Coach hoje\n${p.coachParagraph}`)
+
+  if (p.carnegie) {
+    const fullName = (f: string, l: string | null) => l ? `${f} ${l}` : f
+    if (p.carnegie.principleOfMonth) {
+      parts.push(`\n## Princípio do mês\n${p.carnegie.principleOfMonth.principle}${p.carnegie.principleOfMonth.reflection ? ` — ${p.carnegie.principleOfMonth.reflection}` : ''}`)
+    }
+    if (p.carnegie.birthdaysToday.length > 0) {
+      parts.push(`\n## Aniversários hoje`)
+      for (const b of p.carnegie.birthdaysToday) parts.push(`- ${fullName(b.firstName, b.lastName)}`)
+    }
+    if (p.carnegie.specialDatesToday.length > 0) {
+      parts.push(`\n## Datas especiais hoje`)
+      for (const s of p.carnegie.specialDatesToday) {
+        parts.push(`- ${s.label} (${fullName(s.contactFirstName, s.contactLastName)})`)
+      }
+    }
+    if (p.carnegie.loopsToClose.length > 0) {
+      parts.push(`\n## Loops a fechar`)
+      for (const l of p.carnegie.loopsToClose.slice(0, 5)) {
+        parts.push(`- ${fullName(l.fromFirstName, l.fromLastName)} — ${l.context} (${l.ageDays}d)`)
+      }
+    }
+  }
 
   const quadStr = p.ctx.quadrants7d
     .filter(q => q.completed > 0)

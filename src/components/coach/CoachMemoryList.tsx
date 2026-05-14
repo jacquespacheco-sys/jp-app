@@ -1,13 +1,5 @@
 import { useCoach } from '../../hooks/useCoach.ts'
-import type { MemoryKind } from '../../types/domain.ts'
-
-const KIND_LABEL: Record<MemoryKind, string> = {
-  fact: 'fato',
-  pattern: 'padrão',
-  promise: 'promessa',
-  concern: 'preocupação',
-  preference: 'preferência',
-}
+import { COACH_KIND_LABEL } from '../../lib/coach.ts'
 
 export function CoachMemoryList() {
   const { memories, archiveMemory } = useCoach()
@@ -34,7 +26,7 @@ export function CoachMemoryList() {
                 color: 'var(--accent)',
                 textTransform: 'uppercase',
                 letterSpacing: '1px',
-              }}>{KIND_LABEL[m.kind]}</span>
+              }}>{COACH_KIND_LABEL[m.kind]}</span>
               <span style={{ fontSize: '10px', color: 'var(--fg-dim)' }}>relevance {m.relevance}</span>
             </div>
             <div style={{ fontSize: '13px', color: 'var(--fg)' }}>{m.content}</div>
