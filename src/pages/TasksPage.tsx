@@ -15,6 +15,7 @@ import { useTasks } from '../hooks/useTasks.ts'
 import { useProjects } from '../hooks/useProjects.ts'
 import { useAreas } from '../hooks/useAreas.ts'
 import { useInbox } from '../hooks/useInbox.ts'
+import { applyQuery, hasFilter, type ParsedQuery } from '../lib/taskQueryParser.ts'
 import type { Task, Project } from '../types/domain.ts'
 
 const TABS = ['Today', 'Inbox', 'Kanban', 'Lista', 'Projetos', 'Gantt'] as const
@@ -53,7 +54,8 @@ export function TasksPage() {
   const [creatingProject, setCreatingProject] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [lastSync, setLastSync] = useState<string | null>(null)
-  const { tasks, loading, save, archive, updateStatus, classify, refetch: refetchTasks } = useTasks()
+  const [searchQuery, setSearchQuery] = useState<ParsedQuery | null>(null)
+  const { tasks: tasksRaw, loading, save, archive, updateStatus, classify, refetch: refetchTasks } = useTasks()
   const {
     projects, loading: projectsLoading,
     save: saveProject, archive: archiveProject, complete: completeProject,
@@ -97,6 +99,10 @@ export function TasksPage() {
     return r
   }
 
+  const tasks: Task[] = searchQuery && hasFilter(searchQuery)
+    ? applyQuery(tasksRaw, searchQuery, { projects, areas })
+    : tasksRaw
+
   const syncActions = (
     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px' }}>
@@ -132,8 +138,12 @@ export function TasksPage() {
       <Subtabs tabs={tabsWithCount} active={tab === 'Inbox' && inboxCount > 0 ? `Inbox (${inboxCount})` : tab} onChange={handleTabChange} />
 
       <QuickAdd
+        projects={projects}
+        areas={areas}
         onCapture={async (text) => { await capture(text) }}
+        onCreateTask={async (input) => { await save(input); await refetchTasks() }}
         onOpenStructured={handleOpenStructured}
+        onSearchChange={setSearchQuery}
       />
 
       {tab === 'Today' && (
@@ -149,6 +159,7 @@ export function TasksPage() {
         <InboxView
           entries={entries}
           projects={projects}
+          areas={areas}
           loading={inboxLoading}
           defaultProjectId={defaultProject?.id}
           onProcess={handleProcessInbox}
@@ -183,6 +194,7 @@ export function TasksPage() {
         <ListView
           tasks={tasks}
           projects={projects}
+          areas={areas}
           onOpen={setSelected}
           onToggleDone={handleToggleDone}
         />
@@ -192,8 +204,11 @@ export function TasksPage() {
         <ProjectsView
           projects={projects}
           areas={areas}
-          mode="horizon"
+          tasks={tasks}
           onSelect={setSelectedProject}
+          onCreate={() => setCreatingProject(true)}
+          onOpenTask={setSelected}
+          onToggleDone={handleToggleDone}
         />
       )}
 

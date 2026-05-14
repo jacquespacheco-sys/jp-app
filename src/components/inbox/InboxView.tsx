@@ -1,11 +1,14 @@
-import type { InboxEntry, InboxItem, Task, Project } from '../../types/domain.ts'
+import { useState } from 'react'
+import type { InboxEntry, InboxItem, Task, Project, Area } from '../../types/domain.ts'
 import type { InboxProcessInput } from '../../../api/_schemas/inbox.ts'
 import { TaskRow } from '../tasks/TaskRow.tsx'
+import { TaskFilterBar, applyTaskFilter, persistedTaskFilter, type TaskFilter } from '../tasks/TaskFilterBar.tsx'
 import { IconArrowRight, IconTrash, IconSparkle } from '../common/Icon.tsx'
 
 interface Props {
   entries: InboxEntry[]
   projects: Project[]
+  areas: Area[]
   loading: boolean
   defaultProjectId: string | undefined
   onProcess: (input: InboxProcessInput) => Promise<unknown>
@@ -13,15 +16,19 @@ interface Props {
   onToggleDone: (task: Task) => void
 }
 
-export function InboxView({ entries, projects, loading, defaultProjectId, onProcess, onOpenTask, onToggleDone }: Props) {
+const FILTER_KEY = 'jp_inbox_filter'
+
+export function InboxView({ entries, projects, areas, loading, defaultProjectId, onProcess, onOpenTask, onToggleDone }: Props) {
+  const [filter, setFilter] = useState<TaskFilter>(persistedTaskFilter(FILTER_KEY))
   if (loading) {
     return <div className="content"><div className="empty-state">Carregando inbox…</div></div>
   }
 
   const items = entries.filter((e): e is { kind: 'inbox_item'; data: InboxItem } => e.kind === 'inbox_item')
-  const tasks = entries.filter((e): e is { kind: 'task'; data: Task } => e.kind === 'task')
+  const tasksRaw = entries.filter((e): e is { kind: 'task'; data: Task } => e.kind === 'task').map(e => e.data)
+  const tasks = applyTaskFilter(tasksRaw, filter)
 
-  if (items.length === 0 && tasks.length === 0) {
+  if (items.length === 0 && tasksRaw.length === 0) {
     return (
       <div className="content">
         <div className="empty-state">
@@ -58,7 +65,16 @@ export function InboxView({ entries, projects, loading, defaultProjectId, onProc
   }
 
   return (
-    <div className="content">
+    <div>
+      <TaskFilterBar
+        storageKey={FILTER_KEY}
+        value={filter}
+        onChange={setFilter}
+        projects={projects}
+        areas={areas}
+        tasks={tasksRaw}
+      />
+      <div className="content">
       {items.length > 0 && (
         <div className="task-group">
           <div className="task-group-title">
@@ -95,11 +111,12 @@ export function InboxView({ entries, projects, loading, defaultProjectId, onProc
             Tasks status=inbox
             <span className="task-group-count">{tasks.length}</span>
           </div>
-          {tasks.map(({ data: task }) => (
+          {tasks.map(task => (
             <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpenTask} onToggleDone={onToggleDone} />
           ))}
         </div>
       )}
+      </div>
     </div>
   )
 }

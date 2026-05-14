@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { parseInput } from './taskParser.ts'
+import { parseInput, hasStructure } from './taskParser.ts'
 
 const FIXED_DATE = new Date('2026-04-27T12:00:00Z')
 
@@ -121,6 +121,103 @@ describe('parseInput', () => {
       expect(result.title).toBe('Reunião cliente')
       expect(result.priority).toBe('high')
       expect(result.dueDate).toBe('2026-04-27')
+    })
+  })
+
+  describe('time', () => {
+    it('parses HH:MM', () => {
+      const r = parseInput('Call hoje 14:30')
+      expect(r.dueAt).toMatch(/T17:30:/) // 14:30 BRT → 17:30 UTC; depende de tz local
+      expect(r.title).toBe('Call')
+    })
+
+    it('parses "às 10am"', () => {
+      const r = parseInput('Call amanhã às 10am')
+      expect(r.title).toBe('Call')
+      expect(r.dueAt).toBeDefined()
+    })
+
+    it('parses "18h"', () => {
+      const r = parseInput('Stand-up hoje 18h')
+      expect(r.title).toBe('Stand-up')
+      expect(r.dueAt).toBeDefined()
+    })
+  })
+
+  describe('project', () => {
+    it('extracts "projeto X"', () => {
+      const r = parseInput('Ligar João projeto STATE')
+      expect(r.projectName).toBe('STATE')
+      expect(r.title).toBe('Ligar João')
+    })
+
+    it('extracts quoted project', () => {
+      const r = parseInput('Bug projeto "JP App"')
+      expect(r.projectName).toBe('JP App')
+      expect(r.title).toBe('Bug')
+    })
+  })
+
+  describe('area', () => {
+    it('extracts "area X"', () => {
+      const r = parseInput('Treino area saude')
+      expect(r.areaName).toBe('saude')
+      expect(r.title).toBe('Treino')
+    })
+  })
+
+  describe('priority extra', () => {
+    it('recognizes "urgente"', () => {
+      const r = parseInput('Bug urgente no checkout')
+      expect(r.priority).toBe('high')
+    })
+
+    it('does not eat #importante (was buggy)', () => {
+      const r = parseInput('Task #importante')
+      expect(r.tags).toEqual(['importante'])
+      expect(r.priority).toBe('med')
+    })
+  })
+
+  describe('status', () => {
+    it('detects "fazendo"', () => {
+      const r = parseInput('Migração db fazendo')
+      expect(r.status).toBe('doing')
+      expect(r.title).toBe('Migração db')
+    })
+
+    it('detects "concluído"', () => {
+      const r = parseInput('PR review concluído')
+      expect(r.status).toBe('done')
+    })
+  })
+
+  describe('combined NLP', () => {
+    it('parses user-style sentence', () => {
+      const r = parseInput('Ligar para João, amanhã às 10am, projeto STATE, urgente')
+      expect(r.title).toBe('Ligar para João')
+      expect(r.priority).toBe('high')
+      expect(r.projectName).toBe('STATE')
+      expect(r.dueDate).toBe('2026-04-28')
+      expect(r.dueAt).toBeDefined()
+    })
+  })
+
+  describe('hasStructure', () => {
+    it('returns false for plain text', () => {
+      expect(hasStructure(parseInput('apenas texto'))).toBe(false)
+    })
+
+    it('returns true when due date present', () => {
+      expect(hasStructure(parseInput('algo hoje'))).toBe(true)
+    })
+
+    it('returns true when project hint present', () => {
+      expect(hasStructure(parseInput('algo projeto X'))).toBe(true)
+    })
+
+    it('returns true when priority is high/low (not med)', () => {
+      expect(hasStructure(parseInput('algo !alta'))).toBe(true)
     })
   })
 })
