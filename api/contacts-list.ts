@@ -1,7 +1,7 @@
 import { requireAuth } from './_middleware.js'
 import { getSupabase } from './_supabase.js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import type { Category, CategoryColor } from '../src/types/domain.ts'
+import type { Category, CategoryColor } from '../src/types/domain.js'
 
 type Family = { spouse?: string; children?: string[]; pets?: string[] } & Record<string, unknown>
 type LastSignal = { type?: string; text?: string; url?: string; date?: string } & Record<string, unknown>

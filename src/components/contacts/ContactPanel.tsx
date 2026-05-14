@@ -6,6 +6,7 @@ import { useContacts } from '../../hooks/useContacts.ts'
 import { ContactPanelDatesTab } from './ContactPanelDatesTab.tsx'
 import { ContactPanelComplimentsTab } from './ContactPanelComplimentsTab.tsx'
 import { ContactPanelCategoriesTab } from './ContactPanelCategoriesTab.tsx'
+import { SuggestMessageModal } from './SuggestMessageModal.tsx'
 import type { Contact, ContactTier, ContactChannel, Interaction } from '../../types/domain.ts'
 import type { ContactSaveInput } from '../../../api/_schemas/contact.ts'
 import type { InteractionsListResponse } from '../../types/api.ts'
@@ -97,6 +98,7 @@ export function ContactPanel({ contact, onClose }: Props) {
 
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [suggestOpen, setSuggestOpen] = useState(false)
 
   const [interactions, setInteractions] = useState<Interaction[]>([])
   const [showAddInteraction, setShowAddInteraction] = useState(false)
@@ -218,6 +220,16 @@ export function ContactPanel({ contact, onClose }: Props) {
         <div className="task-panel-header">
           <span className="task-panel-label">{contact ? 'Editar Contato' : 'Novo Contato'}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {contact?.id && (
+              <button
+                className="btn btn-ghost"
+                onClick={() => setSuggestOpen(true)}
+                style={{ fontSize: '9px', padding: '4px 8px' }}
+                title="Sugerir mensagem (IA)"
+              >
+                ✨ Sugerir
+              </button>
+            )}
             <select
               className="task-field-select"
               value={tier}
@@ -455,6 +467,10 @@ export function ContactPanel({ contact, onClose }: Props) {
           {tab === 'datas' && contact?.id && <ContactPanelDatesTab contactId={contact.id} />}
           {tab === 'elogios' && contact?.id && <ContactPanelComplimentsTab contactId={contact.id} />}
         </div>
+
+        {suggestOpen && contact && (
+          <SuggestMessageModal contact={contact} onClose={() => setSuggestOpen(false)} />
+        )}
 
         <div className="task-panel-actions" style={{ flexDirection: 'column', gap: '8px' }}>
           {saveError && (

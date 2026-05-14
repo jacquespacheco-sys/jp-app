@@ -5,6 +5,7 @@ import { Resend } from 'resend'
 import { COACH_MODEL, buildCoachSnapshot, formatSnapshotForPrompt } from './_coach.js'
 import { getAnthropic, htmlEscape } from './_anthropic.js'
 import { fromZonedTime } from 'date-fns-tz'
+import { userLocalNow, inMinuteWindow, defaultTz } from './_tz.js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 export const maxDuration = 300
@@ -54,33 +55,9 @@ interface UserWithProfile {
   } | null
 }
 
-function timeInWindow(targetHHMM: string, nowHHMM: string, marginMin: number): boolean {
-  const [th, tm] = targetHHMM.split(':').map(Number)
-  const [nh, nm] = nowHHMM.split(':').map(Number)
-  if (th == null || tm == null || nh == null || nm == null) return false
-  const diff = Math.abs((nh * 60 + nm) - (th * 60 + tm))
-  return diff <= marginMin
-}
-
-function userLocalTime(timezone: string): { hhmm: string; weekday: string; dateStr: string } {
-  const now = new Date()
-  const fmt = new Intl.DateTimeFormat('en-US', {
-    timeZone: timezone || 'America/Sao_Paulo',
-    hour: '2-digit', minute: '2-digit', hour12: false,
-    weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit',
-  })
-  const parts = Object.fromEntries(fmt.formatToParts(now).map(p => [p.type, p.value]))
-  const hh = (parts['hour'] ?? '00').padStart(2, '0')
-  const mm = (parts['minute'] ?? '00').padStart(2, '0')
-  const wd = parts['weekday'] ?? ''
-  const weekdayMap: Record<string, string> = { Sun: 'SU', Mon: 'MO', Tue: 'TU', Wed: 'WE', Thu: 'TH', Fri: 'FR', Sat: 'SA' }
-  const dateStr = `${parts['year']}-${parts['month']}-${parts['day']}`
-  return { hhmm: `${hh}:${mm}`, weekday: weekdayMap[wd] ?? '', dateStr }
-}
-
 async function checkAlreadySent(userId: string, slot: Slot, todayDateStr: string, timezone: string): Promise<boolean> {
   const supabase = getSupabase()
-  const dayStartUtc = fromZonedTime(`${todayDateStr}T00:00:00`, timezone || 'America/Sao_Paulo').toISOString()
+  const dayStartUtc = fromZonedTime(`${todayDateStr}T00:00:00`, defaultTz(timezone)).toISOString()
   const { data } = await supabase.from('coach_log')
     .select('id')
     .eq('user_id', userId)
@@ -127,7 +104,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       continue
     }
     const schedule = profile.check_in_schedule as Record<string, string | boolean | undefined>
-    const { hhmm, weekday, dateStr } = userLocalTime(userRow.timezone)
+    const now = userLocalNow(userRow.timezone)
+    const { hhmm, weekdayIso, dateStr } = now
 
     const morningTime = schedule['morning'] as string | undefined
     const eveningTime = schedule['evening'] as string | undefined
@@ -135,9 +113,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const weeklyTime = schedule['weeklyTime'] as string | undefined
 
     let slot: Slot | null = null
-    if (morningTime && timeInWindow(morningTime, hhmm, 15)) slot = 'morning'
-    else if (eveningTime && timeInWindow(eveningTime, hhmm, 15)) slot = 'evening'
-    else if (weeklyDay === weekday && weeklyTime && timeInWindow(weeklyTime, hhmm, 15)) slot = 'weekly'
+    if (morningTime && inMinuteWindow(now, morningTime, 15)) slot = 'morning'
+    else if (eveningTime && inMinuteWindow(now, eveningTime, 15)) slot = 'evening'
+    else if (weeklyDay === weekdayIso && weeklyTime && inMinuteWindow(now, weeklyTime, 15)) slot = 'weekly'
 
     if (!slot) {
       results.push({ userId: userRow.id, status: 'out-of-window' })

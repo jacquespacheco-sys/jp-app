@@ -3,7 +3,7 @@ import { requireCron } from './_middleware.js'
 import { getSupabase } from './_supabase.js'
 import { Resend } from 'resend'
 import { htmlEscape } from './_anthropic.js'
-import { formatInTimeZone } from 'date-fns-tz'
+import { userLocalNow, inMinuteWindow, type UserLocalNow } from './_tz.js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 export const maxDuration = 300
@@ -43,43 +43,11 @@ interface UserRow {
   timezone: string | null
 }
 
-interface LocalNow {
-  hhmm: string
-  hourMin: number
-  weekday: number  // 0=Sun..6=Sat
-  dom: number      // 1..31
-  month: number    // 1..12
-  dateStr: string  // YYYY-MM-DD
-}
-
-function userLocal(tz: string): LocalNow {
-  const now = new Date()
-  const hhmm = formatInTimeZone(now, tz, 'HH:mm')
-  const parts = hhmm.split(':')
-  const h = parseInt(parts[0] ?? '0', 10)
-  const m = parseInt(parts[1] ?? '0', 10)
-  const weekdayStr = formatInTimeZone(now, tz, 'i') // 1..7, Mon=1
-  const weekdayIso = parseInt(weekdayStr, 10)
-  const weekday = weekdayIso === 7 ? 0 : weekdayIso // → 0=Sun..6=Sat
-  const dom = parseInt(formatInTimeZone(now, tz, 'd'), 10)
-  const month = parseInt(formatInTimeZone(now, tz, 'M'), 10)
-  const dateStr = formatInTimeZone(now, tz, 'yyyy-MM-dd')
-  return { hhmm, hourMin: h * 60 + m, weekday, dom, month, dateStr }
-}
-
-function inWindow(actualMin: number, targetMin: number, windowMin: number): boolean {
-  return Math.abs(actualMin - targetMin) <= windowMin
-}
-
-function pickRitual(now: LocalNow, principleSet: boolean): Ritual | null {
-  // Gratitude: Friday 18:00 local
-  if (now.weekday === 5 && inWindow(now.hourMin, 18 * 60, WINDOW_MIN)) return 'gratitude'
-  // Reflection: Sunday 19:00 local
-  if (now.weekday === 0 && inWindow(now.hourMin, 19 * 60, WINDOW_MIN)) return 'reflection'
-  // Principle: first Monday of month at 09:00
-  if (now.weekday === 1 && now.dom <= 7 && inWindow(now.hourMin, 9 * 60, WINDOW_MIN) && !principleSet) return 'principle'
-  // Thank You Tour: first day of quarter at 09:00
-  if (now.dom === 1 && [1, 4, 7, 10].includes(now.month) && inWindow(now.hourMin, 9 * 60, WINDOW_MIN)) return 'thank-you-tour'
+function pickRitual(now: UserLocalNow, principleSet: boolean): Ritual | null {
+  if (now.weekday === 5 && inMinuteWindow(now, '18:00', WINDOW_MIN)) return 'gratitude'
+  if (now.weekday === 0 && inMinuteWindow(now, '19:00', WINDOW_MIN)) return 'reflection'
+  if (now.weekday === 1 && now.dom <= 7 && inMinuteWindow(now, '09:00', WINDOW_MIN) && !principleSet) return 'principle'
+  if (now.dom === 1 && [1, 4, 7, 10].includes(now.month) && inMinuteWindow(now, '09:00', WINDOW_MIN)) return 'thank-you-tour'
   return null
 }
 
@@ -128,11 +96,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const results: Array<{ userId: string; ritual?: Ritual; status: string; error?: string }> = []
 
   for (const u of (users ?? []) as UserRow[]) {
-    const tz = u.timezone ?? 'America/Sao_Paulo'
-    const now = userLocal(tz)
-    const monthStr = `${now.dateStr.slice(0, 7)}`
-
-    const principleAlready = await principleSetForMonth(u.id, monthStr)
+    const now = userLocalNow(u.timezone)
+    const principleAlready = await principleSetForMonth(u.id, now.monthStr)
     const ritual = pickRitual(now, principleAlready)
     if (!ritual) {
       results.push({ userId: u.id, status: 'out-of-window' })

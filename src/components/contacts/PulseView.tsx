@@ -6,10 +6,12 @@ import { api } from '../../api.ts'
 import { useContacts } from '../../hooks/useContacts.ts'
 import { usePrincipleOfMonth } from '../../hooks/usePrincipleOfMonth.ts'
 import { useReferrals } from '../../hooks/useReferrals.ts'
-import type { Contact, SpecialDate, ContactTier } from '../../types/domain.ts'
+import { matchesContactFilter } from '../../lib/contactFilter.ts'
+import type { Contact, SpecialDate, ContactTier, ContactFilter } from '../../types/domain.ts'
 
 interface Props {
   onOpenContact: (c: Contact) => void
+  filter?: ContactFilter
 }
 
 type UpcomingDate = SpecialDate & { occurrenceDate: string; daysUntil: number }
@@ -26,13 +28,29 @@ function daysSince(iso: string): number {
   return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000)
 }
 
-export function PulseView({ onOpenContact }: Props) {
+export function PulseView({ onOpenContact, filter }: Props) {
   const navigate = useNavigate()
   const { contacts } = useContacts()
   const { current: currentPrinciple } = usePrincipleOfMonth()
-  const { referrals: pendingLoops } = useReferrals({ pendingFeedback: true })
+  const { referrals: allLoops } = useReferrals({ pendingFeedback: true })
   const [upcoming, setUpcoming] = useState<UpcomingDate[]>([])
   const [unclassifiedCount, setUnclassifiedCount] = useState<number | null>(null)
+
+  const catDimMap = useMemo(() => {
+    const m = new Map<string, string>()
+    for (const c of contacts) {
+      for (const cat of c.categories ?? []) m.set(cat.id, cat.dimensionId)
+    }
+    return m
+  }, [contacts])
+
+  const pendingLoops = useMemo(() => {
+    if (!filter?.categoryIds?.length) return allLoops
+    return allLoops.filter(r => {
+      const from = contacts.find(c => c.id === r.fromContactId)
+      return from && matchesContactFilter(from, filter, catDimMap)
+    })
+  }, [allLoops, filter, contacts, catDimMap])
 
   useEffect(() => {
     void api.get<{ specialDates: UpcomingDate[] }>('/api/special-dates-upcoming?days=14')
@@ -45,10 +63,10 @@ export function PulseView({ onOpenContact }: Props) {
   }, [])
 
   const innerStrongOverdue = useMemo(() => {
-    const byId = new Map(contacts.map(c => [c.id, c]))
     return contacts
       .filter(c => {
         if (!c.tier || (c.tier !== 'inner' && c.tier !== 'strong')) return false
+        if (!matchesContactFilter(c, filter, catDimMap)) return false
         if (!c.lastInteractionAt) return true
         const cadence = c.cadenceDays ?? TIER_CADENCE[c.tier]
         return daysSince(c.lastInteractionAt) > cadence
@@ -59,8 +77,7 @@ export function PulseView({ onOpenContact }: Props) {
         cadence: c.cadenceDays ?? TIER_CADENCE[c.tier as ContactTier],
       }))
       .sort((a, b) => (b.daysSince ?? 9999) - (a.daysSince ?? 9999))
-      .map(x => ({ ...x, contactRef: byId.get(x.contact.id)! }))
-  }, [contacts])
+  }, [contacts, filter, catDimMap])
 
   return (
     <div style={{ padding: '16px' }}>

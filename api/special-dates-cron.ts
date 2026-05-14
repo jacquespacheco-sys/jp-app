@@ -3,12 +3,12 @@ import { requireCron } from './_middleware.js'
 import { getSupabase } from './_supabase.js'
 import { Resend } from 'resend'
 import { htmlEscape } from './_anthropic.js'
-import { formatInTimeZone } from 'date-fns-tz'
+import { userLocalNow, inMinuteWindow } from './_tz.js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 export const maxDuration = 300
 
-const TARGET_HOUR = 8
+const TARGET_HHMM = '08:00'
 const WINDOW_MIN = 15
 
 interface UserRow {
@@ -16,16 +16,6 @@ interface UserRow {
   email: string
   name: string
   timezone: string | null
-}
-
-function inHourWindow(tz: string, hour: number, windowMin: number): boolean {
-  const hhmm = formatInTimeZone(new Date(), tz, 'HH:mm')
-  const parts = hhmm.split(':')
-  const h = parseInt(parts[0] ?? '0', 10)
-  const m = parseInt(parts[1] ?? '0', 10)
-  const targetMin = hour * 60
-  const nowMin = h * 60 + m
-  return Math.abs(nowMin - targetMin) <= windowMin
 }
 
 async function alreadySent(userId: string, dateStr: string): Promise<boolean> {
@@ -115,15 +105,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const results: Array<{ userId: string; status: string; items?: number; error?: string }> = []
 
   for (const u of (users ?? []) as UserRow[]) {
-    const tz = u.timezone ?? 'America/Sao_Paulo'
-    if (!inHourWindow(tz, TARGET_HOUR, WINDOW_MIN)) {
+    const now = userLocalNow(u.timezone)
+    if (!inMinuteWindow(now, TARGET_HHMM, WINDOW_MIN)) {
       results.push({ userId: u.id, status: 'out-of-window' })
       continue
     }
 
-    const ddmm = formatInTimeZone(new Date(), tz, 'dd/MM')
-    const fullDate = formatInTimeZone(new Date(), tz, 'yyyy-MM-dd')
-    const dateLabel = formatInTimeZone(new Date(), tz, 'dd/MM/yyyy')
+    const fullDate = now.dateStr
+    const ddmm = `${String(now.dom).padStart(2, '0')}/${String(now.month).padStart(2, '0')}`
+    const dateLabel = `${ddmm}/${fullDate.slice(0, 4)}`
 
     if (await alreadySent(u.id, fullDate)) {
       results.push({ userId: u.id, status: 'already-sent' })

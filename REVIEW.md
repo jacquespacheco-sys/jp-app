@@ -76,25 +76,29 @@ Pós-merge do branch `feat/coach-mvp` (commit `916ad51`). 4 agentes paralelos: r
 - **`carnegie_tags`/`interaction_tags` sem GIN index** — queries de contagem por princípio (P1..P30) vão fazer seq scan. Adicionar GIN se PR4 `principle-of-month-current` ficar lento.
 - **Promessa duplicada** — `interactions.promise_made` (text) coexiste com Tasks `#promessa + contact_id`. Decisão ainda não escrita: backend cria task automaticamente quando `promise_made` é setado? Definir antes de wirar UI de interaction.
 
-### Carnegie PR4-8 follow-ups
+### Carnegie PR4-8 follow-ups (em aberto)
 - **Pulso: "promessas count" + "streak" cards** — fora do PR4 (sem endpoint `tasks-list?tag=promessa` e sem definição de streak). Adicionar quando essas duas conversas tiverem decisão.
 - **Pulso: count de aplicações do princípio do mês** — não renderizado no banner. Exige `select count(*) from interactions where carnegie_tags @> '{P7}' AND month=current`. Adicionar quando GIN entrar.
-- **ThankYouTour: sem ação concreta** — só lista top contatos. Próximo passo: botão "Mandar mensagem" linkando ao endpoint `contacts-suggest-message` que já existe (PR5).
+- **ThankYouTour: sem ação concreta** — só lista top contatos. Próximo passo: integrar com `SuggestMessageModal` para mandar mensagem direto da lista (modal já existe).
 - **`special-dates-cron`/`rituals-cron`: idempotência via `coach_log`** — mistura levemente domínios (Carnegie escreve no log do Coach). Aceitável; revisitar se ficar bagunçado, com tabela `daily_notifications_log` dedicada.
 - **`contacts-suggest-message`: Sonnet vs Haiku** — segui decisão 9 do briefing (Haiku). Se a qualidade ficar fraca, basta trocar para `claude-sonnet-4-6` em `api/contacts-suggest-message.ts:11`.
-- **Suggest-message: sem UI** — endpoint pronto, nenhum botão "Sugerir mensagem" no ContactPanel. Adicionar é uma feature pequena (5min).
-- **Helper de timezone duplicado** — `userLocalTime` agora aparece 3× (coach-checkin-cron, special-dates-cron, rituals-cron). Extrair para `api/_tz.ts` quando for mexer em algum deles.
-- **PR8 FilterBar só em ContactsList** — Pipeline / PulseView / Promises ficaram fora. Aplicar em Pipeline é trivial (mesmas props). Pulse e Promises exigem repensar a UI.
 - **PR8 ConfigPage: sem drag-reorder de dimensões/categorias** — só sort_order via número. Adicionar @dnd-kit se for valer a pena.
 - **PR8 view `v_contacts_with_categories` quebra filtro por archived** — a view tem `where c.archived = false` hard-coded. `contacts-archive` não vai aparecer no list (correto), mas `contacts-list?includeArchived=true` não funciona. Aceitável (não usado hoje).
 - **PR8 contact card: chips overflow** — em telas estreitas com 3 chips longos, o layout pode quebrar. Ajustar grid de ContactRow se aparecer.
 - **PR8 chip cores em light mode** — paletas foram calibradas no chute (a partir do design system existente). Pode precisar afinação visual no light theme.
-- **PR8 categorias do filtro localStorage** — chave `contacts:filter` persiste `categoryIds` por ID; se o user arquivar uma categoria, o filtro continua referenciando — vira "categoria removida não filtra". Limpeza preguiçosa.
 - **PR7 wizard sem teste de render** — só teste de schema. Component test exige react-testing-library (não em deps); ficar de fora.
-- **PR7 inner > 5 só mostra aviso vermelho** — não força user a recalibrar; pode passar batido. Briefing original mencionava "força recalibrar"; ficou softer.
-- **PR7 wizard categoriais: multi-select é click-on-chip** — sem visual claro de "selected vs not". Apenas opacity 0.5/1. UX pode ser melhor.
-- **Bundle size: 955k JS** (gzip 285k) — passou do warning de 500k. Code-splitting via dynamic imports nos pages é a próxima otimização.
+- **PR7 wizard categorias: multi-select é click-on-chip** — sem visual claro de "selected vs not". Apenas opacity 0.5/1. UX pode ser melhor.
+- **Bundle size: 961k JS** (gzip 286k) — passou do warning de 500k. Code-splitting via dynamic imports nos pages é a próxima otimização.
 - **PR6 (opcional, não implementado)** — Health score + Dunbar dashboard. Briefing diz "fase futura". `v_contact_health` mencionada em §2.6 do briefing mas nunca foi escrita nem em SQL.
+
+### Carnegie PR4-8 follow-ups (resolvidos em cleanup pós-PR8)
+- ~~FilterBar só em ContactsList~~ → aplicado em Pulso, Lista e Pipeline. PulseView aceita prop `filter` e aplica via `matchesContactFilter`.
+- ~~Suggest-message: sem UI~~ → `SuggestMessageModal` + botão "✨ Sugerir" no header do ContactPanel.
+- ~~Helper de timezone duplicado~~ → extraído para `api/_tz.ts` (`userLocalNow`, `inMinuteWindow`, `defaultTz`). 3 crons migrados.
+- ~~PR7 inner > 5 só mostra aviso vermelho~~ → confirmação modal explícita ao tentar marcar 6º Inner.
+- ~~PR8 categorias do filtro localStorage~~ → `useEffect` em ContactsPage limpa IDs órfãos quando categorias carregam.
+- ~~Filter logic duplicado entre ContactsPage e PulseView~~ → extraído para `src/lib/contactFilter.ts`.
+- ~~Imports `.ts` em `categories-list.ts` e `contacts-list.ts`~~ → corrigidos para `.js` (padrão NodeNext).
 
 ---
 

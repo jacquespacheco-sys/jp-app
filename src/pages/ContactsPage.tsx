@@ -11,48 +11,15 @@ import { ContactPanel } from '../components/contacts/ContactPanel.tsx'
 import { FilterBar, persistedFilter } from '../components/shared/FilterBar.tsx'
 import { useContacts } from '../hooks/useContacts.ts'
 import { useCategories } from '../hooks/useCategories.ts'
-import type { Contact, ContactFilter, ContactTier } from '../types/domain.ts'
+import { applyContactFilter } from '../lib/contactFilter.ts'
+import type { Contact, ContactFilter } from '../types/domain.ts'
 
 const TABS = ['Pulso', 'Lista', 'Pipeline', 'Follow-ups', 'Rituais'] as const
 type Tab = typeof TABS[number]
 
 const TABS_WITHOUT_SEARCH: readonly Tab[] = ['Pulso', 'Rituais']
+const TABS_WITH_FILTER: readonly Tab[] = ['Pulso', 'Lista', 'Pipeline']
 const FILTER_KEY = 'contacts:filter'
-
-function applyContactFilter(
-  contacts: Contact[],
-  filter: ContactFilter,
-  catDimMap: Map<string, string>,
-): Contact[] {
-  if (!filter.tier?.length && !filter.phase?.length && !filter.categoryIds?.length) {
-    return contacts
-  }
-
-  const tierSet = filter.tier ? new Set<ContactTier>(filter.tier) : null
-  const phaseSet = filter.phase ? new Set(filter.phase) : null
-
-  let dimGroups: Set<string>[] | null = null
-  if (filter.categoryIds && filter.categoryIds.length > 0) {
-    const groups = new Map<string, Set<string>>()
-    for (const cid of filter.categoryIds) {
-      const dimId = catDimMap.get(cid) ?? '_unknown'
-      const set = groups.get(dimId) ?? new Set<string>()
-      set.add(cid)
-      groups.set(dimId, set)
-    }
-    dimGroups = [...groups.values()]
-  }
-
-  return contacts.filter(c => {
-    if (tierSet && (!c.tier || !tierSet.has(c.tier))) return false
-    if (phaseSet && (!c.phase || !phaseSet.has(c.phase))) return false
-    if (dimGroups) {
-      const ids = new Set((c.categories ?? []).map(cc => cc.id))
-      if (!dimGroups.every(group => [...group].some(id => ids.has(id)))) return false
-    }
-    return true
-  })
-}
 
 export function ContactsPage() {
   const [tab, setTab] = useState<Tab>('Pulso')
@@ -63,13 +30,26 @@ export function ContactsPage() {
   const [syncing, setSyncing] = useState(false)
 
   const { contacts, googleConnected, loading, sync } = useContacts()
-  const { categories } = useCategories()
+  const { categories, loading: catsLoading } = useCategories()
 
   const catDimMap = useMemo(() => {
     const m = new Map<string, string>()
     for (const c of categories) m.set(c.id, c.dimensionId)
     return m
   }, [categories])
+
+  useEffect(() => {
+    if (catsLoading) return
+    if (!filter.categoryIds?.length) return
+    const activeIds = new Set(categories.filter(c => !c.archived).map(c => c.id))
+    const cleaned = filter.categoryIds.filter(id => activeIds.has(id))
+    if (cleaned.length !== filter.categoryIds.length) {
+      setFilter(prev => ({
+        ...prev,
+        ...(cleaned.length > 0 ? { categoryIds: cleaned } : { categoryIds: undefined as never }),
+      } as ContactFilter))
+    }
+  }, [categories, catsLoading, filter.categoryIds])
 
   const filtered = useMemo(() => {
     let list = applyContactFilter(contacts, filter, catDimMap)
@@ -111,7 +91,7 @@ export function ContactsPage() {
   )
 
   const showSearch = !TABS_WITHOUT_SEARCH.includes(tab)
-  const showFilterBar = tab === 'Lista'
+  const showFilterBar = TABS_WITH_FILTER.includes(tab)
 
   return (
     <div>
@@ -135,15 +115,15 @@ export function ContactsPage() {
           storageKey={FILTER_KEY}
           value={filter}
           onChange={setFilter}
-          showTier
-          showPhase
+          showTier={tab !== 'Pipeline'}
+          showPhase={tab === 'Lista'}
           showCategories
         />
       )}
 
       {loading && <div className="empty-state">Carregando…</div>}
 
-      {!loading && tab === 'Pulso' && <PulseView onOpenContact={openContact} />}
+      {!loading && tab === 'Pulso' && <PulseView onOpenContact={openContact} filter={filter} />}
       {!loading && tab === 'Lista' && (
         <>
           {(filter.tier?.length || filter.phase?.length || filter.categoryIds?.length || search.trim()) && (

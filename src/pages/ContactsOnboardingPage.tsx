@@ -34,6 +34,7 @@ export function ContactsOnboardingPage() {
   const [cadenceDays, setCadenceDays] = useState('')
   const [preferredChannel, setPreferredChannel] = useState('')
   const [saving, setSaving] = useState(false)
+  const [confirmingInner, setConfirmingInner] = useState(false)
 
   useEffect(() => {
     setTierChoice(null)
@@ -45,7 +46,7 @@ export function ContactsOnboardingPage() {
     setPreferredChannel('')
   }, [current?.id])
 
-  const handleSave = useCallback(async () => {
+  const doSave = useCallback(async () => {
     if (!current) return
     const update: BulkClassifyUpdate = { id: current.id }
     if (tierChoice) update.tier = tierChoice
@@ -66,8 +67,21 @@ export function ContactsOnboardingPage() {
       await classify(update, true)
     } finally {
       setSaving(false)
+      setConfirmingInner(false)
     }
   }, [current, tierChoice, hookText, linkedinUrl, cadenceDays, preferredChannel, selectedCatIds, classify])
+
+  const handleSave = useCallback(async () => {
+    if (!current) return
+    const wouldBeInner =
+      (tierChoice === 'inner' || (!tierChoice && current.suggestedTier === 'inner'))
+      && current.tier !== 'inner'
+    if (wouldBeInner && counts.inner >= 5) {
+      setConfirmingInner(true)
+      return
+    }
+    await doSave()
+  }, [current, tierChoice, counts.inner, doSave])
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -324,6 +338,35 @@ export function ContactsOnboardingPage() {
           Atalhos: 1-5 tier · ← anterior · → / enter salvar
         </div>
       </div>
+
+      {confirmingInner && (
+        <div className="task-panel-overlay" onClick={e => { if (e.target === e.currentTarget) setConfirmingInner(false) }}>
+          <div style={{
+            background: 'var(--bg-elevated)', border: '1px solid var(--danger)',
+            padding: '24px', maxWidth: '420px', margin: '20vh auto',
+          }}>
+            <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '10px', color: 'var(--danger)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '10px' }}>
+              Inner já tem {counts.inner} pessoas
+            </div>
+            <div style={{ fontSize: '13px', color: 'var(--fg)', marginBottom: '16px', lineHeight: 1.5 }}>
+              Dunbar sugere ≤ 5 em Inner — se todo mundo é Inner, ninguém é. Tem certeza que esta pessoa entra no círculo?
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button className="btn btn-ghost" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setConfirmingInner(false)}>
+                Reconsiderar
+              </button>
+              <button
+                className="btn btn-accent"
+                style={{ flex: 1, justifyContent: 'center', background: 'var(--danger)', color: '#fff' }}
+                onClick={() => { void doSave() }}
+                disabled={saving}
+              >
+                Confirmar Inner
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import { requireAuth } from './_middleware.js'
 import { getSupabase } from './_supabase.js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import type { CategoryColor } from '../src/types/domain.ts'
+import type { CategoryColor } from '../src/types/domain.js'
 
 interface CategoryRow {
   id: string; user_id: string; dimension_id: string
