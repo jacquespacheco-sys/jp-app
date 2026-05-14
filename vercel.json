@@ -8,7 +8,10 @@
     "api/tasks-classify.ts": { "maxDuration": 30 },
     "api/coach-chat.ts": { "maxDuration": 60 },
     "api/coach-memory-extract.ts": { "maxDuration": 30 },
-    "api/coach-checkin-cron.ts": { "maxDuration": 300 }
+    "api/coach-checkin-cron.ts": { "maxDuration": 300 },
+    "api/special-dates-cron.ts": { "maxDuration": 300 },
+    "api/rituals-cron.ts": { "maxDuration": 300 },
+    "api/contacts-suggest-message.ts": { "maxDuration": 30 }
   },
   "crons": [
     {
@@ -17,6 +20,14 @@
     },
     {
       "path": "/api/coach-checkin-cron",
+      "schedule": "0,30 * * * *"
+    },
+    {
+      "path": "/api/special-dates-cron",
+      "schedule": "0,30 * * * *"
+    },
+    {
+      "path": "/api/rituals-cron",
       "schedule": "0,30 * * * *"
     }
   ]

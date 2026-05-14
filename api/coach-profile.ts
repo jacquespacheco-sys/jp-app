@@ -10,14 +10,14 @@ function mapProfile(r: Record<string, unknown> | null) {
     userId: r['user_id'],
     name: r['name'],
     tone: r['tone'],
-    voiceExamples: r['voice_examples'] ?? undefined,
     valuesMd: r['values_md'] ?? [],
-    boundaries: r['boundaries'] ?? undefined,
     checkInSchedule: r['check_in_schedule'] ?? {},
-    systemPromptOverride: r['system_prompt_override'] ?? undefined,
-    northStarMd: r['north_star_md'] ?? undefined,
     h3Goals: r['h3_goals'] ?? [],
     updatedAt: r['updated_at'],
+    ...(r['voice_examples'] != null ? { voiceExamples: r['voice_examples'] } : {}),
+    ...(r['boundaries'] != null ? { boundaries: r['boundaries'] } : {}),
+    ...(r['system_prompt_override'] != null ? { systemPromptOverride: r['system_prompt_override'] } : {}),
+    ...(r['north_star_md'] != null ? { northStarMd: r['north_star_md'] } : {}),
   }
 }
 

@@ -2,15 +2,46 @@ import './_env.js'
 import { requireCron } from './_middleware.js'
 import { getSupabase } from './_supabase.js'
 import { Resend } from 'resend'
-import {
-  COACH_MODEL, buildCoachSnapshot, formatSnapshotForPrompt, getAnthropic,
-} from './_coach.js'
+import { COACH_MODEL, buildCoachSnapshot, formatSnapshotForPrompt } from './_coach.js'
+import { getAnthropic, htmlEscape } from './_anthropic.js'
 import { fromZonedTime } from 'date-fns-tz'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 export const maxDuration = 300
 
 type Slot = 'morning' | 'evening' | 'weekly'
+
+interface SlotConfig {
+  structure: string
+  maxWords: number
+  intro: (time: string) => string
+  subject: string
+  shouldEmail: (sched: Record<string, unknown>) => boolean
+}
+
+const SLOT_CONFIG: Record<Slot, SlotConfig> = {
+  morning: {
+    structure: '- uma observação concreta sobre o estado (não genérica)\n- uma cobrança OU celebração específica (cite áreas/projetos reais)\n- um foco pro dia (UMA coisa, não lista)',
+    maxWords: 120,
+    intro: t => `São ${t} da manhã.`,
+    subject: 'check-in matinal',
+    shouldEmail: sched => sched['emailMorning'] !== false,
+  },
+  evening: {
+    structure: '- o que foi feito hoje que importou (cite concreto)\n- o que ficou aberto e merece atenção\n- pergunta de fechamento (sem ser terapêutica)',
+    maxWords: 100,
+    intro: t => `Fim do dia, ${t}.`,
+    subject: 'check-in noturno',
+    shouldEmail: sched => sched['emailEvening'] === true,
+  },
+  weekly: {
+    structure: '- balanço da semana (AQAL 7d, áreas, projetos)\n- padrão que merece atenção\n- prioridade pra próxima semana (UMA)',
+    maxWords: 160,
+    intro: () => 'Início de semana.',
+    subject: 'check-in semanal',
+    shouldEmail: () => false,
+  },
+}
 
 interface UserWithProfile {
   id: string
@@ -61,27 +92,15 @@ async function checkAlreadySent(userId: string, slot: Slot, todayDateStr: string
 }
 
 function buildCheckInPrompt(slot: Slot, snapshotText: string, time: string, userName: string): string {
+  const cfg = SLOT_CONFIG[slot]
   const marker = `<!-- ${slot} -->`
-  const intro =
-    slot === 'morning' ? `São ${time} da manhã.` :
-    slot === 'evening' ? `Fim do dia, ${time}.` :
-                         `Início de semana.`
-  const structure =
-    slot === 'morning'
-      ? `- uma observação concreta sobre o estado (não genérica)\n- uma cobrança OU celebração específica (cite áreas/projetos reais)\n- um foco pro dia (UMA coisa, não lista)`
-      : slot === 'evening'
-      ? `- o que foi feito hoje que importou (cite concreto)\n- o que ficou aberto e merece atenção\n- pergunta de fechamento (sem ser terapêutica)`
-      : `- balanço da semana (AQAL 7d, áreas, projetos)\n- padrão que merece atenção\n- prioridade pra próxima semana (UMA)`
-
-  const maxWords = slot === 'morning' ? 120 : slot === 'evening' ? 100 : 160
-
-  return `Você é o sócio sênior de ${userName}. ${intro}
+  return `Você é o sócio sênior de ${userName}. ${cfg.intro(time)}
 
 ${snapshotText}
 
-Escreva um check-in (máx ${maxWords} palavras) na voz firme-mas-gentil.
+Escreva um check-in (máx ${cfg.maxWords} palavras) na voz firme-mas-gentil.
 Estrutura sugerida:
-${structure}
+${cfg.structure}
 
 REGRAS:
 - Letra minúscula no início. Sem emoji. Sem ponto de exclamação enfático.
@@ -159,29 +178,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         tokens_out: msg.usage.output_tokens,
       })
 
-      const wantsEmail =
-        (slot === 'morning' && schedule['emailMorning'] !== false) ||
-        (slot === 'evening' && schedule['emailEvening'] === true)
-
+      const cfg = SLOT_CONFIG[slot]
+      const wantsEmail = cfg.shouldEmail(schedule)
       const resendKey = process.env['RESEND_API_KEY']
       const fromEmail = process.env['RESEND_FROM_EMAIL'] ?? 'briefing@state.is'
       if (wantsEmail && resendKey) {
         try {
           const resend = new Resend(resendKey)
-          const subject = slot === 'morning' ? 'check-in matinal' :
-                          slot === 'evening' ? 'check-in noturno' : 'check-in semanal'
           const html = `<!DOCTYPE html><html lang="pt-BR"><body style="background:#0a0a0a;color:#f0f0f0;font-family:-apple-system,system-ui,sans-serif;margin:0;padding:0">
 <div style="max-width:600px;margin:0 auto;padding:40px 24px">
   <div style="font-family:monospace;font-size:13px;letter-spacing:4px;font-weight:700;color:#7dd3fc;margin-bottom:24px">STATE</div>
   <div style="border-left:2px solid #7dd3fc;padding:20px">
-    <div style="font-family:monospace;font-size:9px;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:10px">do coach · ${subject}</div>
-    <div style="font-size:14px;line-height:1.65;color:#ddd;white-space:pre-wrap">${displayText.replace(/</g, '&lt;')}</div>
+    <div style="font-family:monospace;font-size:9px;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:10px">do coach · ${cfg.subject}</div>
+    <div style="font-size:14px;line-height:1.65;color:#ddd;white-space:pre-wrap">${htmlEscape(displayText)}</div>
   </div>
 </div></body></html>`
           await resend.emails.send({
             from: fromEmail,
             to: userRow.email,
-            subject: `Coach — ${subject}`,
+            subject: `Coach — ${cfg.subject}`,
             html,
           })
         } catch (e) {

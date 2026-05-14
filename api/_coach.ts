@@ -1,8 +1,10 @@
 import './_env.js'
-import Anthropic from '@anthropic-ai/sdk'
 import { fromZonedTime } from 'date-fns-tz'
 import { getSupabase } from './_supabase.js'
 import { fetchAqalContext, type AqalContextSnapshot } from './_briefing-context.js'
+import { getAnthropic } from './_anthropic.js'
+
+export { getAnthropic } from './_anthropic.js'
 
 export const COACH_MODEL = 'claude-sonnet-4-6'
 export const COACH_EXTRACTION_MODEL = 'claude-haiku-4-5-20251001'
@@ -225,19 +227,6 @@ REGRAS:
 - Se ele pergunta "o que faço", responda direto.`
 }
 
-let _anthropic: Anthropic | null = null
-export function getAnthropic(): Anthropic {
-  if (_anthropic) return _anthropic
-  const apiKey = process.env['ANTHROPIC_API_KEY']
-  if (!apiKey) throw new Error('ANTHROPIC_API_KEY não configurada')
-  _anthropic = new Anthropic({ apiKey })
-  return _anthropic
-}
-
-/**
- * Renova last_referenced_at das memórias usadas no snapshot.
- * Fire-and-forget — não bloqueia resposta.
- */
 export async function touchMemories(userId: string, memoryIds: string[]): Promise<void> {
   if (memoryIds.length === 0) return
   const supabase = getSupabase()
@@ -246,4 +235,102 @@ export async function touchMemories(userId: string, memoryIds: string[]): Promis
     .update({ last_referenced_at: new Date().toISOString() })
     .eq('user_id', userId)
     .in('id', memoryIds)
+}
+
+export type CoachMemoryKind = 'fact' | 'pattern' | 'promise' | 'concern' | 'preference'
+
+export interface CoachMemoryRow {
+  id: string
+  user_id: string
+  kind: CoachMemoryKind
+  content: string
+  source: string | null
+  related_area_id: string | null
+  related_project_id: string | null
+  related_task_id: string | null
+  relevance: number
+  expires_at: string | null
+  last_referenced_at: string | null
+  created_at: string
+}
+
+export interface CoachMemoryDto {
+  id: string
+  userId: string
+  kind: CoachMemoryKind
+  content: string
+  source?: string
+  relatedAreaId?: string
+  relatedProjectId?: string
+  relatedTaskId?: string
+  relevance: number
+  expiresAt?: string
+  lastReferencedAt?: string
+  createdAt: string
+}
+
+// Generates the coach paragraph for the morning briefing. Returns null on
+// failure — briefing must keep working without it.
+export async function generateCoachParagraph(userId: string, userName: string): Promise<string | null> {
+  try {
+    const supabase = getSupabase()
+    const [snapshot, lastCheckInRes] = await Promise.all([
+      buildCoachSnapshot({ userId, userName }),
+      supabase
+        .from('coach_log')
+        .select('content_md')
+        .eq('user_id', userId)
+        .eq('kind', 'check_in')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ])
+    const snapshotText = formatSnapshotForPrompt(snapshot, userName)
+    const lastCheckInText = (lastCheckInRes.data as { content_md: string } | null)?.content_md ?? '(nenhum)'
+
+    const msg = await getAnthropic().messages.create({
+      model: COACH_MODEL,
+      max_tokens: 500,
+      messages: [{
+        role: 'user',
+        content: `Você é o sócio sênior de ${userName}.
+
+${snapshotText}
+
+Último check-in recente (NÃO repita o conteúdo):
+${lastCheckInText}
+
+Escreva o parágrafo de abertura do briefing matinal (120-180 palavras).
+Voz: firme, direta, sem rodeios, sem emoji. Letra minúscula no início.
+Estrutura:
+- observação concreta sobre o quadro de 7 dias.
+- uma cobrança OU celebração específica (cite áreas/projetos reais).
+- foco do dia: UMA coisa, não lista.
+
+Responda APENAS o texto do parágrafo, sem aspas, sem cabeçalhos.`,
+      }],
+    })
+    const text = msg.content[0]?.type === 'text' ? msg.content[0].text.trim() : ''
+    return text || null
+  } catch (e) {
+    console.error('[coach.paragraph] failed:', e instanceof Error ? e.message : e)
+    return null
+  }
+}
+
+export function mapCoachMemoryRow(r: Partial<CoachMemoryRow>): CoachMemoryDto {
+  return {
+    id: r.id as string,
+    userId: r.user_id as string,
+    kind: r.kind as CoachMemoryKind,
+    content: r.content as string,
+    relevance: r.relevance as number,
+    createdAt: r.created_at as string,
+    ...(r.source != null ? { source: r.source } : {}),
+    ...(r.related_area_id != null ? { relatedAreaId: r.related_area_id } : {}),
+    ...(r.related_project_id != null ? { relatedProjectId: r.related_project_id } : {}),
+    ...(r.related_task_id != null ? { relatedTaskId: r.related_task_id } : {}),
+    ...(r.expires_at != null ? { expiresAt: r.expires_at } : {}),
+    ...(r.last_referenced_at != null ? { lastReferencedAt: r.last_referenced_at } : {}),
+  }
 }

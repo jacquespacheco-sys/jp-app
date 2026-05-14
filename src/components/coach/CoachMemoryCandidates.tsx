@@ -1,13 +1,6 @@
 import { useState } from 'react'
 import type { CoachMemoryCandidate, MemoryKind } from '../../types/domain.ts'
-
-const KIND_LABEL: Record<MemoryKind, string> = {
-  fact: 'fato',
-  pattern: 'padrão',
-  promise: 'promessa',
-  concern: 'preocupação',
-  preference: 'preferência',
-}
+import { COACH_KIND_LABEL } from '../../lib/coach.ts'
 
 export function CoachMemoryCandidates({ candidates, onAccept, onDismiss }: {
   candidates: CoachMemoryCandidate[]
@@ -53,7 +46,7 @@ export function CoachMemoryCandidates({ candidates, onAccept, onDismiss }: {
               textTransform: 'uppercase',
               letterSpacing: '1px',
             }}>
-              {KIND_LABEL[c.kind]} · {c.relevance}
+              {COACH_KIND_LABEL[c.kind]} · {c.relevance}
             </span>
           </div>
           {editingId === c.id ? (

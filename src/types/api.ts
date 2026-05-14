@@ -128,3 +128,36 @@ export interface CoachUnreadResponse { unread: number }
 export interface CoachMemoryPendingResponse { candidates: CoachMemoryCandidate[] }
 export interface CoachMemoryExtractResponse { candidates: CoachMemoryCandidate[] }
 export interface CoachMemoryAcceptResponse { memory: CoachMemoryEntry }
+
+import type {
+  SpecialDate, Referral, Compliment,
+  PrincipleOfMonth, WeeklyReflection, GratitudeEntry,
+} from './domain.ts'
+
+export interface SpecialDatesListResponse { specialDates: SpecialDate[] }
+export interface SpecialDateSaveResponse { specialDate: SpecialDate }
+
+export interface ReferralsListResponse { referrals: Referral[] }
+export interface ReferralSaveResponse { referral: Referral }
+
+export interface ComplimentsListResponse { compliments: Compliment[] }
+export interface ComplimentSaveResponse { compliment: Compliment }
+
+export interface PrincipleOfMonthListResponse { principles: PrincipleOfMonth[] }
+export interface PrincipleOfMonthSaveResponse { principle: PrincipleOfMonth }
+export interface PrincipleOfMonthCurrentResponse { principle: PrincipleOfMonth | null }
+
+export interface WeeklyReflectionsListResponse { reflections: WeeklyReflection[] }
+export interface WeeklyReflectionSaveResponse { reflection: WeeklyReflection }
+export interface WeeklyReflectionCurrentResponse { reflection: WeeklyReflection | null }
+
+export interface GratitudeEntriesListResponse { entries: GratitudeEntry[] }
+export interface GratitudeEntrySaveResponse { entry: GratitudeEntry }
+
+import type { CategoryDimension, Category } from './domain.ts'
+
+export interface CategoryDimensionsListResponse { dimensions: CategoryDimension[] }
+export interface CategoryDimensionSaveResponse { dimension: CategoryDimension }
+export interface CategoriesListResponse { categories: Category[] }
+export interface CategorySaveResponse { category: Category }
+export interface ContactSetCategoriesResponse { contact: Contact | null }

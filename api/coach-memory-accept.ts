@@ -2,6 +2,7 @@ import './_env.js'
 import { requireAuth } from './_middleware.js'
 import { getSupabase } from './_supabase.js'
 import { CoachMemoryAcceptSchema } from './_schemas/coach.js'
+import { mapCoachMemoryRow, type CoachMemoryRow, type CoachMemoryKind } from './_coach.js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -30,7 +31,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const row = candRow as Record<string, unknown>
   const finalRow = {
     user_id: user.id,
-    kind: (kind ?? row['kind']) as 'fact' | 'pattern' | 'promise' | 'concern' | 'preference',
+    kind: (kind ?? row['kind']) as CoachMemoryKind,
     content: (content ?? row['content']) as string,
     relevance: (relevance ?? row['relevance']) as number,
     expires_at: (expiresAt ?? row['expires_at'] ?? null) as string | null,
@@ -46,12 +47,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .eq('id', candidateId).eq('user_id', user.id)
 
   return res.status(201).json({
-    memory: {
-      id: inserted.id, userId: inserted.user_id, kind: inserted.kind,
-      content: inserted.content, relevance: inserted.relevance,
-      ...(inserted.expires_at != null ? { expiresAt: inserted.expires_at } : {}),
-      ...(inserted.last_referenced_at != null ? { lastReferencedAt: inserted.last_referenced_at } : {}),
-      createdAt: inserted.created_at,
-    },
+    memory: mapCoachMemoryRow(inserted as unknown as CoachMemoryRow),
   })
 }

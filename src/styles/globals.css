@@ -24,6 +24,19 @@
   --nav-selected: #7dd3fc;
   --nav-selected-ink: #082f49;
   --sync-green: #7dd3fc;
+
+  /* Category chip palette (light) — pastéis suaves */
+  --chip-gray-bg:   #ececea;  --chip-gray-fg:   #4a4a48;
+  --chip-red-bg:    #fde2df;  --chip-red-fg:    #9a2622;
+  --chip-orange-bg: #fde7d2;  --chip-orange-fg: #8c4a14;
+  --chip-yellow-bg: #fbf2c8;  --chip-yellow-fg: #6e5a0c;
+  --chip-green-bg:  #d8efd6;  --chip-green-fg:  #1f5a1e;
+  --chip-teal-bg:   #d2ecea;  --chip-teal-fg:   #115451;
+  --chip-blue-bg:   #d8e9f8;  --chip-blue-fg:   #1b4470;
+  --chip-purple-bg: #e6dcf3;  --chip-purple-fg: #46266e;
+  --chip-pink-bg:   #fbd9ea;  --chip-pink-fg:   #832855;
+  --chip-accent-bg: var(--accent-soft);
+  --chip-accent-fg: var(--accent-ink);
 }
 
 /* ---------- Variables: Dark ---------- */
@@ -37,6 +50,19 @@ body.dark {
   --border-light: #2a2a2a;
   --shadow: 0 2px 12px rgba(0,0,0,0.3);
   --overlay-bg: rgba(0,0,0,0.85);
+
+  /* Category chip palette (dark) — tons mais saturados sobre fundo escuro */
+  --chip-gray-bg:   #262624;  --chip-gray-fg:   #b5b5b0;
+  --chip-red-bg:    #3a1e1c;  --chip-red-fg:    #f48d86;
+  --chip-orange-bg: #3a2814;  --chip-orange-fg: #f0b070;
+  --chip-yellow-bg: #353012;  --chip-yellow-fg: #e8d56b;
+  --chip-green-bg:  #1d3520;  --chip-green-fg:  #8ed28a;
+  --chip-teal-bg:   #143434;  --chip-teal-fg:   #6dc6c0;
+  --chip-blue-bg:   #1a2a3c;  --chip-blue-fg:   #8fb8e6;
+  --chip-purple-bg: #2a1f3c;  --chip-purple-fg: #b298d8;
+  --chip-pink-bg:   #3a1c2e;  --chip-pink-fg:   #e496bb;
+  --chip-accent-bg: var(--accent-soft);
+  --chip-accent-fg: var(--accent);
 }
 
 /* ---------- Base typography ---------- */

@@ -86,6 +86,22 @@ export interface Project {
   childCount: number
 }
 
+export interface ContactFamily {
+  spouse?: string
+  children?: string[]
+  pets?: string[]
+}
+
+export interface ContactSignal {
+  type?: string
+  text?: string
+  url?: string
+  date?: string
+}
+
+export type ContactTier = 'inner' | 'strong' | 'network' | 'weak' | 'dormant'
+export type ContactChannel = 'whatsapp' | 'email' | 'linkedin' | 'sms' | 'phone'
+
 export interface Contact {
   id: string
   userId: string
@@ -107,6 +123,31 @@ export interface Contact {
   archivedAt?: string
   createdAt: string
   updatedAt: string
+
+  tier?: ContactTier
+  cadenceDays?: number
+  lastInteractionAt?: string
+  preferredName?: string
+  pronunciation?: string
+  interests?: string[]
+  conversationHooks?: string[]
+  whatTheyValue?: string
+  theirGoals?: string
+  family?: ContactFamily
+  firstMetAt?: string
+  companyStartDate?: string
+  preferredChannel?: ContactChannel
+  favorBalance?: number
+  linkedinUrl?: string
+  twitterHandle?: string
+  instagramHandle?: string
+  lastSignal?: ContactSignal
+  lastSignalAt?: string
+  sourceContactId?: string
+  sourceContext?: string
+
+  // Hidratado quando vier de v_contacts_with_categories (PR8)
+  categories?: Category[]
 }
 
 export interface CalendarEvent {
@@ -188,6 +229,9 @@ export interface BriefingItem {
   url: string
 }
 
+export type InteractionInitiator = 'me' | 'them'
+export type InteractionSentiment = 'positive' | 'neutral' | 'tense'
+
 export interface Interaction {
   id: string
   contactId: string
@@ -195,6 +239,16 @@ export interface Interaction {
   type: 'call' | 'meeting' | 'email' | 'message'
   note: string
   createdAt: string
+
+  initiator?: InteractionInitiator
+  sentiment?: InteractionSentiment
+  topicsDiscussed?: string[]
+  carnegieTags?: string[]
+  interactionTags?: string[]
+  complimentText?: string
+  referralFromId?: string
+  newLearning?: string
+  promiseMade?: string
 }
 
 export interface Source {
@@ -497,4 +551,138 @@ export interface CoachMemoryCandidate {
   expiresAt?: string
   sourceLogId?: string
   createdAt: string
+}
+
+// =============================================================
+// Carnegie (0014 base + 0015 rituais)
+// =============================================================
+
+export type SpecialDateType = 'celebrate' | 'acknowledge' | 'silence' | 'check_in'
+export type SpecialDateSource = 'manual' | 'derived_first_met' | 'derived_company_start'
+
+export interface SpecialDate {
+  id: string
+  userId: string
+  contactId: string
+  label: string
+  type: SpecialDateType
+  dateAnniversary?: string
+  dateFull?: string
+  recurring: boolean
+  leadDays?: number
+  silenceDays?: number
+  privateNote?: string
+  source: SpecialDateSource
+  createdAt: string
+  updatedAt: string
+}
+
+export type ReferralStatus = 'open' | 'closed' | 'dropped'
+
+export interface Referral {
+  id: string
+  userId: string
+  fromContactId: string
+  toContactId?: string
+  context: string
+  outcomeNote?: string
+  feedbackGiven: boolean
+  feedbackGivenAt?: string
+  status: ReferralStatus
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Compliment {
+  id: string
+  userId: string
+  contactId: string
+  text: string
+  receivedAt: string
+  context?: string
+  remindToReciprocateAt?: string
+  reciprocated: boolean
+  reciprocatedAt?: string
+  reciprocationNote?: string
+  createdAt: string
+}
+
+export interface PrincipleOfMonth {
+  id: string
+  userId: string
+  principle: string
+  month: string
+  targetApplications: number
+  reflection?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface WeeklyReflection {
+  id: string
+  userId: string
+  week: string
+  markedMeContactId?: string
+  markedMeWhy?: string
+  letDownContactId?: string
+  letDownWhy?: string
+  reconnectContactId?: string
+  reconnectHandled: boolean
+  createdAt: string
+}
+
+export type GratitudeChannel = ContactChannel
+
+export interface GratitudeEntry {
+  id: string
+  userId: string
+  contactId?: string
+  text: string
+  shared: boolean
+  sharedAt?: string
+  sharedChannel?: GratitudeChannel
+  createdAt: string
+}
+
+// =============================================================
+// PR8 categories (0016)
+// =============================================================
+
+export type CategoryColor =
+  | 'gray' | 'red' | 'orange' | 'yellow' | 'green'
+  | 'teal' | 'blue' | 'purple' | 'pink' | 'accent'
+
+export interface CategoryDimension {
+  id: string
+  label: string
+  slug: string
+  description?: string
+  sortOrder: number
+  archived: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Category {
+  id: string
+  dimensionId: string
+  dimensionLabel?: string
+  dimensionSlug?: string
+  label: string
+  slug: string
+  color?: CategoryColor
+  description?: string
+  sortOrder: number
+  archived: boolean
+  usageCount: number
+}
+
+export interface ContactFilter {
+  search?: string
+  tier?: ContactTier[]
+  phase?: string[]
+  categoryIds?: string[]
+  hasPromisesOverdue?: boolean
+  hasOpenReferrals?: boolean
+  archived?: boolean
 }

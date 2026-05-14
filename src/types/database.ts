@@ -46,6 +46,9 @@ type ProjectsInsert = {
   created_at?: string; updated_at?: string
 }
 
+type ContactFamilyJson = { spouse?: string; children?: string[]; pets?: string[] }
+type ContactSignalJson = { type?: string; text?: string; url?: string; date?: string }
+
 type ContactsInsert = {
   id?: string; user_id: string; first_name: string
   last_name?: string | null; company?: string | null; role?: string | null
@@ -55,6 +58,19 @@ type ContactsInsert = {
   google_contact_id?: string | null; synced?: boolean
   archived?: boolean; archived_at?: string | null
   created_at?: string; updated_at?: string
+  // Carnegie (0014)
+  tier?: 'inner' | 'strong' | 'network' | 'weak' | 'dormant' | null
+  cadence_days?: number | null; last_interaction_at?: string | null
+  preferred_name?: string | null; pronunciation?: string | null
+  interests?: string[] | null; conversation_hooks?: string[] | null
+  what_they_value?: string | null; their_goals?: string | null
+  family?: ContactFamilyJson | null
+  first_met_at?: string | null; company_start_date?: string | null
+  preferred_channel?: 'whatsapp' | 'email' | 'linkedin' | 'sms' | 'phone' | null
+  favor_balance?: number | null
+  linkedin_url?: string | null; twitter_handle?: string | null; instagram_handle?: string | null
+  last_signal?: ContactSignalJson | null; last_signal_at?: string | null
+  source_contact_id?: string | null; source_context?: string | null
 }
 
 type TasksInsert = {
@@ -78,7 +94,101 @@ type TasksInsert = {
 }
 
 type TaskLogsInsert = { id?: string; task_id: string; changes: Json; timestamp?: string }
-type InteractionsInsert = { id?: string; contact_id: string; date: string; type: string; note?: string; created_at?: string }
+type InteractionsInsert = {
+  id?: string; contact_id: string; date: string; type: string; note?: string; created_at?: string
+  // Carnegie (0014)
+  initiator?: 'me' | 'them' | null
+  sentiment?: 'positive' | 'neutral' | 'tense' | null
+  topics_discussed?: string[] | null
+  carnegie_tags?: string[] | null
+  interaction_tags?: string[] | null
+  compliment_text?: string | null
+  referral_from_id?: string | null
+  new_learning?: string | null
+  promise_made?: string | null
+}
+
+type SpecialDatesInsert = {
+  id?: string; user_id: string; contact_id: string
+  label: string
+  type: 'celebrate' | 'acknowledge' | 'silence' | 'check_in'
+  date_anniversary?: string | null; date_full?: string | null
+  recurring?: boolean
+  lead_days?: number | null; silence_days?: number | null
+  private_note?: string | null
+  source?: 'manual' | 'derived_first_met' | 'derived_company_start'
+  created_at?: string; updated_at?: string
+}
+
+type ReferralsInsert = {
+  id?: string; user_id: string
+  from_contact_id: string; to_contact_id?: string | null
+  context: string; outcome_note?: string | null
+  feedback_given?: boolean; feedback_given_at?: string | null
+  status?: 'open' | 'closed' | 'dropped'
+  created_at?: string; updated_at?: string
+}
+
+type ComplimentsReceivedInsert = {
+  id?: string; user_id: string; contact_id: string
+  text: string; received_at?: string; context?: string | null
+  remind_to_reciprocate_at?: string | null
+  reciprocated?: boolean; reciprocated_at?: string | null; reciprocation_note?: string | null
+  created_at?: string
+}
+
+// Carnegie rituals (0015)
+type PrincipleOfMonthInsert = {
+  id?: string; user_id: string
+  principle: string; month: string
+  target_applications?: number
+  reflection?: string | null
+  created_at?: string; updated_at?: string
+}
+
+type WeeklyReflectionsInsert = {
+  id?: string; user_id: string; week: string
+  marked_me_contact_id?: string | null; marked_me_why?: string | null
+  let_down_contact_id?: string | null; let_down_why?: string | null
+  reconnect_contact_id?: string | null; reconnect_handled?: boolean
+  created_at?: string
+}
+
+type GratitudeEntriesInsert = {
+  id?: string; user_id: string; contact_id?: string | null
+  text: string
+  shared?: boolean; shared_at?: string | null
+  shared_channel?: 'whatsapp' | 'email' | 'linkedin' | 'sms' | 'phone' | null
+  created_at?: string
+}
+
+// PR8 categories (0016)
+type CategoryColorDb = 'gray' | 'red' | 'orange' | 'yellow' | 'green' | 'teal' | 'blue' | 'purple' | 'pink' | 'accent'
+
+type CategoryDimensionsInsert = {
+  id?: string; user_id: string
+  label: string; slug: string
+  description?: string | null
+  sort_order?: number
+  archived?: boolean
+  created_at?: string; updated_at?: string
+}
+
+type CategoriesInsert = {
+  id?: string; user_id: string; dimension_id: string
+  label: string; slug: string
+  color?: CategoryColorDb | null
+  description?: string | null
+  sort_order?: number
+  archived?: boolean
+  usage_count?: number
+  created_at?: string; updated_at?: string
+}
+
+type ContactCategoriesInsert = {
+  id?: string; user_id: string; contact_id: string; category_id: string
+  created_at?: string
+}
 type RelationshipsInsert = { id?: string; contact_id: string; related_id: string; label: string; created_at?: string }
 type ContactLogsInsert = { id?: string; contact_id: string; changes: Json; timestamp?: string }
 type SourcesInsert = { id?: string; user_id: string; name: string; url: string; active?: boolean; last_fetch?: string | null; created_at?: string }
@@ -288,6 +398,18 @@ export type Database = {
           google_contact_id: string | null; synced: boolean
           archived: boolean; archived_at: string | null
           created_at: string; updated_at: string
+          // Carnegie (0014)
+          tier: string | null; cadence_days: number | null
+          last_interaction_at: string | null
+          preferred_name: string | null; pronunciation: string | null
+          interests: string[] | null; conversation_hooks: string[] | null
+          what_they_value: string | null; their_goals: string | null
+          family: ContactFamilyJson | null
+          first_met_at: string | null; company_start_date: string | null
+          preferred_channel: string | null; favor_balance: number | null
+          linkedin_url: string | null; twitter_handle: string | null; instagram_handle: string | null
+          last_signal: ContactSignalJson | null; last_signal_at: string | null
+          source_contact_id: string | null; source_context: string | null
         }
         Insert: ContactsInsert
         Update: Partial<ContactsInsert>
@@ -324,9 +446,125 @@ export type Database = {
         Relationships: []
       }
       interactions: {
-        Row: { id: string; contact_id: string; date: string; type: string; note: string; created_at: string }
+        Row: {
+          id: string; contact_id: string; date: string; type: string; note: string; created_at: string
+          // Carnegie (0014)
+          initiator: string | null; sentiment: string | null
+          topics_discussed: string[] | null; carnegie_tags: string[] | null
+          interaction_tags: string[] | null; compliment_text: string | null
+          referral_from_id: string | null; new_learning: string | null
+          promise_made: string | null
+        }
         Insert: InteractionsInsert
         Update: Partial<InteractionsInsert>
+        Relationships: []
+      }
+      special_dates: {
+        Row: {
+          id: string; user_id: string; contact_id: string
+          label: string; type: string
+          date_anniversary: string | null; date_full: string | null
+          recurring: boolean
+          lead_days: number | null; silence_days: number | null
+          private_note: string | null; source: string
+          created_at: string; updated_at: string
+        }
+        Insert: SpecialDatesInsert
+        Update: Partial<SpecialDatesInsert>
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          id: string; user_id: string
+          from_contact_id: string; to_contact_id: string | null
+          context: string; outcome_note: string | null
+          feedback_given: boolean; feedback_given_at: string | null
+          status: string
+          created_at: string; updated_at: string
+        }
+        Insert: ReferralsInsert
+        Update: Partial<ReferralsInsert>
+        Relationships: []
+      }
+      compliments_received: {
+        Row: {
+          id: string; user_id: string; contact_id: string
+          text: string; received_at: string; context: string | null
+          remind_to_reciprocate_at: string | null
+          reciprocated: boolean; reciprocated_at: string | null; reciprocation_note: string | null
+          created_at: string
+        }
+        Insert: ComplimentsReceivedInsert
+        Update: Partial<ComplimentsReceivedInsert>
+        Relationships: []
+      }
+      principle_of_month: {
+        Row: {
+          id: string; user_id: string
+          principle: string; month: string
+          target_applications: number
+          reflection: string | null
+          created_at: string; updated_at: string
+        }
+        Insert: PrincipleOfMonthInsert
+        Update: Partial<PrincipleOfMonthInsert>
+        Relationships: []
+      }
+      weekly_reflections: {
+        Row: {
+          id: string; user_id: string; week: string
+          marked_me_contact_id: string | null; marked_me_why: string | null
+          let_down_contact_id: string | null; let_down_why: string | null
+          reconnect_contact_id: string | null; reconnect_handled: boolean
+          created_at: string
+        }
+        Insert: WeeklyReflectionsInsert
+        Update: Partial<WeeklyReflectionsInsert>
+        Relationships: []
+      }
+      gratitude_entries: {
+        Row: {
+          id: string; user_id: string; contact_id: string | null
+          text: string
+          shared: boolean; shared_at: string | null; shared_channel: string | null
+          created_at: string
+        }
+        Insert: GratitudeEntriesInsert
+        Update: Partial<GratitudeEntriesInsert>
+        Relationships: []
+      }
+      category_dimensions: {
+        Row: {
+          id: string; user_id: string
+          label: string; slug: string
+          description: string | null
+          sort_order: number; archived: boolean
+          created_at: string; updated_at: string
+        }
+        Insert: CategoryDimensionsInsert
+        Update: Partial<CategoryDimensionsInsert>
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          id: string; user_id: string; dimension_id: string
+          label: string; slug: string
+          color: string | null; description: string | null
+          sort_order: number; archived: boolean
+          usage_count: number
+          created_at: string; updated_at: string
+        }
+        Insert: CategoriesInsert
+        Update: Partial<CategoriesInsert>
+        Relationships: []
+      }
+      contact_categories: {
+        Row: {
+          id: string; user_id: string; contact_id: string; category_id: string
+          created_at: string
+        }
+        Insert: ContactCategoriesInsert
+        Update: Partial<ContactCategoriesInsert>
         Relationships: []
       }
       relationships: {
@@ -648,6 +886,32 @@ export type Database = {
         }
         Relationships: []
       }
+      v_contacts_with_categories: {
+        Row: Database['public']['Tables']['contacts']['Row'] & {
+          categories: Json
+        }
+        Relationships: []
+      }
+      v_contacts_overdue: {
+        Row: Database['public']['Tables']['contacts']['Row'] & {
+          effective_cadence_days: number | null
+          days_since_last: number | null
+          is_overdue: boolean | null
+        }
+        Relationships: []
+      }
+      v_gratitude_top_contacts: {
+        Row: {
+          user_id: string
+          contact_id: string
+          first_name: string
+          last_name: string | null
+          year: number
+          mentions: number
+          last_mention_at: string
+        }
+        Relationships: []
+      }
     }
     Functions: {
       seed_default_areas: {
@@ -657,6 +921,10 @@ export type Database = {
       sync_contacts_from_google: {
         Args: { p_user_id: string; p_contacts: Json }
         Returns: number
+      }
+      seed_carnegie_categories: {
+        Args: { p_user_id: string }
+        Returns: void
       }
     }
     Enums: {

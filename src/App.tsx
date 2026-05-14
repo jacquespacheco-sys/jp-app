@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { AuthProvider } from './hooks/AuthProvider.tsx'
+import { CoachProvider } from './hooks/CoachProvider.tsx'
+import { ContactsProvider } from './hooks/ContactsProvider.tsx'
 import { useAuth } from './hooks/useAuth.ts'
 import { BottomNav } from './components/layout/BottomNav.tsx'
 import { CoachFab } from './components/coach/CoachFab.tsx'
@@ -9,6 +11,7 @@ import { BriefingPage } from './pages/BriefingPage.tsx'
 import { TasksPage } from './pages/TasksPage.tsx'
 import { CalendarPage } from './pages/CalendarPage.tsx'
 import { ContactsPage } from './pages/ContactsPage.tsx'
+import { ContactsOnboardingPage } from './pages/ContactsOnboardingPage.tsx'
 import { ConfigPage } from './pages/ConfigPage.tsx'
 import { NotesPage } from './pages/NotesPage.tsx'
 import { NewsPage } from './pages/NewsPage.tsx'
@@ -58,6 +61,10 @@ function AppRoutes() {
         element={<ProtectedRoute><ContactsPage /></ProtectedRoute>}
       />
       <Route
+        path="/onboarding-contatos"
+        element={<ProtectedRoute><ContactsOnboardingPage /></ProtectedRoute>}
+      />
+      <Route
         path="/config"
         element={<ProtectedRoute><ConfigPage /></ProtectedRoute>}
       />
@@ -91,7 +98,11 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <ErrorBoundary>
-          <AppRoutes />
+          <CoachProvider>
+            <ContactsProvider>
+              <AppRoutes />
+            </ContactsProvider>
+          </CoachProvider>
         </ErrorBoundary>
       </AuthProvider>
     </BrowserRouter>
