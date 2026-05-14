@@ -146,6 +146,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .from('v_contacts_with_categories')
       .select('*')
       .eq('user_id', user.id)
+      .eq('archived', false)
       .order('first_name', { ascending: true }),
     supabase
       .from('users')

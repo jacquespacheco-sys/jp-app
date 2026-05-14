@@ -40,6 +40,40 @@ export function CategoriesConfigSection() {
     }
   }
 
+  const moveDimension = async (idx: number, dir: -1 | 1) => {
+    const target = idx + dir
+    if (target < 0 || target >= dimensions.length) return
+    const a = dimensions[idx]
+    const b = dimensions[target]
+    if (!a || !b) return
+    await Promise.all([
+      saveDim({ id: a.id, label: a.label, slug: a.slug, sortOrder: b.sortOrder, ...(a.description ? { description: a.description } : {}) }),
+      saveDim({ id: b.id, label: b.label, slug: b.slug, sortOrder: a.sortOrder, ...(b.description ? { description: b.description } : {}) }),
+    ])
+    await refetchDim()
+  }
+
+  const moveCategory = async (list: Category[], idx: number, dir: -1 | 1) => {
+    const target = idx + dir
+    if (target < 0 || target >= list.length) return
+    const a = list[idx]
+    const b = list[target]
+    if (!a || !b) return
+    await Promise.all([
+      saveCat({
+        id: a.id, dimensionId: a.dimensionId, label: a.label, slug: a.slug, sortOrder: b.sortOrder,
+        ...(a.color ? { color: a.color } : { color: null }),
+        ...(a.description ? { description: a.description } : {}),
+      }),
+      saveCat({
+        id: b.id, dimensionId: b.dimensionId, label: b.label, slug: b.slug, sortOrder: a.sortOrder,
+        ...(b.color ? { color: b.color } : { color: null }),
+        ...(b.description ? { description: b.description } : {}),
+      }),
+    ])
+    await refetchCat()
+  }
+
   if (lDim || lCat) {
     return <div style={{ fontSize: '12px', color: 'var(--fg-dim)' }}>Carregando…</div>
   }
@@ -66,8 +100,8 @@ export function CategoriesConfigSection() {
         </div>
       </div>
 
-      {dimensions.map(dim => {
-        const opts = categories.filter(c => c.dimensionId === dim.id)
+      {dimensions.map((dim, dimIdx) => {
+        const opts = categories.filter(c => c.dimensionId === dim.id).sort((a, b) => a.sortOrder - b.sortOrder)
         const isOpen = expanded.has(dim.id)
         return (
           <div key={dim.id} style={{ border: '1px solid var(--border)', marginBottom: '10px' }}>
@@ -84,7 +118,13 @@ export function CategoriesConfigSection() {
                   {opts.length} categorias · slug: {dim.slug}
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                <ReorderArrows
+                  canUp={dimIdx > 0}
+                  canDown={dimIdx < dimensions.length - 1}
+                  onUp={e => { e.stopPropagation(); void moveDimension(dimIdx, -1) }}
+                  onDown={e => { e.stopPropagation(); void moveDimension(dimIdx, 1) }}
+                />
                 <button
                   className="btn btn-ghost"
                   style={{ fontSize: '9px', padding: '4px 8px' }}
@@ -92,21 +132,28 @@ export function CategoriesConfigSection() {
                 >
                   Editar
                 </button>
-                <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '10px', color: 'var(--fg-muted)' }}>
+                <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '10px', color: 'var(--fg-muted)', minWidth: '10px', textAlign: 'center' }}>
                   {isOpen ? '−' : '+'}
                 </span>
               </div>
             </div>
             {isOpen && (
               <div style={{ padding: '12px', borderTop: '1px solid var(--border-light)' }}>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
-                  {opts.map(c => (
-                    <div
-                      key={c.id}
-                      onClick={() => setEditingCat({ dim, cat: c })}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <CategoryChip category={c} size="md" />
+                <div style={{ display: 'grid', gap: '6px', marginBottom: '10px' }}>
+                  {opts.map((c, catIdx) => (
+                    <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <ReorderArrows
+                        canUp={catIdx > 0}
+                        canDown={catIdx < opts.length - 1}
+                        onUp={e => { e.stopPropagation(); void moveCategory(opts, catIdx, -1) }}
+                        onDown={e => { e.stopPropagation(); void moveCategory(opts, catIdx, 1) }}
+                      />
+                      <div
+                        onClick={() => setEditingCat({ dim, cat: c })}
+                        style={{ cursor: 'pointer', flex: 1 }}
+                      >
+                        <CategoryChip category={c} size="md" />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -375,6 +422,41 @@ function CategoryModal({
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+function ReorderArrows({
+  canUp, canDown, onUp, onDown,
+}: {
+  canUp: boolean; canDown: boolean
+  onUp: (e: React.MouseEvent) => void
+  onDown: (e: React.MouseEvent) => void
+}) {
+  return (
+    <div style={{ display: 'inline-flex', flexDirection: 'column' }}>
+      <button
+        type="button" onClick={onUp} disabled={!canUp}
+        style={{
+          background: 'transparent', border: 'none',
+          cursor: canUp ? 'pointer' : 'default',
+          padding: '0 4px', lineHeight: 1,
+          color: canUp ? 'var(--fg-muted)' : 'var(--fg-dim)',
+          fontSize: '10px',
+        }}
+        title="Subir"
+      >▲</button>
+      <button
+        type="button" onClick={onDown} disabled={!canDown}
+        style={{
+          background: 'transparent', border: 'none',
+          cursor: canDown ? 'pointer' : 'default',
+          padding: '0 4px', lineHeight: 1,
+          color: canDown ? 'var(--fg-muted)' : 'var(--fg-dim)',
+          fontSize: '10px',
+        }}
+        title="Descer"
+      >▼</button>
     </div>
   )
 }

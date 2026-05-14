@@ -27,6 +27,9 @@ function chipStyle(color: CategoryColor | undefined, size: 'sm' | 'md'): React.C
     border: color ? '1px solid transparent' : '1px solid var(--border)',
     borderRadius: '2px',
     whiteSpace: 'nowrap',
+    maxWidth: '100%',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   }
 }
 

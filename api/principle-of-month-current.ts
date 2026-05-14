@@ -31,7 +31,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (error) return res.status(500).json({ error: error.message })
 
-  return res.status(200).json({
-    principle: data ? mapPrinciple(data as Record<string, unknown>) : null,
-  })
+  const principle = data ? mapPrinciple(data as Record<string, unknown>) : null
+
+  let appliedCount = 0
+  if (principle) {
+    const monthStart = `${month}-01T00:00:00Z`
+    const [year, mNum] = month.split('-').map(Number)
+    const next = mNum === 12 ? `${(year ?? 0) + 1}-01-01T00:00:00Z` : `${year}-${String((mNum ?? 0) + 1).padStart(2, '0')}-01T00:00:00Z`
+
+    const { data: ints } = await supabase
+      .from('interactions')
+      .select('id, carnegie_tags, contacts!inner(user_id)')
+      .eq('contacts.user_id', user.id)
+      .gte('date', monthStart)
+      .lt('date', next)
+      .contains('carnegie_tags', [principle.principle])
+
+    appliedCount = (ints ?? []).length
+  }
+
+  return res.status(200).json({ principle, appliedCount })
 }

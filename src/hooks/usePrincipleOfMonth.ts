@@ -11,19 +11,22 @@ import type { PrincipleOfMonthSaveInput } from '../../api/_schemas/principle-of-
 export function usePrincipleOfMonth() {
   const [principles, setPrinciples] = useState<PrincipleOfMonth[]>([])
   const [current, setCurrent] = useState<PrincipleOfMonth | null>(null)
+  const [appliedCount, setAppliedCount] = useState(0)
   const [loading, setLoading] = useState(true)
 
   const fetch = useCallback(async () => {
     try {
       const [list, cur] = await Promise.all([
         api.get<PrincipleOfMonthListResponse>('/api/principle-of-month-list'),
-        api.get<PrincipleOfMonthCurrentResponse>('/api/principle-of-month-current'),
+        api.get<PrincipleOfMonthCurrentResponse & { appliedCount?: number }>('/api/principle-of-month-current'),
       ])
       setPrinciples(list.principles)
       setCurrent(cur.principle)
+      setAppliedCount(cur.appliedCount ?? 0)
     } catch {
       setPrinciples([])
       setCurrent(null)
+      setAppliedCount(0)
     } finally {
       setLoading(false)
     }
@@ -42,5 +45,5 @@ export function usePrincipleOfMonth() {
     return res.principle
   }, [])
 
-  return { principles, current, loading, save, refetch: fetch }
+  return { principles, current, appliedCount, loading, save, refetch: fetch }
 }

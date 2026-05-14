@@ -6,6 +6,7 @@ import { usePrincipleOfMonth } from '../../hooks/usePrincipleOfMonth.ts'
 import { useWeeklyReflections } from '../../hooks/useWeeklyReflections.ts'
 import { useGratitudeEntries } from '../../hooks/useGratitudeEntries.ts'
 import { GRATITUDE_CHANNELS } from '../../../api/_schemas/gratitude-entry.ts'
+import { SuggestMessageModal } from './SuggestMessageModal.tsx'
 import type { Contact, ContactChannel } from '../../types/domain.ts'
 
 interface Props {
@@ -32,17 +33,22 @@ const currentWeek = () => format(new Date(), "RRRR-'W'II")
 
 export function RitualsView({ onOpenContact }: Props) {
   const [openModal, setOpenModal] = useState<'principle' | 'reflection' | 'gratitude' | null>(null)
+  const [suggestFor, setSuggestFor] = useState<Contact | null>(null)
 
   return (
     <div style={{ padding: '16px', display: 'grid', gap: '14px' }}>
       <PrincipleCard onOpen={() => setOpenModal('principle')} />
       <WeeklyReflectionCard onOpen={() => setOpenModal('reflection')} />
       <GratitudeCard onOpen={() => setOpenModal('gratitude')} />
-      <ThankYouTourCard onOpenContact={onOpenContact} />
+      <ThankYouTourCard
+        onSuggestMessage={setSuggestFor}
+        onOpenContact={onOpenContact}
+      />
 
       {openModal === 'principle' && <PrincipleModal onClose={() => setOpenModal(null)} />}
       {openModal === 'reflection' && <ReflectionModal onClose={() => setOpenModal(null)} />}
       {openModal === 'gratitude' && <GratitudeModal onClose={() => setOpenModal(null)} />}
+      {suggestFor && <SuggestMessageModal contact={suggestFor} onClose={() => setSuggestFor(null)} />}
     </div>
   )
 }
@@ -111,7 +117,12 @@ function GratitudeCard({ onOpen }: { onOpen: () => void }) {
   )
 }
 
-function ThankYouTourCard({ onOpenContact }: { onOpenContact: (c: Contact) => void }) {
+function ThankYouTourCard({
+  onSuggestMessage, onOpenContact,
+}: {
+  onSuggestMessage: (c: Contact) => void
+  onOpenContact: (c: Contact) => void
+}) {
   const { contacts } = useContacts()
   const [top, setTop] = useState<TopContact[]>([])
   const [loading, setLoading] = useState(true)
@@ -135,23 +146,33 @@ function ThankYouTourCard({ onOpenContact }: { onOpenContact: (c: Contact) => vo
             return (
               <div
                 key={t.contactId}
-                onClick={() => full && onOpenContact(full)}
                 style={{
                   padding: '8px 0',
                   borderBottom: '1px solid var(--border-light)',
                   display: 'grid',
-                  gridTemplateColumns: '1fr auto',
+                  gridTemplateColumns: '1fr auto auto',
                   gap: '10px',
                   alignItems: 'center',
-                  cursor: full ? 'pointer' : 'default',
                 }}
               >
-                <div style={{ fontSize: '13px', color: 'var(--fg)' }}>
+                <div
+                  onClick={() => full && onOpenContact(full)}
+                  style={{ fontSize: '13px', color: 'var(--fg)', cursor: full ? 'pointer' : 'default' }}
+                >
                   {t.firstName}{t.lastName ? ` ${t.lastName}` : ''}
                 </div>
                 <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>
                   {t.mentions}× · {t.tier ?? '—'}
                 </div>
+                <button
+                  className="btn btn-ghost"
+                  style={{ fontSize: '9px', padding: '3px 7px' }}
+                  onClick={() => full && onSuggestMessage(full)}
+                  disabled={!full}
+                  title="Sugerir mensagem"
+                >
+                  ✨
+                </button>
               </div>
             )
           })}

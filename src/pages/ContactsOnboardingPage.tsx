@@ -290,24 +290,30 @@ export function ContactsOnboardingPage() {
                       {dim.label}
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                      {opts.map(c => (
-                        <button
-                          key={c.id}
-                          onClick={() => {
-                            setSelectedCatIds(prev => {
-                              const next = new Set(prev)
-                              if (next.has(c.id)) next.delete(c.id); else next.add(c.id)
-                              return next
-                            })
-                          }}
-                          style={{
-                            background: 'transparent', border: 'none', padding: 0, cursor: 'pointer',
-                            opacity: selectedCatIds.has(c.id) ? 1 : 0.5,
-                          }}
-                        >
-                          <CategoryChip category={c} size="sm" />
-                        </button>
-                      ))}
+                      {opts.map(c => {
+                        const selected = selectedCatIds.has(c.id)
+                        return (
+                          <button
+                            key={c.id}
+                            onClick={() => {
+                              setSelectedCatIds(prev => {
+                                const next = new Set(prev)
+                                if (next.has(c.id)) next.delete(c.id); else next.add(c.id)
+                                return next
+                              })
+                            }}
+                            style={{
+                              background: 'transparent', border: 'none', padding: '2px', cursor: 'pointer',
+                              opacity: selected ? 1 : 0.55,
+                              boxShadow: selected ? '0 0 0 2px var(--accent)' : 'none',
+                              borderRadius: '3px',
+                              transition: 'opacity 0.1s, box-shadow 0.1s',
+                            }}
+                          >
+                            <CategoryChip category={c} size="sm" />
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
                 )
