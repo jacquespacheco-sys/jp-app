@@ -204,8 +204,11 @@ export function TasksPage() {
         <ProjectsView
           projects={projects}
           areas={areas}
-          mode="horizon"
+          tasks={tasks}
           onSelect={setSelectedProject}
+          onCreate={() => setCreatingProject(true)}
+          onOpenTask={setSelected}
+          onToggleDone={handleToggleDone}
         />
       )}
 

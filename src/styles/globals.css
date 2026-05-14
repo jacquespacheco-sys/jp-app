@@ -1310,6 +1310,35 @@ html, body {
    ============================================================= */
 
 /* ---------- Project Row ---------- */
+.projects-bar {
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  background: var(--bg); display: flex; flex-direction: column; gap: 8px;
+}
+.projects-mode-bar {
+  display: flex; gap: 4px; align-items: center;
+}
+.projects-filter-row {
+  display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+}
+.project-row-wrapper {
+  display: flex; align-items: stretch; gap: 0;
+}
+.project-expand {
+  background: transparent; border: none; cursor: pointer;
+  color: var(--fg-dim); padding: 0 8px; font-size: 12px;
+  align-self: stretch; display: flex; align-items: center;
+}
+.project-expand:hover { color: var(--fg); }
+.project-tasks-inline {
+  padding: 6px 0 12px 28px; border-left: 1px dashed var(--border-light);
+  margin-left: 16px; background: var(--bg-elevated);
+}
+.project-tasks-done summary {
+  font-family: 'Space Mono', monospace; font-size: 10px;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--fg-muted); padding: 8px 12px; cursor: pointer;
+}
+
 .project-row {
   display: flex; gap: 12px; padding: 14px 12px;
   border-bottom: 1px solid var(--border-light);
