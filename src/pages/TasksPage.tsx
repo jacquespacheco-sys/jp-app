@@ -149,6 +149,7 @@ export function TasksPage() {
         <InboxView
           entries={entries}
           projects={projects}
+          areas={areas}
           loading={inboxLoading}
           defaultProjectId={defaultProject?.id}
           onProcess={handleProcessInbox}
@@ -183,6 +184,7 @@ export function TasksPage() {
         <ListView
           tasks={tasks}
           projects={projects}
+          areas={areas}
           onOpen={setSelected}
           onToggleDone={handleToggleDone}
         />
