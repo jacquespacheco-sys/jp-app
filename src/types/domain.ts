@@ -558,7 +558,7 @@ export interface CoachMemoryCandidate {
 // =============================================================
 
 export type SpecialDateType = 'celebrate' | 'acknowledge' | 'silence' | 'check_in'
-export type SpecialDateSource = 'manual' | 'derived_first_met' | 'derived_company_start'
+export type SpecialDateSource = 'manual' | 'derived_first_met' | 'derived_company_start' | 'derived_birthday'
 
 export interface SpecialDate {
   id: string

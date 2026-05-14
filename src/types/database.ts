@@ -116,7 +116,7 @@ type SpecialDatesInsert = {
   recurring?: boolean
   lead_days?: number | null; silence_days?: number | null
   private_note?: string | null
-  source?: 'manual' | 'derived_first_met' | 'derived_company_start'
+  source?: 'manual' | 'derived_first_met' | 'derived_company_start' | 'derived_birthday'
   created_at?: string; updated_at?: string
 }
 

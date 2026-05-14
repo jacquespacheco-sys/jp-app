@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const SPECIAL_DATE_TYPES = ['celebrate', 'acknowledge', 'silence', 'check_in'] as const
-export const SPECIAL_DATE_SOURCES = ['manual', 'derived_first_met', 'derived_company_start'] as const
+export const SPECIAL_DATE_SOURCES = ['manual', 'derived_first_met', 'derived_company_start', 'derived_birthday'] as const
 
 export const SpecialDateSaveSchema = z.object({
   id: z.string().uuid().optional(),
