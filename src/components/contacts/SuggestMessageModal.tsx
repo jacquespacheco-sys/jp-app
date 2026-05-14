@@ -80,9 +80,18 @@ export function SuggestMessageModal({ contact, onClose }: Props) {
                 value={context}
                 onChange={e => setContext(e.target.value)}
                 placeholder="Ex: vou ligar amanhã pra falar do pitch / quero reaproximar depois de 6 meses sem falar"
-                style={{ minHeight: '70px', marginBottom: '12px' }}
+                style={{ minHeight: '70px', marginBottom: '4px' }}
                 autoFocus
               />
+              <div style={{
+                fontFamily: 'Space Mono, monospace', fontSize: '9px', letterSpacing: '1px',
+                color: context.trim().length < 5 ? 'var(--fg-dim)' : 'var(--accent)',
+                textAlign: 'right', marginBottom: '12px',
+              }}>
+                {context.trim().length < 5
+                  ? `digite ao menos ${5 - context.trim().length} char${5 - context.trim().length === 1 ? '' : 's'} para gerar`
+                  : `${context.length}/500`}
+              </div>
               <label className="task-panel-notes-label" style={{ display: 'block', marginTop: 0 }}>Intenção (opcional)</label>
               <select
                 className="input"
