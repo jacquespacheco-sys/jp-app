@@ -56,7 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  // 2. Sync tasks per list — collect all rows from Google
+  // 2. Pull tasks per list
   type GoogleTaskRow = {
     user_id: string
     project_id: string
@@ -70,6 +70,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const taskRows: GoogleTaskRow[] = []
+  const googleUpdatedById = new Map<string, string>()
 
   for (const list of taskLists) {
     if (!list.id) continue
@@ -99,18 +100,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           synced: true,
           updated_at: new Date().toISOString(),
         })
+        if (t.updated) googleUpdatedById.set(t.id, t.updated)
       }
 
       pageToken = page.nextPageToken ?? undefined
     } while (pageToken)
   }
 
+  console.log(`[tasks-sync] pulled ${taskRows.length} tasks from Google across ${listUpserts.length} lists`)
+
   if (taskRows.length === 0) {
-    return res.status(200).json({ projects: listUpserts.length, tasks_inserted: 0, tasks_updated: 0 })
+    return res.status(200).json({ projects: listUpserts.length, tasks_inserted: 0, tasks_updated: 0, tasks_unchanged: 0 })
   }
 
-  // PASS 1: insert NEW tasks only — ignoreDuplicates evita sobrescrever existentes.
-  // Tasks novas vindas do Google entram com title, notes, status, due_date completos.
+  // PASS 1: insert new tasks only. ignoreDuplicates evita sobrescrever existentes.
   const { error: insertErr } = await supabase
     .from('tasks')
     .upsert(taskRows as never[], { onConflict: 'user_id,google_tasks_id', ignoreDuplicates: true })
@@ -120,45 +123,108 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: insertErr.message })
   }
 
-  // PASS 2: update EXISTING tasks — só campos que Google é a fonte da verdade.
-  // Preserva: areaId, quadrantOverride, context, energy, timeEstimateMin, scheduledAt,
-  //          waitingFor, rrule, parentTaskId, ai_classified, tags, priority, contactId.
-  // Atualiza:  status (done/inbox), due_date, synced. NÃO sobrescreve title nem notes
-  //           — usuário pode ter editado essas coisas localmente.
-  let updated = 0
-  for (const row of taskRows) {
-    const { error: updErr, count } = await supabase
-      .from('tasks')
-      .update(
-        {
-          status: row.status,
-          due_date: row.due_date,
-          synced: true,
-          updated_at: row.updated_at,
-        },
-        { count: 'exact' }
-      )
-      .eq('user_id', row.user_id)
-      .eq('google_tasks_id', row.google_tasks_id)
-      // só atualiza tasks que NÃO foram tocadas localmente recentemente
-      // (heurística: se updated_at local > 60s no futuro de quando o Google foi consultado,
-      // assume que o usuário editou agora e não sobrescreve status/due)
-      // — implementação simples: sempre atualiza, mas só os campos seguros acima
+  // PASS 2: smart merge para tasks já existentes.
+  // Busca o estado local pra decidir o que atualizar baseado em:
+  //   - completion delta (Google done → local done; vice-versa só se local não foi tocado depois)
+  //   - timestamps (updated_at local vs google.updated)
+  // Preserva status granular (next/doing/blocked/waiting/scheduled/someday) quando
+  // o Google só diz needsAction — o app tem mais granularidade que o Google.
+  const googleIds = taskRows.map(r => r.google_tasks_id)
+  const { data: existingRows } = await supabase
+    .from('tasks')
+    .select('id, google_tasks_id, status, due_date, updated_at, archived')
+    .eq('user_id', user.id)
+    .in('google_tasks_id', googleIds)
 
-    if (updErr) {
-      console.error('[tasks-sync] task update error:', updErr.message, row.google_tasks_id)
-      continue
-    }
-    if (count) updated += count
+  const localByGoogleId = new Map<string, {
+    id: string; status: string; due_date: string | null; updated_at: string; archived: boolean
+  }>()
+  for (const r of (existingRows ?? []) as Array<{
+    id: string; google_tasks_id: string; status: string; due_date: string | null; updated_at: string; archived: boolean
+  }>) {
+    localByGoogleId.set(r.google_tasks_id, r)
   }
 
-  // Insertions: count rows that are now in DB but weren't before — não temos contagem direta.
-  // Reportamos quantas eram pra inserir vs quantas foram atualizadas.
-  const inserted = Math.max(0, taskRows.length - updated)
+  let updated = 0
+  let unchanged = 0
+  let inserted = 0
+
+  for (const row of taskRows) {
+    const local = localByGoogleId.get(row.google_tasks_id)
+    if (!local) {
+      inserted++
+      continue
+    }
+
+    if (local.archived) {
+      // Local archivado — Google ainda mostra. Push delete pra Google (best-effort).
+      const taskListId = taskLists.find(l => l.id && projectIdByGoogleId.get(l.id) === row.project_id)?.id
+      if (taskListId) {
+        try {
+          await tasksApi.tasks.delete({ tasklist: taskListId, task: row.google_tasks_id })
+          console.log(`[tasks-sync] deleted from Google: ${row.google_tasks_id} (was archived locally)`)
+        } catch (e) {
+          console.warn('[tasks-sync] delete failed:', e instanceof Error ? e.message : e)
+        }
+      }
+      continue
+    }
+
+    // Decide se Google é "mais novo": se google.updated > local.updated_at, sim.
+    const gUpdated = googleUpdatedById.get(row.google_tasks_id)
+    const googleNewer = !!gUpdated && gUpdated > local.updated_at
+
+    // Status merge inteligente:
+    // - Google done && local !done → trazer pra done
+    // - Google needsAction && local done → reabrir como 'next' (não 'inbox')
+    // - Google needsAction && local granular (next/doing/etc) → manter local
+    let nextStatus: 'done' | 'next' | null = null
+    if (row.status === 'done' && local.status !== 'done' && local.status !== 'cancelled') {
+      if (googleNewer) nextStatus = 'done'
+    } else if (row.status === 'inbox' && local.status === 'done') {
+      if (googleNewer) nextStatus = 'next'
+    }
+
+    // Due date: só aplica se Google é mais novo
+    const dueChanged = googleNewer && row.due_date !== local.due_date
+    const nextDue = dueChanged ? row.due_date : undefined
+
+    const update: { status?: 'done' | 'next'; due_date?: string | null; synced: boolean; updated_at?: string } = {
+      synced: true,
+    }
+    if (nextStatus) update.status = nextStatus
+    if (nextDue !== undefined) update.due_date = nextDue
+
+    if (update.status || update.due_date !== undefined) {
+      update.updated_at = new Date().toISOString()
+      const { error: updErr } = await supabase
+        .from('tasks')
+        .update(update)
+        .eq('user_id', user.id)
+        .eq('google_tasks_id', row.google_tasks_id)
+      if (updErr) {
+        console.error('[tasks-sync] task update error:', updErr.message, row.google_tasks_id)
+        continue
+      }
+      updated++
+    } else {
+      // Só marca como synced (sem mexer em updated_at pra não invalidar conflitos futuros)
+      await supabase
+        .from('tasks')
+        .update({ synced: true })
+        .eq('user_id', user.id)
+        .eq('google_tasks_id', row.google_tasks_id)
+      unchanged++
+    }
+  }
+
+  console.log(`[tasks-sync] inserted=${inserted} updated=${updated} unchanged=${unchanged}`)
 
   return res.status(200).json({
     projects: listUpserts.length,
+    tasks_pulled: taskRows.length,
     tasks_inserted: inserted,
     tasks_updated: updated,
+    tasks_unchanged: unchanged,
   })
 }
