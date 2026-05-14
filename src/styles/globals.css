@@ -1236,6 +1236,20 @@ html, body {
   color: var(--danger); font-family: 'Space Mono', monospace;
   font-size: 10px; margin-top: 6px; letter-spacing: 1px;
 }
+.quick-add-preview {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+}
+.quick-add-chip {
+  font-family: 'Space Mono', monospace; font-size: 9px;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 3px 8px; background: var(--bg-elevated);
+  border: 1px solid var(--border); color: var(--fg-muted);
+}
+.quick-add-chip.unresolved { color: var(--danger); border-color: var(--danger); opacity: 0.7; }
+.quick-add-search {
+  display: flex; gap: 8px; align-items: center; margin-top: 8px;
+  padding-top: 8px; border-top: 1px solid var(--border-light);
+}
 @keyframes toast-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* ---------- Inbox view ---------- */
