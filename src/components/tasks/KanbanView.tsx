@@ -1,5 +1,9 @@
 import { useState, useEffect, memo } from 'react'
-import { DndContext, type DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import {
+  DndContext, type DragEndEvent,
+  MouseSensor, TouchSensor, KeyboardSensor,
+  useSensor, useSensors,
+} from '@dnd-kit/core'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import type { Task, Project, Area, Quadrant, TaskContext, HorizonLvl } from '../../types/domain.ts'
 import { QUADRANT_COLORS, QUADRANT_LABELS } from '../../types/domain.ts'
@@ -135,7 +139,11 @@ export function KanbanView({ tasks, projects, areas, onOpen, onStatusChange, onQ
     try { window.localStorage.setItem('jp_kanban_mode', mode) } catch { /* noop */ }
   }, [mode])
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 6 } }),
+    useSensor(KeyboardSensor),
+  )
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event

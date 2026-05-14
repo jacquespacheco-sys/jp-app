@@ -159,6 +159,37 @@ export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify
     }
   }
 
+  const handleMarkDone = async () => {
+    if (!task.id) return
+    setSaving(true)
+    try {
+      const input: TaskSaveInput = {
+        id: task.id,
+        title: title.trim() || task.title,
+        notes,
+        status: 'done',
+        priority,
+        projectId,
+        tags: tagsList,
+        dependsOn: task.dependsOn,
+      }
+      if (areaId) input.areaId = areaId
+      if (context) input.context = context
+      if (energy !== undefined) input.energy = energy
+      if (timeEst !== undefined && timeEst > 0) input.timeEstimateMin = timeEst
+      const dueIso = localInputToIso(dueAt)
+      if (dueIso) input.dueAt = dueIso
+      const schedIso = localInputToIso(scheduledAt)
+      if (schedIso) input.scheduledAt = schedIso
+      if (waitingFor.trim()) input.waitingFor = waitingFor.trim()
+      if (rrule.trim()) input.rrule = rrule.trim()
+      await onSave(input)
+      onClose()
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const handleClassify = async () => {
     if (!onClassify || !task.id) return
     setClassifying(true)
@@ -478,6 +509,11 @@ export function TaskPanel({ task, projects, areas, onSave, onArchive, onClassify
             {!isCreate && task.id && (
               <button className="btn btn-ghost" onClick={() => setConfirmOpen(true)} disabled={saving}>
                 Arquivar
+              </button>
+            )}
+            {!isCreate && task.id && status !== 'done' && (
+              <button className="btn btn-ghost" onClick={() => { void handleMarkDone() }} disabled={saving || !title.trim()}>
+                Concluir
               </button>
             )}
             <button className="btn btn-accent" onClick={() => { void handleSave() }} disabled={saving || !title.trim()}>

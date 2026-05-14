@@ -41,7 +41,13 @@ export function useTasks() {
   const updateStatus = useCallback(async (id: string, status: Task['status']) => {
     const task = tasks.find(t => t.id === id)
     if (!task) return
-    await save({ ...task, id: task.id, projectId: task.projectId, status })
+    setTasks(prev => prev.map(t => (t.id === id ? { ...t, status } : t)))
+    try {
+      await save({ ...task, id: task.id, projectId: task.projectId, status })
+    } catch (e) {
+      setTasks(prev => prev.map(t => (t.id === id ? task : t)))
+      throw e
+    }
   }, [tasks, save])
 
   const classify = useCallback(async (taskId: string): Promise<TaskClassifyResult> => {
