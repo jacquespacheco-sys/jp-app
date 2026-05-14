@@ -27,7 +27,7 @@ export function ProjectsCard({ projects, areas }: Props) {
             const area = areas.find(a => a.id === p.areaId)
             const accent = p.resolvedQuadrant
               ? QUADRANT_COLORS[p.resolvedQuadrant]
-              : (area ? QUADRANT_COLORS[area.quadrant] : '#9ca3af')
+              : (area ? QUADRANT_COLORS[area.quadrant] : 'var(--fg-muted)')
             const total = p.taskCount
             const done = total - p.taskOpenCount
             const pct = total > 0 ? Math.round((done / total) * 100) : 0

@@ -10,10 +10,10 @@ const STATUS_LABELS: Record<ProjectStatusType, string> = {
   active: 'ativo', on_hold: 'pausado', someday: 'algum dia', done: 'concluído', archived: 'arquivado',
 }
 const STATUS_COLORS: Record<ProjectStatusType, string> = {
-  active: '#7dd3fc', on_hold: '#9ca3af', someday: '#a78bfa', done: '#34d399', archived: '#64748b',
+  active: '#5D8194', on_hold: '#8A8075', someday: '#6B5E72', done: '#5C8159', archived: '#A99E91',
 }
 const KIND_LABELS: Record<ProjectKind, string> = { outcome: 'outcome', evergreen: 'evergreen' }
-const KIND_COLORS: Record<ProjectKind, string> = { outcome: '#7dd3fc', evergreen: '#9ca3af' }
+const KIND_COLORS: Record<ProjectKind, string> = { outcome: '#5D8194', evergreen: '#8A8075' }
 const HORIZON_LABELS: Record<HorizonLvl, string> = {
   H0: 'H0 · agora', H1: 'H1 · esta semana', H2: 'H2 · trimestre',
   H3: 'H3 · 1-2 anos', H4: 'H4 · 3-5 anos', H5: 'H5 · vida',

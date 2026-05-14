@@ -10,7 +10,7 @@ import type { Project } from '../types/domain.ts'
 type StatusFilter = 'active' | 'on_hold' | 'someday' | 'done'
 
 const EMPTY_PROJECT: Project = {
-  id: '', userId: '', name: '', color: '#7dd3fc',
+  id: '', userId: '', name: '', color: '#CFE3E8',
   archived: false, createdAt: '', updatedAt: '',
   kind: 'outcome', status: 'active', horizon: 'H1',
   position: 0, taskCount: 0, taskOpenCount: 0, childCount: 0,

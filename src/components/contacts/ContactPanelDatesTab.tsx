@@ -110,7 +110,7 @@ export function ContactPanelDatesTab({ contactId }: Props) {
             style={{ marginBottom: '8px' }}
           />
           {error && (
-            <div style={{ fontSize: '10px', color: 'var(--danger)', marginBottom: '8px', fontFamily: 'Space Mono, monospace', letterSpacing: '0.5px' }}>
+            <div style={{ fontSize: '10px', color: 'var(--danger)', marginBottom: '8px', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px' }}>
               {error}
             </div>
           )}
@@ -124,13 +124,13 @@ export function ContactPanelDatesTab({ contactId }: Props) {
       )}
 
       {loading && (
-        <div style={{ fontSize: '11px', color: 'var(--fg-dim)', fontFamily: 'Space Mono, monospace', letterSpacing: '1px' }}>
+        <div style={{ fontSize: '11px', color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>
           Carregando…
         </div>
       )}
 
       {!loading && specialDates.length === 0 && (
-        <div style={{ fontSize: '11px', color: 'var(--fg-dim)', fontFamily: 'Space Mono, monospace', letterSpacing: '1px' }}>
+        <div style={{ fontSize: '11px', color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>
           Nenhuma data registrada
         </div>
       )}
@@ -139,7 +139,7 @@ export function ContactPanelDatesTab({ contactId }: Props) {
         <div key={d.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--border-light)', display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'flex-start' }}>
           <div>
             <div style={{ fontSize: '12px', color: 'var(--fg)', marginBottom: '2px' }}>{d.label}</div>
-            <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>
               {TYPE_LABEL[d.type]} · {d.dateAnniversary ?? d.dateFull}
               {d.leadDays != null ? ` · -${d.leadDays}d` : ''}
             </div>

@@ -34,12 +34,12 @@ function MandalaQuadrant({
         alignItems: pos.col === 0 ? 'flex-start' : 'flex-end',
         justifyContent: pos.row === 0 ? 'flex-start' : 'flex-end',
         textAlign: pos.col === 0 ? 'left' : 'right',
-        color: '#0a0a0a',
+        color: 'var(--fg)',
         minHeight: '160px',
         position: 'relative',
       }}
     >
-      <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', letterSpacing: '2px', opacity: 0.7 }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '2px', opacity: 0.7 }}>
         {pos.corner} · {quadrant}
       </div>
       <div style={{ fontSize: '11px', fontWeight: 700, marginTop: '4px', maxWidth: '120px' }}>
@@ -49,7 +49,7 @@ function MandalaQuadrant({
       <div style={{ fontSize: '32px', fontWeight: 800, lineHeight: 1 }}>
         {completed}
       </div>
-      <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '10px', letterSpacing: '1px', marginTop: '4px' }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '1px', marginTop: '4px' }}>
         {minutes > 0 ? `${minutes}min` : 'tarefas/7d'}
       </div>
     </div>
@@ -107,7 +107,7 @@ export function DashboardPage() {
 
       <div className="content">
         <div style={{ marginBottom: '20px' }}>
-          <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', letterSpacing: '2px', color: 'var(--fg-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '2px', color: 'var(--fg-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>
             Últimos 7 dias
           </div>
           <div style={{ display: 'flex', gap: '20px', alignItems: 'baseline' }}>
@@ -158,7 +158,7 @@ export function DashboardPage() {
               <div key={a.areaId} style={{ padding: '12px 0', borderBottom: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: QUADRANT_COLORS[a.quadrant], flexShrink: 0 }} />
                 <div style={{ flex: 1, fontSize: '13px' }}>{a.name}</div>
-                <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '0.5px' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '0.5px' }}>
                   {a.completed} ✓ · {a.open} ○
                 </div>
               </div>

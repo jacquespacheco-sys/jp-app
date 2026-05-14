@@ -50,7 +50,7 @@ export function ContactRow({ contact, onClick }: Props) {
             {visible.map(c => <CategoryChip key={c.id} category={c} size="sm" />)}
             {overflow > 0 && (
               <span style={{
-                fontFamily: 'Space Mono, monospace', fontSize: '9px',
+                fontFamily: 'var(--font-mono)', fontSize: '9px',
                 color: 'var(--fg-dim)', letterSpacing: '1px',
                 padding: '2px 6px', alignSelf: 'center',
               }}>
@@ -62,7 +62,7 @@ export function ContactRow({ contact, onClick }: Props) {
       </div>
       {contact.phase && (
         <div style={{
-          fontFamily: 'Space Mono, monospace', fontSize: '9px',
+          fontFamily: 'var(--font-mono)', fontSize: '9px',
           letterSpacing: '1px', padding: '3px 7px', border: '1px solid var(--border)',
           color: 'var(--fg-muted)', textTransform: 'uppercase', whiteSpace: 'nowrap',
         }}>

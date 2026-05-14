@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { NoteTag } from '../../types/domain.ts'
 
-const PRESET_COLORS = ['#7dd3fc', '#ff6b6b', '#4ecdc4', '#a78bfa', '#f9ca24', '#f472b6', '#34d399', '#fb923c', '#94a3b8', '#5eead4']
+const PRESET_COLORS = ['#DFD0EC', '#F5D5DC', '#CFE3E8', '#9B6B73', '#F5E8C3', '#F5D5C3', '#C9DDC9', '#F0CFA8', '#A99E91', '#5C8159']
 
 interface Props {
   tags: NoteTag[]
@@ -11,7 +11,7 @@ interface Props {
 
 export function TagManager({ tags, onSave, onDelete }: Props) {
   const [name, setName] = useState('')
-  const [color, setColor] = useState(PRESET_COLORS[0] ?? '#7dd3fc')
+  const [color, setColor] = useState(PRESET_COLORS[0] ?? '#DFD0EC')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
@@ -26,7 +26,7 @@ export function TagManager({ tags, onSave, onDelete }: Props) {
     setSaving(true)
     try {
       await onSave({ ...(editingId ? { id: editingId } : {}), name: name.trim(), color })
-      setName(''); setColor(PRESET_COLORS[0] ?? '#7dd3fc'); setEditingId(null)
+      setName(''); setColor(PRESET_COLORS[0] ?? '#DFD0EC'); setEditingId(null)
     } finally {
       setSaving(false)
     }
@@ -71,7 +71,7 @@ export function TagManager({ tags, onSave, onDelete }: Props) {
           {editingId ? 'Salvar' : 'Criar'}
         </button>
         {editingId && (
-          <button className="btn btn-ghost" style={{ fontSize: '11px', padding: '6px 10px' }} onClick={() => { setEditingId(null); setName(''); setColor(PRESET_COLORS[0] ?? '#7dd3fc') }}>×</button>
+          <button className="btn btn-ghost" style={{ fontSize: '11px', padding: '6px 10px' }} onClick={() => { setEditingId(null); setName(''); setColor(PRESET_COLORS[0] ?? '#DFD0EC') }}>×</button>
         )}
       </div>
     </div>

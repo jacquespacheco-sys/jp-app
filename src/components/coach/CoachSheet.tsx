@@ -131,7 +131,7 @@ export function CoachSheet({ open, onClose, onOpenProfile }: Props) {
             style={{ background: 'none', border: 'none', color: 'var(--fg-dim)', fontSize: '20px', cursor: 'pointer', padding: '4px' }}
           >×</button>
           <div style={{
-            fontFamily: 'Space Mono, monospace',
+            fontFamily: 'var(--font-mono)',
             fontSize: '11px',
             letterSpacing: '2px',
             color: 'var(--fg)',
@@ -174,7 +174,7 @@ export function CoachSheet({ open, onClose, onOpenProfile }: Props) {
           {grouped.map(g => (
             <div key={g.separator}>
               <div style={{
-                fontFamily: 'Space Mono, monospace',
+                fontFamily: 'var(--font-mono)',
                 fontSize: '9px',
                 letterSpacing: '2px',
                 color: 'var(--fg-dim)',

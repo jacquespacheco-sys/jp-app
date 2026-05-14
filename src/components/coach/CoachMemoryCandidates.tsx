@@ -19,7 +19,7 @@ export function CoachMemoryCandidates({ candidates, onAccept, onDismiss }: {
       background: 'var(--bg-secondary)',
     }}>
       <div style={{
-        fontFamily: 'Space Mono, monospace',
+        fontFamily: 'var(--font-mono)',
         fontSize: '9px',
         letterSpacing: '2px',
         color: 'var(--fg-dim)',
@@ -40,7 +40,7 @@ export function CoachMemoryCandidates({ candidates, onAccept, onDismiss }: {
             marginBottom: '4px',
           }}>
             <span style={{
-              fontFamily: 'Space Mono, monospace',
+              fontFamily: 'var(--font-mono)',
               fontSize: '9px',
               color: 'var(--accent)',
               textTransform: 'uppercase',

@@ -42,7 +42,7 @@ export function FollowupsView({ contacts, onOpen }: Props) {
           <div key={c.id} style={{ position: 'relative' }}>
             <div style={{
               position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
-              fontFamily: 'Space Mono, monospace', fontSize: '9px', letterSpacing: '1px',
+              fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '1px',
               color, textTransform: 'uppercase',
             }}>
               {label}

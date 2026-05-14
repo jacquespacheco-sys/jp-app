@@ -39,7 +39,7 @@ function BriefingView({ briefing }: { briefing: Briefing }) {
           margin: '20px 0',
         }}>
           <div style={{
-            fontFamily: 'Space Mono, monospace',
+            fontFamily: 'var(--font-mono)',
             fontSize: '9px',
             letterSpacing: '2px',
             color: 'var(--fg-dim)',
@@ -115,7 +115,7 @@ function BriefingView({ briefing }: { briefing: Briefing }) {
         </div>
       )}
 
-      <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-dim)', letterSpacing: '1px', marginTop: '16px' }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-dim)', letterSpacing: '1px', marginTop: '16px' }}>
         {format(parseISO(briefing.createdAt), "d 'de' MMMM 'às' HH:mm", { locale: ptBR })}
         {briefing.tokenCount && ` · ${briefing.tokenCount.toLocaleString()} tokens`}
       </div>
@@ -178,7 +178,7 @@ export function BriefingPage() {
                 Nenhum briefing gerado hoje
               </div>
               {error && (
-                <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '11px', color: 'var(--danger)', marginBottom: '16px', padding: '10px 12px', border: '1px solid var(--danger)' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--danger)', marginBottom: '16px', padding: '10px 12px', border: '1px solid var(--danger)' }}>
                   {error}
                 </div>
               )}
@@ -193,7 +193,7 @@ export function BriefingPage() {
               <BriefingView briefing={todayBriefing} />
               <div className="content" style={{ textAlign: 'center', paddingTop: 0 }}>
                 {error && (
-                  <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '11px', color: 'var(--danger)', marginBottom: '16px', padding: '10px 12px', border: '1px solid var(--danger)' }}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--danger)', marginBottom: '16px', padding: '10px 12px', border: '1px solid var(--danger)' }}>
                     {error}
                   </div>
                 )}
@@ -215,7 +215,7 @@ export function BriefingPage() {
           {history.map(b => (
             <div key={b.id} style={{ padding: '14px 0', borderBottom: '1px solid var(--border-light)', cursor: 'pointer' }}
               onClick={() => { setTodayBriefing(b); setTab('Hoje') }}>
-              <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '10px', letterSpacing: '1.5px', color: 'var(--fg-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '1.5px', color: 'var(--fg-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
                 {format(parseISO(b.date), "EEEE, d 'de' MMMM", { locale: ptBR })}
               </div>
               <div style={{ fontSize: '13px', fontWeight: 500 }}>{b.highlight}</div>

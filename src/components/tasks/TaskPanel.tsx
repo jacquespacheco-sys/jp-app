@@ -46,7 +46,7 @@ const PRIORITY_LABELS: Record<Task['priority'], string> = {
 }
 
 const PRIORITY_COLORS: Record<Task['priority'], string> = {
-  high: '#ef4444', med: '#fbbf24', low: '#94a3b8',
+  high: '#9B6B73', med: '#8C7536', low: '#8A8075',
 }
 
 const CONTEXT_LABELS: Record<TaskContext, string> = {
@@ -55,12 +55,12 @@ const CONTEXT_LABELS: Record<TaskContext, string> = {
 }
 
 const CONTEXT_COLORS: Record<TaskContext, string> = {
-  deep: '#a78bfa',
-  shallow: '#9ca3af',
-  social: '#fb923c',
-  criativo: '#f472b6',
-  somatico: '#34d399',
-  offline: '#64748b',
+  deep: '#6B5E72',
+  shallow: '#8A8075',
+  social: '#A06C4C',
+  criativo: '#9B6B73',
+  somatico: '#5C8159',
+  offline: '#A99E91',
 }
 
 const QUADRANT_LABELS_SHORT: Record<Quadrant, string> = {

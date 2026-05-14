@@ -124,7 +124,7 @@ export function ContactsOnboardingPage() {
       <div>
         <Topbar title="Classificação Carnegie" actions={actions} />
         <div className="content" style={{ padding: '32px 16px', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '32px', letterSpacing: '3px', marginBottom: '12px' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '32px', letterSpacing: '3px', marginBottom: '12px' }}>
             Fila concluída
           </div>
           <div style={{ fontSize: '13px', color: 'var(--fg-muted)', marginBottom: '20px' }}>
@@ -157,10 +157,10 @@ export function ContactsOnboardingPage() {
         padding: '12px 16px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-          <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
             {index + 1} de {total} · {totalRemaining - index} restando
           </div>
-          <div style={{ display: 'flex', gap: '8px', fontFamily: 'Space Mono, monospace', fontSize: '9px', letterSpacing: '1px', textTransform: 'uppercase' }}>
+          <div style={{ display: 'flex', gap: '8px', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '1px', textTransform: 'uppercase' }}>
             <span style={{ color: innerOverLimit ? 'var(--danger)' : innerAtLimit ? 'var(--chip-orange-fg)' : 'var(--fg-muted)' }}>
               Inner {counts.inner}/5
             </span>
@@ -182,7 +182,7 @@ export function ContactsOnboardingPage() {
         <div style={{ border: '1px solid var(--border)', padding: '20px', background: 'var(--bg-elevated)' }}>
           {/* Identity */}
           <div style={{ marginBottom: '14px' }}>
-            <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '24px', letterSpacing: '2px', marginBottom: '2px' }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '24px', letterSpacing: '2px', marginBottom: '2px' }}>
               {current.firstName}{current.lastName ? ` ${current.lastName}` : ''}
             </div>
             <div style={{ fontSize: '12px', color: 'var(--fg-muted)' }}>
@@ -191,7 +191,7 @@ export function ContactsOnboardingPage() {
           </div>
 
           {/* Context */}
-          <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '1px', marginBottom: '14px' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '1px', marginBottom: '14px' }}>
             {current.lastInteractionAt
               ? `Última: ${new Date(current.lastInteractionAt).toLocaleDateString('pt-BR')}`
               : 'Sem interação registrada'}
@@ -202,7 +202,7 @@ export function ContactsOnboardingPage() {
 
           {/* Suggestion */}
           {current.suggestedTier && !tierChoice && (
-            <div style={{ fontSize: '11px', color: 'var(--fg-muted)', padding: '8px 10px', background: 'var(--accent-faint)', border: '1px solid var(--accent-soft)', marginBottom: '16px', fontFamily: 'Space Mono, monospace', letterSpacing: '1px' }}>
+            <div style={{ fontSize: '11px', color: 'var(--fg-muted)', padding: '8px 10px', background: 'var(--accent-faint)', border: '1px solid var(--accent-soft)', marginBottom: '16px', fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>
               Sugerido: <strong style={{ color: 'var(--accent-ink)' }}>{current.suggestedTier.toUpperCase()}</strong>
             </div>
           )}
@@ -220,7 +220,7 @@ export function ContactsOnboardingPage() {
                   color: tierChoice === t.tier ? 'var(--accent-ink)' : t.color,
                   border: `1px solid ${tierChoice === t.tier ? 'var(--accent)' : 'var(--border)'}`,
                   cursor: 'pointer',
-                  fontFamily: 'Space Mono, monospace',
+                  fontFamily: 'var(--font-mono)',
                   fontSize: '10px',
                   letterSpacing: '1px',
                   textTransform: 'uppercase',
@@ -228,7 +228,7 @@ export function ContactsOnboardingPage() {
                 }}
                 title={t.hint}
               >
-                <span style={{ fontSize: '14px', fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '2px' }}>
+                <span style={{ fontSize: '14px', fontFamily: 'var(--font-display)', letterSpacing: '2px' }}>
                   {idx + 1}
                 </span>
                 {t.label}
@@ -286,7 +286,7 @@ export function ContactsOnboardingPage() {
                 if (opts.length === 0) return null
                 return (
                   <div key={dim.id} style={{ marginBottom: '8px' }}>
-                    <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>
                       {dim.label}
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
@@ -340,7 +340,7 @@ export function ContactsOnboardingPage() {
           </button>
         </div>
 
-        <div style={{ marginTop: '20px', fontSize: '9px', color: 'var(--fg-dim)', fontFamily: 'Space Mono, monospace', letterSpacing: '1px', textAlign: 'center' }}>
+        <div style={{ marginTop: '20px', fontSize: '9px', color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '1px', textAlign: 'center' }}>
           Atalhos: 1-5 tier · ← anterior · → / enter salvar
         </div>
       </div>
@@ -351,7 +351,7 @@ export function ContactsOnboardingPage() {
             background: 'var(--bg-elevated)', border: '1px solid var(--danger)',
             padding: '24px', maxWidth: '420px', margin: '20vh auto',
           }}>
-            <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '10px', color: 'var(--danger)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '10px' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--danger)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '10px' }}>
               Inner já tem {counts.inner} pessoas
             </div>
             <div style={{ fontSize: '13px', color: 'var(--fg)', marginBottom: '16px', lineHeight: 1.5 }}>
@@ -363,7 +363,7 @@ export function ContactsOnboardingPage() {
               </button>
               <button
                 className="btn btn-accent"
-                style={{ flex: 1, justifyContent: 'center', background: 'var(--danger)', color: '#fff' }}
+                style={{ flex: 1, justifyContent: 'center', background: 'var(--danger)', color: 'var(--bg)' }}
                 onClick={() => { void doSave() }}
                 disabled={saving}
               >

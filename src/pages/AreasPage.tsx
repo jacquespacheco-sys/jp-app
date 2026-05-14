@@ -103,7 +103,7 @@ function AreaEditor({ area, parentOptions, onSave, onCancel }: EditorProps) {
 
       <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', color: 'var(--fg-muted)' }}>
         Cor (hex)
-        <input value={color} onChange={e => setColor(e.target.value)} placeholder="#a8ff00"
+        <input value={color} onChange={e => setColor(e.target.value)} placeholder="#DFD0EC"
           style={{ padding: '8px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--fg)', fontFamily: 'inherit', fontSize: '13px' }} />
       </label>
 
@@ -203,7 +203,7 @@ export function AreasPage() {
                   <div style={{ padding: '12px 0', borderBottom: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: '13px', fontWeight: 600 }}>{a.name}</div>
-                      <div style={{ fontSize: '10px', fontFamily: 'Space Mono, monospace', color: 'var(--fg-dim)', letterSpacing: '0.5px' }}>
+                      <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--fg-dim)', letterSpacing: '0.5px' }}>
                         /{a.slug}{a.icon ? ` · ${a.icon}` : ''}
                       </div>
                       {a.visionH4 && (
@@ -231,7 +231,7 @@ export function AreasPage() {
                         <span style={{ fontSize: '11px', color: 'var(--fg-muted)' }}>↳</span>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: '12px', fontWeight: 500 }}>{child.name}</div>
-                          <div style={{ fontSize: '10px', fontFamily: 'Space Mono, monospace', color: 'var(--fg-dim)' }}>/{child.slug}</div>
+                          <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--fg-dim)' }}>/{child.slug}</div>
                         </div>
                         <button className="btn btn-ghost" onClick={() => setEditing(child)} style={{ fontSize: '10px' }}>Editar</button>
                         <button onClick={() => setConfirmArchive(child)} title="Arquivar" style={{ background: 'none', border: 'none', color: 'var(--fg-dim)', cursor: 'pointer', fontSize: '16px' }}>×</button>

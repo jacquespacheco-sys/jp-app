@@ -25,8 +25,8 @@ const PRIORITY_ORDER: Record<Task['priority'], number> = { high: 0, med: 1, low:
 
 const CONTEXTS: TaskContext[] = ['deep', 'shallow', 'social', 'criativo', 'somatico', 'offline']
 const CONTEXT_COLORS: Record<TaskContext, string> = {
-  deep: '#a78bfa', shallow: '#9ca3af', social: '#fb923c',
-  criativo: '#f472b6', somatico: '#34d399', offline: '#64748b',
+  deep: '#6B5E72', shallow: '#8A8075', social: '#A06C4C',
+  criativo: '#9B6B73', somatico: '#5C8159', offline: '#A99E91',
 }
 
 interface Filter {

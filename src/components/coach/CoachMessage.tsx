@@ -17,7 +17,7 @@ export function CoachMessage({ entry, streaming }: {
   return (
     <div style={{ padding: '12px 0', display: 'flex', flexDirection: 'column', alignItems: isUser ? 'flex-end' : 'flex-start' }}>
       <div style={{
-        fontFamily: 'Space Mono, monospace',
+        fontFamily: 'var(--font-mono)',
         fontSize: '9px',
         letterSpacing: '1px',
         color: 'var(--fg-dim)',

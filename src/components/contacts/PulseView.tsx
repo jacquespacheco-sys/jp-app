@@ -121,11 +121,11 @@ export function PulseView({ onOpenContact, filter }: Props) {
             <div style={{ fontSize: '13px', color: 'var(--fg)', marginBottom: '2px' }}>
               {unclassifiedCount} contatos sem classificar
             </div>
-            <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>
               Revisar tier + hooks
             </div>
           </div>
-          <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '11px', color: 'var(--accent-ink)', letterSpacing: '1.5px' }}>→</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent-ink)', letterSpacing: '1.5px' }}>→</span>
         </div>
       )}
 
@@ -136,15 +136,15 @@ export function PulseView({ onOpenContact, filter }: Props) {
         padding: '16px',
         marginBottom: '24px',
       }}>
-        <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '6px' }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '6px' }}>
           Princípio do mês {currentPrinciple ? `· ${currentPrinciple.month}` : ''}
         </div>
         {currentPrinciple ? (
           <>
-            <div style={{ fontSize: '22px', fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '2px', marginBottom: '4px' }}>
+            <div style={{ fontSize: '22px', fontFamily: 'var(--font-display)', letterSpacing: '2px', marginBottom: '4px' }}>
               {currentPrinciple.principle}
             </div>
-            <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '1px', marginBottom: currentPrinciple.reflection ? '10px' : 0 }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '1px', marginBottom: currentPrinciple.reflection ? '10px' : 0 }}>
               {appliedCount}/{currentPrinciple.targetApplications} aplicações no mês
               {appliedCount >= currentPrinciple.targetApplications && ' ✓'}
             </div>
@@ -205,11 +205,11 @@ export function PulseView({ onOpenContact, filter }: Props) {
                 padding: '10px',
                 background: 'var(--bg-elevated)',
               }}>
-                <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>
                   {d.daysUntil === 0 ? 'Hoje' : d.daysUntil === 1 ? 'Amanhã' : `Em ${d.daysUntil}d`}
                 </div>
                 <div style={{ fontSize: '13px', color: 'var(--fg)', marginBottom: '2px' }}>{d.label}</div>
-                <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-dim)', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-dim)', letterSpacing: '1px', textTransform: 'uppercase' }}>
                   {TYPE_LABEL[d.type]}
                 </div>
               </div>
@@ -248,7 +248,7 @@ export function PulseView({ onOpenContact, filter }: Props) {
               <RowMain>
                 <RowName>
                   {x.contact.firstName}{x.contact.lastName ? ` ${x.contact.lastName}` : ''}
-                  <span style={{ marginLeft: '8px', fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                  <span style={{ marginLeft: '8px', fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>
                     {x.contact.tier}
                   </span>
                 </RowName>
@@ -269,14 +269,14 @@ export function PulseView({ onOpenContact, filter }: Props) {
 function Stat({ label, value, subtitle }: { label: string; value: number; subtitle?: string }) {
   return (
     <div style={{ border: '1px solid var(--border)', padding: '12px', background: 'var(--bg-elevated)' }}>
-      <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '6px' }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '6px' }}>
         {label}
       </div>
-      <div style={{ fontSize: '28px', fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '2px', color: value > 0 ? 'var(--accent)' : 'var(--fg-muted)' }}>
+      <div style={{ fontSize: '28px', fontFamily: 'var(--font-display)', letterSpacing: '2px', color: value > 0 ? 'var(--accent)' : 'var(--fg-muted)' }}>
         {value}
       </div>
       {subtitle && (
-        <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '8px', color: 'var(--fg-dim)', letterSpacing: '1px', textTransform: 'uppercase', marginTop: '3px' }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--fg-dim)', letterSpacing: '1px', textTransform: 'uppercase', marginTop: '3px' }}>
           {subtitle}
         </div>
       )}
@@ -287,7 +287,7 @@ function Stat({ label, value, subtitle }: { label: string; value: number; subtit
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: '24px' }}>
-      <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '10px' }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '10px' }}>
         {title}
       </div>
       {children}
@@ -324,7 +324,7 @@ function RowName({ children }: { children: React.ReactNode }) {
 
 function RowDetail({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-dim)', letterSpacing: '1px' }}>
+    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-dim)', letterSpacing: '1px' }}>
       {children}
     </div>
   )
@@ -332,7 +332,7 @@ function RowDetail({ children }: { children: React.ReactNode }) {
 
 function RowMeta({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>
+    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>
       {children}
     </div>
   )
@@ -340,7 +340,7 @@ function RowMeta({ children }: { children: React.ReactNode }) {
 
 function EmptyLine({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ fontSize: '12px', color: 'var(--fg-dim)', fontFamily: 'Space Mono, monospace', letterSpacing: '1px', padding: '8px 0' }}>
+    <div style={{ fontSize: '12px', color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '1px', padding: '8px 0' }}>
       {children}
     </div>
   )

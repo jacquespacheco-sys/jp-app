@@ -12,7 +12,7 @@ export function ProjectRow({ project, areas, isChild, onSelect }: Props) {
   const area = areas.find(a => a.id === project.areaId)
   const accent = project.resolvedQuadrant
     ? QUADRANT_COLORS[project.resolvedQuadrant]
-    : (area ? QUADRANT_COLORS[area.quadrant] : '#9ca3af')
+    : (area ? QUADRANT_COLORS[area.quadrant] : 'var(--fg-muted)')
 
   const total = project.taskCount
   const open = project.taskOpenCount
