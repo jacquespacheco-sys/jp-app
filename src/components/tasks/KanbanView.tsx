@@ -2,7 +2,7 @@ import { useState, useEffect, memo } from 'react'
 import {
   DndContext, type DragEndEvent,
   MouseSensor, TouchSensor, KeyboardSensor,
-  useSensor, useSensors,
+  useSensor, useSensors, pointerWithin,
 } from '@dnd-kit/core'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import type { Task, Project, Area, Quadrant, TaskContext, HorizonLvl } from '../../types/domain.ts'
@@ -61,9 +61,16 @@ const CONTEXT_COLUMNS: { key: TaskContext; label: string }[] = [
 interface CardProps { task: Task; project: Project | undefined; onOpen: (task: Task) => void }
 
 const KanbanCard = memo(function KanbanCard({ task, project, onOpen }: CardProps) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: task.id })
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: task.id })
   const q = task.resolvedQuadrant
   const showStatus = task.status !== 'next' && task.status !== 'inbox'
+
+  const style: React.CSSProperties = {
+    ...(q ? { borderLeft: `3px solid ${QUADRANT_COLORS[q]}` } : {}),
+    ...(transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : {}),
+    ...(isDragging ? { opacity: 0.4, zIndex: 999, position: 'relative' as const } : {}),
+    touchAction: 'none',
+  }
 
   return (
     <div
@@ -71,8 +78,8 @@ const KanbanCard = memo(function KanbanCard({ task, project, onOpen }: CardProps
       className={`kanban-card${isDragging ? ' dragging' : ''}`}
       {...listeners}
       {...attributes}
-      onClick={() => onOpen(task)}
-      style={q ? { borderLeft: `3px solid ${QUADRANT_COLORS[q]}` } : undefined}
+      onClick={() => { if (!isDragging) onOpen(task) }}
+      style={style}
     >
       {project && <div className="kanban-card-project">{project.name}</div>}
       <div className="kanban-card-title">{task.title}</div>
@@ -250,7 +257,7 @@ export function KanbanView({ tasks, projects, areas, onOpen, onStatusChange, onQ
       </div>
 
       {droppable ? (
-        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>{body}</DndContext>
+        <DndContext sensors={sensors} collisionDetection={pointerWithin} onDragEnd={handleDragEnd}>{body}</DndContext>
       ) : body}
     </div>
   )

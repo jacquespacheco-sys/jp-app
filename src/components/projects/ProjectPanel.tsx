@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
-import type { Project, Area, HorizonLvl, ProjectKind, ProjectStatusType } from '../../types/domain.ts'
+import type { Project, Area, HorizonLvl, ProjectKind, ProjectStatusType, Quadrant } from '../../types/domain.ts'
 import type { ProjectSaveInput } from '../../../api/_schemas/project.ts'
 import { ConfirmDialog } from '../common/ConfirmDialog.tsx'
 import { Chip } from '../common/Chip.tsx'
 import { IconCalendar } from '../common/Icon.tsx'
-import { QUADRANT_COLORS } from '../../types/domain.ts'
+import { QUADRANT_COLORS, QUADRANT_LABELS } from '../../types/domain.ts'
+
+const PROJECT_COLORS = ['#DFD0EC', '#F5D5DC', '#CFE3E8', '#F5E8C3', '#F5D5C3', '#C9DDC9', '#9B6B73', '#5C8159', '#A06C4C', '#5D8194']
+const QUADRANT_OPTS: Quadrant[] = ['I', 'IT', 'WE', 'ITS']
 
 const STATUS_LABELS: Record<ProjectStatusType, string> = {
   active: 'ativo', on_hold: 'pausado', someday: 'algum dia', done: 'concluído', archived: 'arquivado',
@@ -43,6 +46,8 @@ export function ProjectPanel({ project, areas, allProjects, onSave, onArchive, o
   const [areaId, setAreaId] = useState<string | undefined>(project.areaId)
   const [parentId, setParentId] = useState<string | undefined>(project.parentId)
   const [targetDate, setTargetDate] = useState(project.targetDate ?? '')
+  const [color, setColor] = useState(project.color || PROJECT_COLORS[0]!)
+  const [quadrantOverride, setQuadrantOverride] = useState<Quadrant | undefined>(project.quadrantOverride)
   const [saving, setSaving] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
 
@@ -50,6 +55,8 @@ export function ProjectPanel({ project, areas, allProjects, onSave, onArchive, o
     setName(project.name); setOutcome(project.outcome ?? ''); setStatus(project.status)
     setKind(project.kind); setHorizon(project.horizon); setAreaId(project.areaId)
     setParentId(project.parentId); setTargetDate(project.targetDate ?? '')
+    setColor(project.color || PROJECT_COLORS[0]!)
+    setQuadrantOverride(project.quadrantOverride)
   }, [project])
 
   const selectedArea = areas.find(a => a.id === areaId)
@@ -65,13 +72,14 @@ export function ProjectPanel({ project, areas, allProjects, onSave, onArchive, o
         kind,
         status,
         horizon,
-        color: project.color,
+        color,
       }
       if (!isCreate && project.id) input.id = project.id
       if (outcome.trim()) input.outcome = outcome.trim()
       if (areaId) input.areaId = areaId
       if (parentId) input.parentId = parentId
       if (targetDate) input.targetDate = targetDate
+      if (quadrantOverride) input.quadrantOverride = quadrantOverride
       await onSave(input)
       onClose()
     } finally {
@@ -201,6 +209,41 @@ export function ProjectPanel({ project, areas, allProjects, onSave, onArchive, o
                   </div>
                 )}
               />
+            </div>
+
+            <div className="chip-row">
+              <Chip
+                label={quadrantOverride ? `${quadrantOverride} · ${QUADRANT_LABELS[quadrantOverride]}` : '+ quadrante'}
+                {...(quadrantOverride ? { style: tinted(QUADRANT_COLORS[quadrantOverride]) } : {})}
+                popover={(close) => (
+                  <div className="popover-list">
+                    <button className="popover-item" onClick={() => { setQuadrantOverride(undefined); close() }}>
+                      herdar da área
+                    </button>
+                    {QUADRANT_OPTS.map(q => (
+                      <button key={q} className="popover-item"
+                        onClick={() => { setQuadrantOverride(q); close() }}
+                        style={{ borderLeft: `3px solid ${QUADRANT_COLORS[q]}` }}>
+                        {q} · {QUADRANT_LABELS[q]}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              />
+            </div>
+
+            <span className="task-panel-notes-label">Cor</span>
+            <div className="color-picker" style={{ marginTop: '8px' }}>
+              {PROJECT_COLORS.map(c => (
+                <button
+                  key={c}
+                  type="button"
+                  className={`color-dot${color === c ? ' selected' : ''}`}
+                  style={{ background: c }}
+                  onClick={() => setColor(c)}
+                  aria-label={`cor ${c}`}
+                />
+              ))}
             </div>
 
             <span className="task-panel-notes-label">Outcome</span>
