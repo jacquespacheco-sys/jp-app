@@ -211,7 +211,7 @@ Total: **15 módulos**, **84+ endpoints**, **11 páginas**, **19 hooks**, **13 m
 | `src/components/common/Icon.tsx` | `IconCalendar`, `IconClock`, `IconPause`, `IconRepeat`, `IconSparkle`, `IconTrash`, `IconArrowRight`, `IconInbox`, `IconPlus`, `EnergyDots` | Sistema de ícones SVG inline |
 | `src/components/common/SyncStatus.tsx` | `<SyncStatus />` | Pill de status de sync (timestamp última sync) |
 | `src/lib/dates.ts` | helpers de data/timezone | Toda formatação/parsing de datas |
-| `src/lib/colors.ts` | `QUADRANT_COLORS`, `QUADRANT_LABELS` | Cores do AQAL (I=roxo, IT=verde, WE=laranja, ITS=azul) |
+| `src/types/domain.ts` | `QUADRANT_COLORS`, `QUADRANT_COLORS_SOFT`, `QUADRANT_COLORS_INK`, `QUADRANT_VARS`, `QUADRANT_LABELS`, `projectColorSoft()` | Cores AQAL — paleta Seda (I=lilás, IT=sage, WE=peach-warm, ITS=sky) |
 | `src/lib/coach.ts` | `COACH_KIND_LABEL` | Label PT de memory kinds (fact/pattern/promise/concern/preference) |
 | `src/lib/taskParser.ts` | `parseInput(text)` → `{ title, priority, dueDate, tags }` | NLP local de quick-add (PT/EN: !alta/!media/!baixa, hoje/amanhã, #tags) |
 | `src/styles/globals.css` | CSS variables + classes utilitárias | Fonte da verdade visual |
@@ -234,22 +234,31 @@ Total: **15 módulos**, **84+ endpoints**, **11 páginas**, **19 hooks**, **13 m
 | `.empty-state` | Estado vazio padrão |
 | `.sync-status` | Pill de timestamp de sync |
 
-### CSS variables (em `:root` + `body.dark`)
+### CSS variables (em `:root` + `body.dark`) — Paleta Seda
+
+> Redesign "ClickUp Seda" aplicado. Plano completo: `JP_App_Redesign_Implementation.md`.
 
 ```
---bg, --bg-elevated, --bg-subtle      cor de fundo
---fg, --fg-muted, --fg-dim             cor de texto
---accent (#7dd3fc light / #a8ff00 dark)    cor de marca
---accent-ink                           cor de texto sobre accent
---accent-soft, --accent-faint          variações
---border, --border-light               separadores
---danger (#d9342b)                     erros/destrutivo
---shadow                               sombras
---overlay-bg                           backdrop de modais
---nav-selected, --sync-green           específicos
+--bg #FBF9F5 / #1A1714        creme-pérola / preto-tinta (light/dark)
+--bg-elevated, --bg-subtle    superfícies elevadas / pílulas-inputs
+--fg #3A352F / #E8DDD0        marrom-tinta / creme claro
+--fg-muted, --fg-dim          texto secundário
+--accent #DFD0EC (lilás)      cor de marca (Coach/AI)
+--accent-ink, --accent-soft, --accent-faint
+--cta-bg, --cta-fg            botão primário (inverte no dark)
+--border, --border-light      separadores
+--danger #9B6B73 (rosa-vinho) erros/destrutivo
+--success #5C8159 (sage)      sucesso
+--color-{rose,lilac,sky,peach,peach-warm,butter,sage}  7 cores funcionais
+  translúcidas (alpha 0.6 light / 0.2 dark), cada uma com par -ink e -border
+--gradient-coach{,-strong,-bar}  gradiente lilás→rosa→sky (fita do Coach)
+--shadow, --overlay-bg, --nav-selected, --sync-green
+--font-sans, --font-display, --font-mono   tokens de tipografia
 ```
 
-**Tipografia:** Bebas Neue (logo/títulos), Space Grotesk (UI 13-14px), Space Mono (labels/timestamps 9-10px com letter-spacing 1.5-2.5px uppercase).
+**Tipografia:** Fraunces (`--font-display`, logo/títulos/voz do Coach em italic), General Sans (`--font-sans`, UI 13-14px), JetBrains Mono (`--font-mono`, labels/timestamps 9-10px uppercase). Substituíram Bebas Neue / Space Grotesk / Space Mono.
+
+**Classes utilitárias novas:** `.chip`/`.chip-{cor}`, `.card`/`.card-coach`/`.card-focus`, `.kpi-*`, `.view-toggle`, `.filter-pill`, `.aqal-bar-*`, `.avatar`/`.avatar-{cor}`, `.coach-bubble`/`.user-bubble`, `.list-section-*`.
 
 ---
 

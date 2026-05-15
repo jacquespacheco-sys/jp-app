@@ -3,6 +3,7 @@ import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { api } from '../../api.ts'
 import { useContacts } from '../../hooks/useContacts.ts'
+import { IconSparkle } from '../common/Icon.tsx'
 import { ContactPanelDatesTab } from './ContactPanelDatesTab.tsx'
 import { ContactPanelComplimentsTab } from './ContactPanelComplimentsTab.tsx'
 import { ContactPanelCategoriesTab } from './ContactPanelCategoriesTab.tsx'
@@ -227,14 +228,14 @@ export function ContactPanel({ contact, onClose }: Props) {
                 style={{ fontSize: '9px', padding: '4px 8px' }}
                 title="Sugerir mensagem (IA)"
               >
-                ✨ Sugerir
+                <IconSparkle size={11} /> Sugerir
               </button>
             )}
             <select
               className="task-field-select"
               value={tier}
               onChange={e => setTier(e.target.value as ContactTier | '')}
-              style={{ fontSize: '10px', padding: '4px 6px', fontFamily: 'Space Mono, monospace', letterSpacing: '1px', textTransform: 'uppercase' }}
+              style={{ fontSize: '10px', padding: '4px 6px', fontFamily: 'var(--font-mono)', letterSpacing: '1px', textTransform: 'uppercase' }}
               title="Tier (cadência relacional)"
             >
               <option value="">— tier —</option>
@@ -256,7 +257,7 @@ export function ContactPanel({ contact, onClose }: Props) {
                 border: 'none',
                 borderBottom: tab === t.key ? '2px solid var(--accent)' : '2px solid transparent',
                 color: tab === t.key ? 'var(--fg)' : 'var(--fg-muted)',
-                fontFamily: 'Space Mono, monospace',
+                fontFamily: 'var(--font-mono)',
                 fontSize: '10px',
                 letterSpacing: '1.5px',
                 textTransform: 'uppercase',
@@ -346,16 +347,16 @@ export function ContactPanel({ contact, onClose }: Props) {
 
                   <div>
                     {interactions.length === 0 && (
-                      <div style={{ fontSize: '11px', color: 'var(--fg-dim)', fontFamily: 'Space Mono, monospace', letterSpacing: '1px' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>
                         Nenhuma interação registrada
                       </div>
                     )}
                     {interactions.map(int => (
                       <div key={int.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)', display: 'grid', gridTemplateColumns: '70px 80px 1fr', gap: '10px', alignItems: 'flex-start' }}>
-                        <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>
                           {TYPE_LABEL[int.type] ?? int.type}
                         </span>
-                        <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-dim)', letterSpacing: '1px' }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-dim)', letterSpacing: '1px' }}>
                           {format(parseISO(int.date), 'd MMM yy', { locale: ptBR })}
                         </span>
                         <span style={{ fontSize: '12px', color: 'var(--fg-muted)' }}>{int.note}</span>
@@ -474,7 +475,7 @@ export function ContactPanel({ contact, onClose }: Props) {
 
         <div className="task-panel-actions" style={{ flexDirection: 'column', gap: '8px' }}>
           {saveError && (
-            <div style={{ fontSize: '11px', fontFamily: 'Space Mono, monospace', color: 'var(--danger)', letterSpacing: '0.5px', padding: '8px 10px', border: '1px solid var(--danger)', width: '100%' }}>
+            <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--danger)', letterSpacing: '0.5px', padding: '8px 10px', border: '1px solid var(--danger)', width: '100%' }}>
               {saveError}
             </div>
           )}

@@ -81,7 +81,7 @@ export function CategoriesConfigSection() {
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-        <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
           {dimensions.length} dimensões · {categories.length} categorias
         </div>
         <div style={{ display: 'flex', gap: '6px' }}>
@@ -114,7 +114,7 @@ export function CategoriesConfigSection() {
             >
               <div>
                 <div style={{ fontSize: '13px', fontWeight: 600 }}>{dim.label}</div>
-                <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', marginTop: '2px' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', marginTop: '2px' }}>
                   {opts.length} categorias · slug: {dim.slug}
                 </div>
               </div>
@@ -132,7 +132,7 @@ export function CategoriesConfigSection() {
                 >
                   Editar
                 </button>
-                <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '10px', color: 'var(--fg-muted)', minWidth: '10px', textAlign: 'center' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--fg-muted)', minWidth: '10px', textAlign: 'center' }}>
                   {isOpen ? '−' : '+'}
                 </span>
               </div>
@@ -369,7 +369,7 @@ function CategoryModal({
                 width: '28px', height: '28px',
                 border: color === null ? '2px solid var(--accent)' : '1px solid var(--border)',
                 background: 'transparent', cursor: 'pointer',
-                fontFamily: 'Space Mono, monospace', fontSize: '14px', color: 'var(--fg-muted)',
+                fontFamily: 'var(--font-mono)', fontSize: '14px', color: 'var(--fg-muted)',
               }}
               title="Sem cor"
             >

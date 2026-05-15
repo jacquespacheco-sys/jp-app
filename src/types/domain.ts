@@ -379,11 +379,56 @@ export const QUADRANT_LABELS: Record<Quadrant, string> = {
   ITS: 'Sistemas',
 }
 
+/**
+ * Cores AQAL — paleta Seda.
+ * - QUADRANT_COLORS: hex sólido (legacy, ícones, badges, project picker)
+ * - QUADRANT_COLORS_SOFT: rgba translúcido para chips, barras, fundos
+ * - QUADRANT_COLORS_INK: cor de texto sobre fundo soft (contraste)
+ * - QUADRANT_VARS: nomes de CSS variables — prefira estes em vez de hex literal
+ *
+ * Mapeamento:
+ *   I   = lilás (interior, mente, espírito)
+ *   IT  = sage (corpo, ações físicas)
+ *   WE  = peach-warm (relações)
+ *   ITS = sky (sistemas)
+ */
 export const QUADRANT_COLORS: Record<Quadrant, string> = {
-  I: '#a78bfa',
-  IT: '#34d399',
-  WE: '#fb923c',
-  ITS: '#60a5fa',
+  I: '#DFD0EC',
+  IT: '#C9DDC9',
+  WE: '#F0CFA8',
+  ITS: '#CFE3E8',
+}
+
+export const QUADRANT_COLORS_SOFT: Record<Quadrant, string> = {
+  I: 'rgba(223, 208, 236, 0.6)',
+  IT: 'rgba(201, 221, 201, 0.6)',
+  WE: 'rgba(240, 207, 168, 0.6)',
+  ITS: 'rgba(207, 227, 232, 0.6)',
+}
+
+export const QUADRANT_COLORS_INK: Record<Quadrant, string> = {
+  I: '#6B5E72',
+  IT: '#5C8159',
+  WE: '#A06C4C',
+  ITS: '#5D8194',
+}
+
+export const QUADRANT_VARS: Record<Quadrant, { soft: string; ink: string; barClass: string }> = {
+  I:   { soft: 'var(--color-lilac)',      ink: 'var(--color-lilac-ink)',      barClass: 'q-i'   },
+  IT:  { soft: 'var(--color-sage)',       ink: 'var(--color-sage-ink)',       barClass: 'q-it'  },
+  WE:  { soft: 'var(--color-peach-warm)', ink: 'var(--color-peach-warm-ink)', barClass: 'q-we'  },
+  ITS: { soft: 'var(--color-sky)',        ink: 'var(--color-sky-ink)',        barClass: 'q-its' },
+}
+
+/** Converte hex `#RRGGBB` em rgba com alpha (default 0.5). Para project.color (user-defined). */
+export function projectColorSoft(hex: string, alpha = 0.5): string {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim())
+  if (!m || !m[1]) return hex
+  const h = m[1]
+  const r = parseInt(h.slice(0, 2), 16)
+  const g = parseInt(h.slice(2, 4), 16)
+  const b = parseInt(h.slice(4, 6), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
 // =============================================================

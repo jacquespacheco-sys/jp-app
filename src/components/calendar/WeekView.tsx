@@ -13,16 +13,16 @@ interface Props {
 }
 
 function calendarColor(calendars: Calendar[], calendarId: string): string {
-  return calendars.find(c => c.id === calendarId)?.customColor ?? '#616161'
+  return calendars.find(c => c.id === calendarId)?.customColor ?? '#8A8075'
 }
 
 function textOnColor(hex: string): string {
-  if (!hex.startsWith('#') || hex.length < 7) return '#ffffff'
+  if (!hex.startsWith('#') || hex.length < 7) return '#FBF9F5'
   const r = parseInt(hex.slice(1, 3), 16)
   const g = parseInt(hex.slice(3, 5), 16)
   const b = parseInt(hex.slice(5, 7), 16)
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-  return luminance > 0.5 ? '#0a0a0a' : '#ffffff'
+  return luminance > 0.5 ? '#3A352F' : '#FBF9F5'
 }
 
 function eventTop(startAt: string): number {

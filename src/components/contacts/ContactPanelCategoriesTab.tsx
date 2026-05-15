@@ -82,7 +82,7 @@ export function ContactPanelCategoriesTab({ contactId, initialCategoryIds }: Pro
         />
       ))}
       <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border-light)' }}>
-        <Link to="/config?tab=categories" style={{ fontSize: '10px', color: 'var(--accent)', fontFamily: 'Space Mono, monospace', letterSpacing: '1px', textTransform: 'uppercase' }}>
+        <Link to="/config?tab=categories" style={{ fontSize: '10px', color: 'var(--accent)', fontFamily: 'var(--font-mono)', letterSpacing: '1px', textTransform: 'uppercase' }}>
           Gerenciar categorias →
         </Link>
       </div>
@@ -107,7 +107,7 @@ function DimensionSection({
   return (
     <div style={{ marginBottom: '20px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-        <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
           {dim.label}
         </span>
         <button
@@ -122,7 +122,7 @@ function DimensionSection({
       </div>
 
       {selected.length === 0 ? (
-        <div style={{ fontSize: '11px', color: 'var(--fg-dim)', fontFamily: 'Space Mono, monospace', letterSpacing: '1px' }}>
+        <div style={{ fontSize: '11px', color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>
           Nenhuma
         </div>
       ) : (

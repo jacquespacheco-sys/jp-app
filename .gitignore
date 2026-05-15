@@ -43,3 +43,6 @@ supabase/.temp/
 HANDOFF-NOTE.md
 
 .env*.local
+
+# Claude Code local settings
+.claude/

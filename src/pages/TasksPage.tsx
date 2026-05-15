@@ -40,7 +40,7 @@ const EMPTY_TASK: Task = {
 }
 
 const EMPTY_PROJECT: Project = {
-  id: '', userId: '', name: '', color: '#7dd3fc',
+  id: '', userId: '', name: '', color: '#CFE3E8',
   archived: false, createdAt: '', updatedAt: '',
   kind: 'outcome', status: 'active', horizon: 'H1',
   position: 0, taskCount: 0, taskOpenCount: 0, childCount: 0,
@@ -85,6 +85,10 @@ export function TasksPage() {
     void updateStatus(task.id, task.status === 'done' ? 'next' : 'done')
   }
 
+  const handleSetQuadrant = (task: Task, q: Task['quadrantOverride'] | null) => {
+    void save({ ...task, id: task.id, projectId: task.projectId, quadrantOverride: q ?? undefined })
+  }
+
   const handleOpenStructured = () => {
     if (!defaultProject) {
       window.alert('Crie um projeto primeiro')
@@ -109,7 +113,7 @@ export function TasksPage() {
         <button className="sync-status" onClick={() => { void handleSync() }} disabled={syncing}>
           {syncing ? 'Sync…' : 'Sync'}
         </button>
-        {lastSync && <span style={{ fontSize: '7px', fontFamily: 'Space Mono, monospace', color: 'var(--fg-dim)', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>{lastSync}</span>}
+        {lastSync && <span style={{ fontSize: '7px', fontFamily: 'var(--font-mono)', color: 'var(--fg-dim)', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>{lastSync}</span>}
       </div>
       <ThemeToggle />
     </div>
@@ -152,6 +156,7 @@ export function TasksPage() {
           projects={projects}
           onOpen={setSelected}
           onToggleDone={handleToggleDone}
+          onSetQuadrant={handleSetQuadrant}
         />
       )}
 
@@ -165,6 +170,7 @@ export function TasksPage() {
           onProcess={handleProcessInbox}
           onOpenTask={setSelected}
           onToggleDone={handleToggleDone}
+          onSetQuadrant={handleSetQuadrant}
         />
       )}
 
@@ -187,6 +193,12 @@ export function TasksPage() {
             const input = { ...t, id: t.id, projectId: t.projectId, areaId: areaId ?? undefined }
             void save(input)
           }}
+          onContextChange={(id, context) => {
+            const t = tasks.find(x => x.id === id)
+            if (!t) return
+            const input = { ...t, id: t.id, projectId: t.projectId, context: context ?? undefined }
+            void save(input)
+          }}
         />
       )}
 
@@ -197,6 +209,7 @@ export function TasksPage() {
           areas={areas}
           onOpen={setSelected}
           onToggleDone={handleToggleDone}
+          onSetQuadrant={handleSetQuadrant}
         />
       )}
 
@@ -209,6 +222,7 @@ export function TasksPage() {
           onCreate={() => setCreatingProject(true)}
           onOpenTask={setSelected}
           onToggleDone={handleToggleDone}
+          onSetQuadrant={handleSetQuadrant}
         />
       )}
 

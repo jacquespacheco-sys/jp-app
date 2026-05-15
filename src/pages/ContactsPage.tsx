@@ -127,7 +127,7 @@ export function ContactsPage() {
       {!loading && tab === 'Lista' && (
         <>
           {(filter.tier?.length || filter.phase?.length || filter.categoryIds?.length || search.trim()) && (
-            <div style={{ padding: '10px 16px', fontFamily: 'Space Mono, monospace', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '1px' }}>
+            <div style={{ padding: '10px 16px', fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '1px' }}>
               Mostrando {filtered.length} de {contacts.length}
             </div>
           )}

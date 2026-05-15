@@ -196,7 +196,7 @@ function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: '4px',
       padding: '3px 8px', fontSize: '10px',
-      fontFamily: 'Space Mono, monospace', letterSpacing: '1px', textTransform: 'uppercase',
+      fontFamily: 'var(--font-mono)', letterSpacing: '1px', textTransform: 'uppercase',
       background: 'var(--bg-elevated)', color: 'var(--fg-muted)',
       border: '1px solid var(--border)',
     }}>
@@ -215,7 +215,7 @@ function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
 function FilterSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: '12px' }}>
-      <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '6px' }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '6px' }}>
         {title}
       </div>
       <div style={{ display: 'grid', gap: '4px' }}>{children}</div>

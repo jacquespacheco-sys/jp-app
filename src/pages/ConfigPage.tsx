@@ -38,7 +38,7 @@ function SourceRow({ source, onToggle, onDelete }: {
       </button>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '2px' }}>{source.name}</div>
-        <div style={{ fontSize: '10px', fontFamily: 'Space Mono, monospace', color: 'var(--fg-dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--fg-dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {source.url}
         </div>
       </div>
@@ -104,7 +104,7 @@ function AddSourceForm({ onAdd }: { onAdd: (name: string, url: string) => Promis
         }}
       />
       {error && (
-        <div style={{ fontSize: '11px', fontFamily: 'Space Mono, monospace', color: 'var(--danger)', letterSpacing: '0.5px' }}>
+        <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--danger)', letterSpacing: '0.5px' }}>
           {error}
         </div>
       )}
@@ -218,7 +218,7 @@ export function ConfigPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--border-light)' }}>
             <div>
               <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '3px' }}>Áreas de vida</div>
-              <div style={{ fontSize: '11px', color: 'var(--fg-muted)', fontFamily: 'Space Mono, monospace', letterSpacing: '0.5px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px' }}>
                 Quadrantes integrais I · IT · WE · ITS
               </div>
             </div>
@@ -229,7 +229,7 @@ export function ConfigPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--border-light)' }}>
             <div>
               <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '3px' }}>Mandala</div>
-              <div style={{ fontSize: '11px', color: 'var(--fg-muted)', fontFamily: 'Space Mono, monospace', letterSpacing: '0.5px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px' }}>
                 Distribuição AQAL nos últimos 7 dias
               </div>
             </div>
@@ -243,7 +243,7 @@ export function ConfigPage() {
           <div className="section-title">Integrações</div>
 
           {connectMsg && (
-            <div style={{ fontSize: '11px', fontFamily: 'Space Mono, monospace', padding: '10px 12px', border: '1px solid var(--border)', marginBottom: '16px', color: connectMsg.includes('Erro') ? 'var(--danger)' : 'var(--accent)', letterSpacing: '1px' }}>
+            <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', padding: '10px 12px', border: '1px solid var(--border)', marginBottom: '16px', color: connectMsg.includes('Erro') ? 'var(--danger)' : 'var(--accent)', letterSpacing: '1px' }}>
               {connectMsg}
             </div>
           )}
@@ -251,7 +251,7 @@ export function ConfigPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--border-light)' }}>
             <div>
               <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '3px' }}>Google Calendar + Contatos</div>
-              <div style={{ fontSize: '11px', color: 'var(--fg-muted)', fontFamily: 'Space Mono, monospace', letterSpacing: '0.5px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px' }}>
                 {googleConnected ? 'Conectado' : 'Não conectado'}
               </div>
             </div>
@@ -270,7 +270,7 @@ export function ConfigPage() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--border-light)' }}>
               <div>
                 <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '3px' }}>Google Tasks</div>
-                <div style={{ fontSize: '11px', color: 'var(--fg-muted)', fontFamily: 'Space Mono, monospace', letterSpacing: '0.5px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px' }}>
                   Importa listas e tarefas
                 </div>
               </div>
@@ -319,7 +319,7 @@ export function ConfigPage() {
 
         <div className="section">
           <div className="section-title">Newsletters</div>
-          <div style={{ fontSize: '12px', color: 'var(--fg-dim)', fontFamily: 'Space Mono, monospace', letterSpacing: '0.5px', padding: '4px 0' }}>
+          <div style={{ fontSize: '12px', color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px', padding: '4px 0' }}>
             Leitura via IMAP — em breve
           </div>
         </div>
@@ -334,7 +334,7 @@ export function ConfigPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--border-light)' }}>
             <div>
               <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '3px' }}>Classificação inicial</div>
-              <div style={{ fontSize: '11px', color: 'var(--fg-muted)', fontFamily: 'Space Mono, monospace', letterSpacing: '0.5px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px' }}>
                 Passar pela base e definir tier + hooks
               </div>
             </div>

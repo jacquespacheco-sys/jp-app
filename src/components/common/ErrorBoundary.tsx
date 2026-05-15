@@ -19,7 +19,7 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.error) {
       return this.props.fallback ?? (
         <div style={{ padding: '48px 24px', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', letterSpacing: '2px', color: 'var(--fg-dim)', marginBottom: '16px', textTransform: 'uppercase' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '2px', color: 'var(--fg-dim)', marginBottom: '16px', textTransform: 'uppercase' }}>
             Algo deu errado
           </div>
           <div style={{ fontSize: '13px', color: 'var(--fg-muted)', marginBottom: '24px', maxWidth: '320px', margin: '0 auto 24px' }}>

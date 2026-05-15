@@ -20,7 +20,7 @@ function groupByDay(events: CalendarEvent[]): Map<string, CalendarEvent[]> {
 }
 
 function calendarColor(calendars: Calendar[], calendarId: string): string {
-  return calendars.find(c => c.id === calendarId)?.customColor ?? '#616161'
+  return calendars.find(c => c.id === calendarId)?.customColor ?? '#8A8075'
 }
 
 export function AgendaView({ events, calendars, onOpen }: Props) {

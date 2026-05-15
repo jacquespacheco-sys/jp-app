@@ -53,7 +53,7 @@ export function ContactPanelComplimentsTab({ contactId }: Props) {
             style={{ marginBottom: '8px' }}
           />
           {error && (
-            <div style={{ fontSize: '10px', color: 'var(--danger)', marginBottom: '8px', fontFamily: 'Space Mono, monospace', letterSpacing: '0.5px' }}>
+            <div style={{ fontSize: '10px', color: 'var(--danger)', marginBottom: '8px', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px' }}>
               {error}
             </div>
           )}
@@ -63,20 +63,20 @@ export function ContactPanelComplimentsTab({ contactId }: Props) {
           >
             {saving ? 'Salvando…' : 'Salvar elogio'}
           </button>
-          <div style={{ fontSize: '9px', color: 'var(--fg-dim)', marginTop: '8px', fontFamily: 'Space Mono, monospace', letterSpacing: '1px' }}>
+          <div style={{ fontSize: '9px', color: 'var(--fg-dim)', marginTop: '8px', fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>
             Sistema vai te lembrar de retribuir entre 4 e 6 meses depois — não imediato.
           </div>
         </div>
       )}
 
       {loading && (
-        <div style={{ fontSize: '11px', color: 'var(--fg-dim)', fontFamily: 'Space Mono, monospace', letterSpacing: '1px' }}>
+        <div style={{ fontSize: '11px', color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>
           Carregando…
         </div>
       )}
 
       {!loading && compliments.length === 0 && (
-        <div style={{ fontSize: '11px', color: 'var(--fg-dim)', fontFamily: 'Space Mono, monospace', letterSpacing: '1px' }}>
+        <div style={{ fontSize: '11px', color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>
           Nenhum elogio registrado
         </div>
       )}
@@ -94,7 +94,7 @@ export function ContactPanelComplimentsTab({ contactId }: Props) {
               </button>
             )}
           </div>
-          <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>
             {format(parseISO(c.receivedAt), 'd MMM yy', { locale: ptBR })}
             {c.context ? ` · ${c.context}` : ''}
             {c.reciprocated && c.reciprocatedAt

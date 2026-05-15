@@ -11,7 +11,7 @@ interface Props {
 const DAYS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
 
 function calendarColor(calendars: Calendar[], calendarId: string): string {
-  return calendars.find(c => c.id === calendarId)?.customColor ?? '#616161'
+  return calendars.find(c => c.id === calendarId)?.customColor ?? '#8A8075'
 }
 
 export function MonthView({ date, events, calendars, onOpen }: Props) {
@@ -61,7 +61,7 @@ export function MonthView({ date, events, calendars, onOpen }: Props) {
                 )
               })}
               {dayEvents.length > 3 && (
-                <div style={{ fontSize: '9px', color: 'var(--fg-dim)', fontFamily: 'Space Mono, monospace', padding: '0 2px' }}>
+                <div style={{ fontSize: '9px', color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', padding: '0 2px' }}>
                   +{dayEvents.length - 3}
                 </div>
               )}

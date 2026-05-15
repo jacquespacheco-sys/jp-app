@@ -3,7 +3,7 @@ import type { Project, Area } from '../../types/domain.ts'
 import type { TaskSaveInput } from '../../../api/_schemas/task.ts'
 import { parseInput, hasStructure, type ParsedTask } from '../../lib/taskParser.ts'
 import { parseQuery, hasFilter, type ParsedQuery } from '../../lib/taskQueryParser.ts'
-import { IconInbox, IconPlus, IconSparkle } from '../common/Icon.tsx'
+import { IconInbox, IconPlus, IconSparkle, IconSearch } from '../common/Icon.tsx'
 
 interface Props {
   projects: Project[]
@@ -129,10 +129,10 @@ export function QuickAdd({ projects, areas, onCapture, onCreateTask, onOpenStruc
           )}
           {parsed.projectName && (
             <span className={`quick-add-chip${matchedProject ? '' : ' unresolved'}`} title={matchedProject ? 'projeto identificado' : 'projeto não encontrado — vai pro projeto default'}>
-              📁 {matchedProject?.name ?? `${parsed.projectName}?`}
+              proj · {matchedProject?.name ?? `${parsed.projectName}?`}
             </span>
           )}
-          {parsed.areaName && matchedArea && <span className="quick-add-chip">⌂ {matchedArea.name}</span>}
+          {parsed.areaName && matchedArea && <span className="quick-add-chip">área · {matchedArea.name}</span>}
           {parsed.priority !== 'med' && <span className="quick-add-chip">{parsed.priority === 'high' ? '!alta' : '!baixa'}</span>}
           {parsed.status && parsed.status !== 'next' && <span className="quick-add-chip">{parsed.status}</span>}
           {parsed.tags.map(t => <span key={t} className="quick-add-chip">#{t}</span>)}
@@ -146,7 +146,7 @@ export function QuickAdd({ projects, areas, onCapture, onCreateTask, onOpenStruc
         className="quick-add-search"
         onSubmit={e => { e.preventDefault() }}
       >
-        <span className="quick-add-icon">🔍</span>
+        <span className="quick-add-icon"><IconSearch size={14} /></span>
         <input
           className="quick-add-input"
           placeholder="buscar (ex: vencimento entre 20 e 27/05, projeto STATE)"

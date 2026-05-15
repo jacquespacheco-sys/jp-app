@@ -6,6 +6,7 @@ import { usePrincipleOfMonth } from '../../hooks/usePrincipleOfMonth.ts'
 import { useWeeklyReflections } from '../../hooks/useWeeklyReflections.ts'
 import { useGratitudeEntries } from '../../hooks/useGratitudeEntries.ts'
 import { GRATITUDE_CHANNELS } from '../../../api/_schemas/gratitude-entry.ts'
+import { IconSparkle } from '../common/Icon.tsx'
 import { SuggestMessageModal } from './SuggestMessageModal.tsx'
 import type { Contact, ContactChannel } from '../../types/domain.ts'
 
@@ -161,7 +162,7 @@ function ThankYouTourCard({
                 >
                   {t.firstName}{t.lastName ? ` ${t.lastName}` : ''}
                 </div>
-                <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>
                   {t.mentions}× · {t.tier ?? '—'}
                 </div>
                 <button
@@ -171,7 +172,7 @@ function ThankYouTourCard({
                   disabled={!full}
                   title="Sugerir mensagem"
                 >
-                  ✨
+                  <IconSparkle size={12} />
                 </button>
               </div>
             )
@@ -374,7 +375,7 @@ function GratitudeModal({ onClose }: { onClose: () => void }) {
         placeholder="Hoje sou grato por…"
         style={{ minHeight: '80px', marginBottom: '4px' }}
       />
-      <div style={{ fontSize: '9px', color: 'var(--fg-dim)', textAlign: 'right', fontFamily: 'Space Mono, monospace', marginBottom: '12px' }}>
+      <div style={{ fontSize: '9px', color: 'var(--fg-dim)', textAlign: 'right', fontFamily: 'var(--font-mono)', marginBottom: '12px' }}>
         {text.length}/280
       </div>
 
@@ -398,7 +399,7 @@ function GratitudeModal({ onClose }: { onClose: () => void }) {
       )}
 
       {error && (
-        <div style={{ fontSize: '10px', color: 'var(--danger)', marginBottom: '8px', fontFamily: 'Space Mono, monospace', letterSpacing: '0.5px' }}>
+        <div style={{ fontSize: '10px', color: 'var(--danger)', marginBottom: '8px', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px' }}>
           {error}
         </div>
       )}
@@ -417,11 +418,11 @@ function Card({ title, subtitle, children }: { title: string; subtitle?: string;
   return (
     <div style={{ border: '1px solid var(--border)', padding: '14px', background: 'var(--bg-elevated)' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '10px' }}>
-        <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '10px', color: 'var(--fg)', letterSpacing: '2px', textTransform: 'uppercase' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--fg)', letterSpacing: '2px', textTransform: 'uppercase' }}>
           {title}
         </span>
         {subtitle && (
-          <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--fg-muted)', letterSpacing: '1px' }}>
             {subtitle}
           </span>
         )}
@@ -432,11 +433,11 @@ function Card({ title, subtitle, children }: { title: string; subtitle?: string;
 }
 
 function CardValue({ children }: { children: React.ReactNode }) {
-  return <div style={{ fontSize: '20px', fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '2px', color: 'var(--fg)' }}>{children}</div>
+  return <div style={{ fontSize: '20px', fontFamily: 'var(--font-display)', letterSpacing: '2px', color: 'var(--fg)' }}>{children}</div>
 }
 
 function CardSubvalue({ children }: { children: React.ReactNode }) {
-  return <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '1px', marginTop: '4px' }}>{children}</div>
+  return <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '1px', marginTop: '4px' }}>{children}</div>
 }
 
 function CardEmpty({ children }: { children: React.ReactNode }) {

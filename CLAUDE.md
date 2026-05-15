@@ -17,7 +17,8 @@ Assistente pessoal do Jorge (founder do STATE Innovation Center). PWA mobile-fir
 ```
 Frontend:    Vite 6 + React 19 + React Router DOM 7
 Linguagem:   TypeScript strict (noUncheckedIndexedAccess, exactOptionalPropertyTypes)
-Estilo:      CSS variables + CSS puro (sem Tailwind/shadcn)
+Estilo:      CSS variables + CSS puro (sem Tailwind/shadcn) — paleta Seda
+Tipografia:  Fraunces (display) + General Sans (UI) + JetBrains Mono (labels)
 Backend:     Funções serverless em api/*.ts (Vercel, NodeNext, ESM)
 Validação:   Zod em todo handler (schemas em api/_schemas/)
 Banco:       Supabase PostgreSQL — SQL puro, sem ORM
@@ -92,7 +93,8 @@ Todo handler `/api/*.ts`:
 - `src/hooks/CoachProvider.tsx` + `useCoach.ts` — **modelo canônico** de Provider+consumer (streaming, polling, optimistic updates)
 - `src/components/layout/` → Topbar, BottomNav, Subtabs
 - `src/components/common/` → ConfirmDialog (sempre em ação destrutiva), ThemeToggle, ErrorBoundary, Chip, Icon, SyncStatus
-- `src/lib/` → `dates.ts` (timezone helpers), `colors.ts` (QUADRANT_COLORS/LABELS), `coach.ts` (COACH_KIND_LABEL), `taskParser.ts` (NLP quick-add)
+- `src/types/domain.ts` → `QUADRANT_COLORS` + `_SOFT`/`_INK`/`_VARS`, `QUADRANT_LABELS`, `projectColorSoft()` (paleta Seda AQAL)
+- `src/lib/` → `dates.ts` (timezone), `coach.ts` (COACH_KIND_LABEL), `taskParser.ts` + `taskQueryParser.ts` (NLP capture/busca)
 - `src/styles/globals.css` → CSS variables + classes utilitárias (`.task-panel`, `.btn`, `.section`, etc.)
 
 ## Padrões de código (recap)
@@ -318,7 +320,7 @@ jp-app/
 2. **SPEC.md** — espinha do app: módulos, schema, endpoints, integrações
 3. **REVIEW.md** — débitos abertos
 4. **Stack** → seção "Stack final" deste arquivo
-5. **Visual** → `prototipo.html` (identidade) + `src/styles/globals.css` (verdade aplicada)
+5. **Visual** → `JP_App_Redesign_Implementation.md` (paleta Seda — linguagem atual) + `src/styles/globals.css` (verdade aplicada). `prototipo.html` é histórico (pré-Seda).
 6. **Padrões** → seção "Padrões de código" deste arquivo
 
 Quando algo não estiver coberto, **pergunte antes de codar**.

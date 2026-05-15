@@ -19,7 +19,7 @@ function chipStyle(color: CategoryColor | undefined, size: 'sm' | 'md'): React.C
     gap: '4px',
     padding,
     fontSize,
-    fontFamily: 'Space Mono, monospace',
+    fontFamily: 'var(--font-mono)',
     letterSpacing: '1px',
     textTransform: 'uppercase',
     background: bg,

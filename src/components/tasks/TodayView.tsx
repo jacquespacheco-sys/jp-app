@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import type { Task, Project, TaskContext } from '../../types/domain.ts'
+import type { Task, Project, TaskContext, Quadrant } from '../../types/domain.ts'
 import { TaskRow } from './TaskRow.tsx'
 
 interface Props {
@@ -7,6 +7,7 @@ interface Props {
   projects: Project[]
   onOpen: (task: Task) => void
   onToggleDone: (task: Task) => void
+  onSetQuadrant?: (task: Task, q: Quadrant | null) => void
 }
 
 const today = (): string => {
@@ -25,8 +26,8 @@ const PRIORITY_ORDER: Record<Task['priority'], number> = { high: 0, med: 1, low:
 
 const CONTEXTS: TaskContext[] = ['deep', 'shallow', 'social', 'criativo', 'somatico', 'offline']
 const CONTEXT_COLORS: Record<TaskContext, string> = {
-  deep: '#a78bfa', shallow: '#9ca3af', social: '#fb923c',
-  criativo: '#f472b6', somatico: '#34d399', offline: '#64748b',
+  deep: '#6B5E72', shallow: '#8A8075', social: '#A06C4C',
+  criativo: '#9B6B73', somatico: '#5C8159', offline: '#A99E91',
 }
 
 interface Filter {
@@ -48,7 +49,7 @@ function loadFilter(): Filter {
   }
 }
 
-export function TodayView({ tasks, projects, onOpen, onToggleDone }: Props) {
+export function TodayView({ tasks, projects, onOpen, onToggleDone, onSetQuadrant }: Props) {
   const [filter, setFilter] = useState<Filter>(loadFilter)
   const todayStr = today()
 
@@ -138,7 +139,7 @@ export function TodayView({ tasks, projects, onOpen, onToggleDone }: Props) {
           <div className="empty-state">{hasFilter ? 'Nada bate com esse filtro' : 'Nenhuma tarefa para hoje'}</div>
         ) : (
           filtered.map(task => (
-            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} />
+            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} {...(onSetQuadrant ? { onSetQuadrant } : {})} />
           ))
         )}
       </div>
@@ -150,7 +151,7 @@ export function TodayView({ tasks, projects, onOpen, onToggleDone }: Props) {
             <span className="task-group-count">{scheduledToday.length}</span>
           </div>
           {scheduledToday.map(task => (
-            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} />
+            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} {...(onSetQuadrant ? { onSetQuadrant } : {})} />
           ))}
         </div>
       )}
@@ -162,7 +163,7 @@ export function TodayView({ tasks, projects, onOpen, onToggleDone }: Props) {
             <span className="task-group-count">{completedToday.length}</span>
           </div>
           {completedToday.map(task => (
-            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} />
+            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} {...(onSetQuadrant ? { onSetQuadrant } : {})} />
           ))}
         </div>
       )}

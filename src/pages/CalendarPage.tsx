@@ -184,7 +184,7 @@ export function CalendarPage() {
           <button className="sync-status" onClick={() => { void handleSync() }} disabled={syncing}>
             {syncing ? 'Sync…' : 'Sync'}
           </button>
-          {lastSync && <span style={{ fontSize: '7px', fontFamily: 'Space Mono, monospace', color: 'var(--fg-dim)', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>{lastSync}</span>}
+          {lastSync && <span style={{ fontSize: '7px', fontFamily: 'var(--font-mono)', color: 'var(--fg-dim)', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>{lastSync}</span>}
         </div>
       )}
       <button

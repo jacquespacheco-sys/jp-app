@@ -1,3 +1,33 @@
+# Histórico de Sessões de Review/Refactor
+
+---
+
+## Sessão Redesign Seda + Tasks/Kanban (2026-05-15) — branch `feature/redesign-seda`
+
+10 commits. Em teste prático pelo usuário por alguns dias antes de novos ajustes.
+
+**Redesign visual "ClickUp Seda"** (plano: `JP_App_Redesign_Implementation.md`):
+- Fontes: Bebas/Space Grotesk/Space Mono → Fraunces/General Sans/JetBrains Mono
+- CSS vars: paleta seda completa (creme/marrom-tinta light, preto-tinta/creme dark), 7 cores funcionais translúcidas, gradiente Coach, tokens tipográficos
+- `QUADRANT_COLORS` em `domain.ts` → seda + `_SOFT`/`_INK`/`_VARS`/`projectColorSoft()`
+- Auditoria: 27 hex literais + 98 `fontFamily` inline → tokens
+- App icon: triângulo lilás (era "JP" lime); sw.js auto-desregistra em dev
+
+**Tasks/Projetos/Kanban:**
+- Kanban drag: causa raiz era text-selection roubando o gesto em cards com texto → `user-select:none` + remoção de `memo` + DragOverlay + `pointerWithin`
+- Quadrante filtrado por `quadrantOverride ?? resolvedQuadrant` (resolvedQuadrant é stale pós-save até refetch)
+- Horizonte derivado da data da task (fallback horizonte do projeto); done/cancelled fora dos modos não-status; contexto arrastável
+- Chip AQAL em todo TaskRow; cor distinta por projeto (+picker, +hash determinístico p/ cor legada); modo AQAL em ProjectsView; filter row removida
+- NLP smart capture/search (`taskParser` estendido + `taskQueryParser`)
+- Portas dev env-driven (`API_PORT`/`VITE_PORT`, defaults 3001/3000)
+
+**Pendências conhecidas / a validar no uso:**
+- Drag do Kanban precisa validação prática nos 5 modos (fix de text-selection é a hipótese principal, não testável headless)
+- `prototipo.html` agora é histórico (pré-Seda) — não é mais fonte de verdade visual
+- Cores legadas de projeto (`#7dd3fc`/`#CFE3E8`) recebem cor por hash do id em ProjectRow até o usuário escolher no picker (sem migration de DB)
+
+---
+
 # Coach MVP — Code Review Findings (2026-05-13)
 
 Pós-merge do branch `feat/coach-mvp` (commit `916ad51`). 4 agentes paralelos: reuse, quality, efficiency, security. O que foi feito nessa sessão e o que ficou para próxima.

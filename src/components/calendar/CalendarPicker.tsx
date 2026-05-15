@@ -43,10 +43,10 @@ export function CalendarPicker({ calendars, onToggle }: Props) {
         >
           <span style={{
             width: '8px', height: '8px', borderRadius: '2px', flexShrink: 0,
-            background: cal.customColor ?? '#616161',
+            background: cal.customColor ?? '#8A8075',
           }} />
           <span style={{
-            fontFamily: 'Space Mono, monospace', fontSize: '9px',
+            fontFamily: 'var(--font-mono)', fontSize: '9px',
             letterSpacing: '0.5px', color: 'var(--fg-muted)',
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>

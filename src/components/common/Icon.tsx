@@ -84,6 +84,15 @@ export function IconInbox(p: Props) {
   )
 }
 
+export function IconSearch(p: Props) {
+  return (
+    <Wrap {...p}>
+      <circle cx="11" cy="11" r="7" />
+      <line x1="21" y1="21" x2="16" y2="16" />
+    </Wrap>
+  )
+}
+
 export function IconTrash(p: Props) {
   return (
     <Wrap {...p}>

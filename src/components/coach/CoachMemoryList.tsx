@@ -21,7 +21,7 @@ export function CoachMemoryList() {
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline', marginBottom: '4px' }}>
               <span style={{
-                fontFamily: 'Space Mono, monospace',
+                fontFamily: 'var(--font-mono)',
                 fontSize: '9px',
                 color: 'var(--accent)',
                 textTransform: 'uppercase',

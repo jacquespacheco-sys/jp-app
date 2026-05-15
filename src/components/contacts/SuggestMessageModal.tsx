@@ -84,7 +84,7 @@ export function SuggestMessageModal({ contact, onClose }: Props) {
                 autoFocus
               />
               <div style={{
-                fontFamily: 'Space Mono, monospace', fontSize: '9px', letterSpacing: '1px',
+                fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '1px',
                 color: context.trim().length < 5 ? 'var(--fg-dim)' : 'var(--accent)',
                 textAlign: 'right', marginBottom: '12px',
               }}>
@@ -103,7 +103,7 @@ export function SuggestMessageModal({ contact, onClose }: Props) {
                 {SUGGEST_INTENTS.map(i => <option key={i} value={i}>{INTENT_LABEL[i]}</option>)}
               </select>
               {error && (
-                <div style={{ fontSize: '11px', color: 'var(--danger)', marginBottom: '8px', fontFamily: 'Space Mono, monospace', letterSpacing: '0.5px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--danger)', marginBottom: '8px', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px' }}>
                   {error}
                 </div>
               )}
@@ -119,7 +119,7 @@ export function SuggestMessageModal({ contact, onClose }: Props) {
           {angles && angles.map((a, idx) => (
             <div key={idx} style={{ border: '1px solid var(--border)', padding: '14px', marginBottom: '12px', background: 'var(--bg-elevated)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <div style={{ fontFamily: 'Space Mono, monospace', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--fg-muted)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
                   Ângulo {idx + 1} · {a.tone}
                 </div>
                 <button

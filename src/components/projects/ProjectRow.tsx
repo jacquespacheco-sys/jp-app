@@ -1,5 +1,4 @@
 import type { Project, Area } from '../../types/domain.ts'
-import { QUADRANT_COLORS } from '../../types/domain.ts'
 
 interface Props {
   project: Project
@@ -8,11 +7,21 @@ interface Props {
   onSelect: (project: Project) => void
 }
 
+// Cores legadas (default antigo do schema). Tratadas como "não definida"
+// para derivar uma cor determinística por id — dá variedade sem migration.
+const LEGACY_DEFAULTS = new Set(['#7dd3fc', '#CFE3E8'])
+const PALETTE = ['#DFD0EC', '#F5D5DC', '#CFE3E8', '#F5E8C3', '#F5D5C3', '#C9DDC9', '#9B6B73', '#5C8159', '#A06C4C', '#5D8194']
+
+function colorForProject(p: Project): string {
+  if (p.color && !LEGACY_DEFAULTS.has(p.color)) return p.color
+  let h = 0
+  for (let i = 0; i < p.id.length; i++) h = (h * 31 + p.id.charCodeAt(i)) >>> 0
+  return PALETTE[h % PALETTE.length]!
+}
+
 export function ProjectRow({ project, areas, isChild, onSelect }: Props) {
   const area = areas.find(a => a.id === project.areaId)
-  const accent = project.resolvedQuadrant
-    ? QUADRANT_COLORS[project.resolvedQuadrant]
-    : (area ? QUADRANT_COLORS[area.quadrant] : '#9ca3af')
+  const accent = colorForProject(project)
 
   const total = project.taskCount
   const open = project.taskOpenCount
@@ -29,6 +38,7 @@ export function ProjectRow({ project, areas, isChild, onSelect }: Props) {
     >
       <div className="project-row-main">
         <div className="project-row-header">
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: accent, flexShrink: 0, display: 'inline-block' }} />
           <span className="project-row-name">{project.title || project.name}</span>
           {!isOutcome && <span className="project-row-badge">evergreen</span>}
         </div>
