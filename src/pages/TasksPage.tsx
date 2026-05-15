@@ -85,6 +85,10 @@ export function TasksPage() {
     void updateStatus(task.id, task.status === 'done' ? 'next' : 'done')
   }
 
+  const handleSetQuadrant = (task: Task, q: Task['quadrantOverride'] | null) => {
+    void save({ ...task, id: task.id, projectId: task.projectId, quadrantOverride: q ?? undefined })
+  }
+
   const handleOpenStructured = () => {
     if (!defaultProject) {
       window.alert('Crie um projeto primeiro')
@@ -152,6 +156,7 @@ export function TasksPage() {
           projects={projects}
           onOpen={setSelected}
           onToggleDone={handleToggleDone}
+          onSetQuadrant={handleSetQuadrant}
         />
       )}
 
@@ -165,6 +170,7 @@ export function TasksPage() {
           onProcess={handleProcessInbox}
           onOpenTask={setSelected}
           onToggleDone={handleToggleDone}
+          onSetQuadrant={handleSetQuadrant}
         />
       )}
 
@@ -197,6 +203,7 @@ export function TasksPage() {
           areas={areas}
           onOpen={setSelected}
           onToggleDone={handleToggleDone}
+          onSetQuadrant={handleSetQuadrant}
         />
       )}
 
@@ -209,6 +216,7 @@ export function TasksPage() {
           onCreate={() => setCreatingProject(true)}
           onOpenTask={setSelected}
           onToggleDone={handleToggleDone}
+          onSetQuadrant={handleSetQuadrant}
         />
       )}
 

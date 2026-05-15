@@ -1,6 +1,6 @@
 import { useState, useEffect, memo } from 'react'
 import {
-  DndContext, type DragEndEvent,
+  DndContext, DragOverlay, type DragEndEvent, type DragStartEvent,
   MouseSensor, TouchSensor, KeyboardSensor,
   useSensor, useSensors, pointerWithin,
 } from '@dnd-kit/core'
@@ -60,26 +60,16 @@ const CONTEXT_COLUMNS: { key: TaskContext; label: string }[] = [
 
 interface CardProps { task: Task; project: Project | undefined; onOpen: (task: Task) => void }
 
-const KanbanCard = memo(function KanbanCard({ task, project, onOpen }: CardProps) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: task.id })
-  const q = task.resolvedQuadrant
+function CardContent({ task, project, overlay }: { task: Task; project: Project | undefined; overlay?: boolean }) {
+  const q = task.quadrantOverride ?? task.resolvedQuadrant
   const showStatus = task.status !== 'next' && task.status !== 'inbox'
-
-  const style: React.CSSProperties = {
-    ...(q ? { borderLeft: `3px solid ${QUADRANT_COLORS[q]}` } : {}),
-    ...(transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : {}),
-    ...(isDragging ? { opacity: 0.4, zIndex: 999, position: 'relative' as const } : {}),
-    touchAction: 'none',
-  }
-
   return (
     <div
-      ref={setNodeRef}
-      className={`kanban-card${isDragging ? ' dragging' : ''}`}
-      {...listeners}
-      {...attributes}
-      onClick={() => { if (!isDragging) onOpen(task) }}
-      style={style}
+      className={`kanban-card${overlay ? ' dragging' : ''}`}
+      style={{
+        ...(q ? { borderLeft: `3px solid ${QUADRANT_COLORS[q]}` } : {}),
+        ...(overlay ? { cursor: 'grabbing', boxShadow: 'var(--shadow)' } : {}),
+      }}
     >
       {project && <div className="kanban-card-project">{project.name}</div>}
       <div className="kanban-card-title">{task.title}</div>
@@ -90,6 +80,22 @@ const KanbanCard = memo(function KanbanCard({ task, project, onOpen }: CardProps
         {task.timeEstimateMin && <span>{task.timeEstimateMin}m</span>}
         {task.rrule && <span style={{ display: 'inline-flex', alignItems: 'center' }}><IconRepeat size={10} /></span>}
       </div>
+    </div>
+  )
+}
+
+const KanbanCard = memo(function KanbanCard({ task, project, onOpen }: CardProps) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: task.id })
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      onClick={() => { if (!isDragging) onOpen(task) }}
+      style={{ touchAction: 'none', opacity: isDragging ? 0.35 : 1 }}
+    >
+      <CardContent task={task} project={project} />
     </div>
   )
 })
@@ -146,13 +152,20 @@ export function KanbanView({ tasks, projects, areas, onOpen, onStatusChange, onQ
     try { window.localStorage.setItem('jp_kanban_mode', mode) } catch { /* noop */ }
   }, [mode])
 
+  const [activeId, setActiveId] = useState<string | null>(null)
+
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 6 } }),
     useSensor(KeyboardSensor),
   )
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(String(event.active.id))
+  }
+
   const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null)
     const { active, over } = event
     if (!over) return
     const taskId = String(active.id)
@@ -165,12 +178,15 @@ export function KanbanView({ tasks, projects, areas, onOpen, onStatusChange, onQ
       if (task.status !== newStatus) onStatusChange(taskId, newStatus)
     } else if (mode === 'quadrant') {
       const newQuadrant = overId === 'none' ? null : (overId as Quadrant)
-      onQuadrantChange?.(taskId, newQuadrant)
+      const current = task.quadrantOverride ?? task.resolvedQuadrant ?? null
+      if (current !== newQuadrant) onQuadrantChange?.(taskId, newQuadrant)
     } else if (mode === 'area') {
       const newAreaId = overId === 'none' ? null : overId
-      onAreaChange?.(taskId, newAreaId)
+      if ((task.areaId ?? null) !== newAreaId) onAreaChange?.(taskId, newAreaId)
     }
   }
+
+  const activeTask = activeId ? tasks.find(t => t.id === activeId) ?? null : null
 
   let columns: { id: string; label: string; tasks: Task[]; accent?: string }[] = []
   let droppable = mode === 'status' || mode === 'quadrant' || mode === 'area'
@@ -182,23 +198,24 @@ export function KanbanView({ tasks, projects, areas, onOpen, onStatusChange, onQ
       tasks: tasks.filter(t => t.status === c.key),
     }))
   } else if (mode === 'quadrant') {
+    const effQ = (t: Task) => t.quadrantOverride ?? t.resolvedQuadrant
     columns = QUADRANT_COLUMNS.map(c => ({
       id: c.key,
       label: c.label,
       accent: QUADRANT_COLORS[c.key],
-      tasks: tasks.filter(t => t.resolvedQuadrant === c.key),
+      tasks: tasks.filter(t => effQ(t) === c.key),
     }))
-    const semQuad = tasks.filter(t => !t.resolvedQuadrant)
-    if (semQuad.length > 0) columns.push({ id: 'none', label: 'sem quadrante', tasks: semQuad })
+    const semQuad = tasks.filter(t => !effQ(t))
+    columns.push({ id: 'none', label: 'sem quadrante', tasks: semQuad })
   } else if (mode === 'area') {
     columns = areas.map(a => ({
       id: a.id,
       label: a.name,
       accent: QUADRANT_COLORS[a.quadrant],
       tasks: tasks.filter(t => t.areaId === a.id),
-    })).filter(c => c.tasks.length > 0)
+    }))
     const semArea = tasks.filter(t => !t.areaId)
-    if (semArea.length > 0) columns.push({ id: 'none', label: 'sem área', tasks: semArea })
+    columns.push({ id: 'none', label: 'sem área', tasks: semArea })
   } else if (mode === 'horizon') {
     const projectHorizonMap = new Map<string, HorizonLvl>()
     for (const p of projects) {
@@ -257,7 +274,20 @@ export function KanbanView({ tasks, projects, areas, onOpen, onStatusChange, onQ
       </div>
 
       {droppable ? (
-        <DndContext sensors={sensors} collisionDetection={pointerWithin} onDragEnd={handleDragEnd}>{body}</DndContext>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={pointerWithin}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={() => setActiveId(null)}
+        >
+          {body}
+          <DragOverlay dropAnimation={null}>
+            {activeTask
+              ? <CardContent task={activeTask} project={projects.find(p => p.id === activeTask.projectId)} overlay />
+              : null}
+          </DragOverlay>
+        </DndContext>
       ) : body}
     </div>
   )

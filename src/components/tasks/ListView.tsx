@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Task, Project, Area } from '../../types/domain.ts'
+import type { Task, Project, Area, Quadrant } from '../../types/domain.ts'
 import { TaskRow } from './TaskRow.tsx'
 import { TaskFilterBar, applyTaskFilter, persistedTaskFilter, type TaskFilter } from './TaskFilterBar.tsx'
 
@@ -9,12 +9,13 @@ interface Props {
   areas: Area[]
   onOpen: (task: Task) => void
   onToggleDone: (task: Task) => void
+  onSetQuadrant?: (task: Task, q: Quadrant | null) => void
 }
 
 const PRIORITY_ORDER: Record<Task['priority'], number> = { high: 0, med: 1, low: 2 }
 const FILTER_KEY = 'jp_list_filter'
 
-export function ListView({ tasks, projects, areas, onOpen, onToggleDone }: Props) {
+export function ListView({ tasks, projects, areas, onOpen, onToggleDone, onSetQuadrant }: Props) {
   const [filter, setFilter] = useState<TaskFilter>(persistedTaskFilter(FILTER_KEY))
   const filtered = applyTaskFilter(tasks, filter)
   const active = filtered.filter(t => t.status !== 'done')
@@ -53,7 +54,7 @@ export function ListView({ tasks, projects, areas, onOpen, onToggleDone }: Props
             <span className="task-group-count">{pts.length}</span>
           </div>
           {pts.map(task => (
-            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} />
+            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} {...(onSetQuadrant ? { onSetQuadrant } : {})} />
           ))}
         </div>
       ))}
@@ -65,7 +66,7 @@ export function ListView({ tasks, projects, areas, onOpen, onToggleDone }: Props
             <span className="task-group-count">{unassigned.length}</span>
           </div>
           {unassigned.map(task => (
-            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} />
+            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} {...(onSetQuadrant ? { onSetQuadrant } : {})} />
           ))}
         </div>
       )}
@@ -77,7 +78,7 @@ export function ListView({ tasks, projects, areas, onOpen, onToggleDone }: Props
             <span className="task-group-count">{done.length}</span>
           </div>
           {done.map(task => (
-            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} />
+            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} {...(onSetQuadrant ? { onSetQuadrant } : {})} />
           ))}
         </div>
       )}

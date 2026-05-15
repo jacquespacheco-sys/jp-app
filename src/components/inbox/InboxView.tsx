@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { InboxEntry, InboxItem, Task, Project, Area } from '../../types/domain.ts'
+import type { InboxEntry, InboxItem, Task, Project, Area, Quadrant } from '../../types/domain.ts'
 import type { InboxProcessInput } from '../../../api/_schemas/inbox.ts'
 import { TaskRow } from '../tasks/TaskRow.tsx'
 import { TaskFilterBar, applyTaskFilter, persistedTaskFilter, type TaskFilter } from '../tasks/TaskFilterBar.tsx'
@@ -14,11 +14,12 @@ interface Props {
   onProcess: (input: InboxProcessInput) => Promise<unknown>
   onOpenTask: (task: Task) => void
   onToggleDone: (task: Task) => void
+  onSetQuadrant?: (task: Task, q: Quadrant | null) => void
 }
 
 const FILTER_KEY = 'jp_inbox_filter'
 
-export function InboxView({ entries, projects, areas, loading, defaultProjectId, onProcess, onOpenTask, onToggleDone }: Props) {
+export function InboxView({ entries, projects, areas, loading, defaultProjectId, onProcess, onOpenTask, onToggleDone, onSetQuadrant }: Props) {
   const [filter, setFilter] = useState<TaskFilter>(persistedTaskFilter(FILTER_KEY))
   if (loading) {
     return <div className="content"><div className="empty-state">Carregando inbox…</div></div>
@@ -112,7 +113,7 @@ export function InboxView({ entries, projects, areas, loading, defaultProjectId,
             <span className="task-group-count">{tasks.length}</span>
           </div>
           {tasks.map(task => (
-            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpenTask} onToggleDone={onToggleDone} />
+            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpenTask} onToggleDone={onToggleDone} {...(onSetQuadrant ? { onSetQuadrant } : {})} />
           ))}
         </div>
       )}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import type { Task, Project, TaskContext } from '../../types/domain.ts'
+import type { Task, Project, TaskContext, Quadrant } from '../../types/domain.ts'
 import { TaskRow } from './TaskRow.tsx'
 
 interface Props {
@@ -7,6 +7,7 @@ interface Props {
   projects: Project[]
   onOpen: (task: Task) => void
   onToggleDone: (task: Task) => void
+  onSetQuadrant?: (task: Task, q: Quadrant | null) => void
 }
 
 const today = (): string => {
@@ -48,7 +49,7 @@ function loadFilter(): Filter {
   }
 }
 
-export function TodayView({ tasks, projects, onOpen, onToggleDone }: Props) {
+export function TodayView({ tasks, projects, onOpen, onToggleDone, onSetQuadrant }: Props) {
   const [filter, setFilter] = useState<Filter>(loadFilter)
   const todayStr = today()
 
@@ -138,7 +139,7 @@ export function TodayView({ tasks, projects, onOpen, onToggleDone }: Props) {
           <div className="empty-state">{hasFilter ? 'Nada bate com esse filtro' : 'Nenhuma tarefa para hoje'}</div>
         ) : (
           filtered.map(task => (
-            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} />
+            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} {...(onSetQuadrant ? { onSetQuadrant } : {})} />
           ))
         )}
       </div>
@@ -150,7 +151,7 @@ export function TodayView({ tasks, projects, onOpen, onToggleDone }: Props) {
             <span className="task-group-count">{scheduledToday.length}</span>
           </div>
           {scheduledToday.map(task => (
-            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} />
+            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} {...(onSetQuadrant ? { onSetQuadrant } : {})} />
           ))}
         </div>
       )}
@@ -162,7 +163,7 @@ export function TodayView({ tasks, projects, onOpen, onToggleDone }: Props) {
             <span className="task-group-count">{completedToday.length}</span>
           </div>
           {completedToday.map(task => (
-            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} />
+            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} {...(onSetQuadrant ? { onSetQuadrant } : {})} />
           ))}
         </div>
       )}

@@ -15,6 +15,7 @@ interface Props {
   onCreate?: () => void
   onOpenTask?: (task: Task) => void
   onToggleDone?: (task: Task) => void
+  onSetQuadrant?: (task: Task, q: Quadrant | null) => void
 }
 
 const MODE_LABELS: Record<Mode, string> = {
@@ -101,7 +102,7 @@ function groupProjects(projects: Project[], areas: Area[], mode: Mode): Group[] 
   return [{ id: 'all', label: '', projects: parents }]
 }
 
-export function ProjectsView({ projects, areas, tasks = [], onSelect, onCreate, onOpenTask, onToggleDone }: Props) {
+export function ProjectsView({ projects, areas, tasks = [], onSelect, onCreate, onOpenTask, onToggleDone, onSetQuadrant }: Props) {
   const canExpand = onOpenTask !== undefined && onToggleDone !== undefined
   const [mode, setMode] = useState<Mode>(loadMode)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
@@ -208,13 +209,13 @@ export function ProjectsView({ projects, areas, tasks = [], onSelect, onCreate, 
                         <div className="empty-state" style={{ padding: '12px', fontSize: '11px' }}>Sem tarefas neste projeto</div>
                       )}
                       {openTasks.map(t => (
-                        <TaskRow key={t.id} task={t} projects={projects} onOpen={onOpenTask} onToggleDone={onToggleDone} />
+                        <TaskRow key={t.id} task={t} projects={projects} onOpen={onOpenTask} onToggleDone={onToggleDone} {...(onSetQuadrant ? { onSetQuadrant } : {})} />
                       ))}
                       {doneTasks.length > 0 && (
                         <details className="project-tasks-done">
                           <summary>concluídas ({doneTasks.length})</summary>
                           {doneTasks.map(t => (
-                            <TaskRow key={t.id} task={t} projects={projects} onOpen={onOpenTask} onToggleDone={onToggleDone} />
+                            <TaskRow key={t.id} task={t} projects={projects} onOpen={onOpenTask} onToggleDone={onToggleDone} {...(onSetQuadrant ? { onSetQuadrant } : {})} />
                           ))}
                         </details>
                       )}
