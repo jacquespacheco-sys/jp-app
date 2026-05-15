@@ -715,7 +715,7 @@ html, body {
 .kanban-col-body { padding: 10px; flex: 1; display: flex; flex-direction: column; gap: 8px; min-height: 60px; }
 .kanban-col-body.drag-over { background: rgba(168, 255, 0, 0.06); }
 
-.kanban-card { padding: 10px 12px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 11px; margin-bottom: 6px; cursor: grab; }
+.kanban-card { padding: 10px 12px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 11px; margin-bottom: 6px; cursor: grab; user-select: none; -webkit-user-select: none; }
 .kanban-card:active { cursor: grabbing; }
 .kanban-card.dragging { opacity: 0.4; }
 .kanban-card-project { font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--fg-muted); font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }

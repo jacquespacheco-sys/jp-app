@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from 'react'
+import { useState, useEffect } from 'react'
 import {
   DndContext, DragOverlay, type DragEndEvent, type DragStartEvent,
   MouseSensor, TouchSensor, KeyboardSensor,
@@ -19,6 +19,7 @@ interface Props {
   onStatusChange: (taskId: string, status: Task['status']) => void
   onQuadrantChange?: (taskId: string, quadrant: Quadrant | null) => void
   onAreaChange?: (taskId: string, areaId: string | null) => void
+  onContextChange?: (taskId: string, context: TaskContext | null) => void
 }
 
 const STATUS_COLUMNS: { key: Task['status']; label: string }[] = [
@@ -60,9 +61,28 @@ const CONTEXT_COLUMNS: { key: TaskContext; label: string }[] = [
 
 interface CardProps { task: Task; project: Project | undefined; onOpen: (task: Task) => void }
 
+function whenLabel(task: Task): string | null {
+  const sched = task.scheduledAt ? new Date(task.scheduledAt) : null
+  if (sched && !isNaN(sched.getTime())) {
+    return '◷ ' + sched.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+  }
+  if (task.dueAt) {
+    const d = new Date(task.dueAt)
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+    }
+  }
+  if (task.dueDate) {
+    const [y, m, dd] = task.dueDate.split('-')
+    if (y && m && dd) return `${dd}/${m}`
+  }
+  return null
+}
+
 function CardContent({ task, project, overlay }: { task: Task; project: Project | undefined; overlay?: boolean }) {
   const q = task.quadrantOverride ?? task.resolvedQuadrant
   const showStatus = task.status !== 'next' && task.status !== 'inbox'
+  const when = whenLabel(task)
   return (
     <div
       className={`kanban-card${overlay ? ' dragging' : ''}`}
@@ -74,6 +94,7 @@ function CardContent({ task, project, overlay }: { task: Task; project: Project 
       {project && <div className="kanban-card-project">{project.name}</div>}
       <div className="kanban-card-title">{task.title}</div>
       <div className="kanban-card-meta">
+        {when && <span style={{ color: 'var(--fg)', fontWeight: 600 }}>{when}</span>}
         {showStatus && <span>{task.status}</span>}
         {task.context && <span>@{task.context}</span>}
         {task.energy && <span style={{ display: 'inline-flex', alignItems: 'center' }}><EnergyDots value={task.energy} size={3} /></span>}
@@ -84,7 +105,7 @@ function CardContent({ task, project, overlay }: { task: Task; project: Project 
   )
 }
 
-const KanbanCard = memo(function KanbanCard({ task, project, onOpen }: CardProps) {
+function KanbanCard({ task, project, onOpen }: CardProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: task.id })
 
   return (
@@ -93,12 +114,12 @@ const KanbanCard = memo(function KanbanCard({ task, project, onOpen }: CardProps
       {...listeners}
       {...attributes}
       onClick={() => { if (!isDragging) onOpen(task) }}
-      style={{ touchAction: 'none', opacity: isDragging ? 0.35 : 1 }}
+      style={{ touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none', opacity: isDragging ? 0.35 : 1 }}
     >
       <CardContent task={task} project={project} />
     </div>
   )
-})
+}
 
 interface ColProps {
   id: string
@@ -110,7 +131,7 @@ interface ColProps {
   droppable: boolean
 }
 
-const KanbanColumn = memo(function KanbanColumn({ id, label, tasks, projects, onOpen, accent, droppable }: ColProps) {
+function KanbanColumn({ id, label, tasks, projects, onOpen, accent, droppable }: ColProps) {
   const { setNodeRef, isOver } = useDroppable({ id, disabled: !droppable })
 
   return (
@@ -131,7 +152,7 @@ const KanbanColumn = memo(function KanbanColumn({ id, label, tasks, projects, on
       </div>
     </div>
   )
-})
+}
 
 const MODE_LABELS: Record<Mode, string> = {
   quadrant: 'Quadrante',
@@ -141,7 +162,25 @@ const MODE_LABELS: Record<Mode, string> = {
   context: 'Contexto',
 }
 
-export function KanbanView({ tasks, projects, areas, onOpen, onStatusChange, onQuadrantChange, onAreaChange }: Props) {
+/** Horizonte derivado da data de vencimento da task (não do projeto). */
+function taskHorizon(t: Task): HorizonLvl | null {
+  const iso = t.dueAt ?? (t.dueDate ? `${t.dueDate}T12:00:00` : null)
+  if (!iso) return null
+  const due = new Date(iso)
+  if (isNaN(due.getTime())) return null
+  const now = new Date()
+  const days = Math.floor((due.getTime() - now.getTime()) / 86400000)
+  if (days <= 0) return 'H0'        // atrasado ou hoje
+  if (days <= 7) return 'H1'        // esta semana
+  if (days <= 92) return 'H2'       // trimestre
+  if (days <= 730) return 'H3'      // 1-2 anos
+  if (days <= 1825) return 'H4'     // 3-5 anos
+  return 'H5'                       // vida
+}
+
+const isOpen = (t: Task) => t.status !== 'done' && t.status !== 'cancelled'
+
+export function KanbanView({ tasks, projects, areas, onOpen, onStatusChange, onQuadrantChange, onAreaChange, onContextChange }: Props) {
   const [mode, setMode] = useState<Mode>(() => {
     const saved = typeof window !== 'undefined' ? window.localStorage.getItem('jp_kanban_mode') : null
     if (saved === 'quadrant' || saved === 'status' || saved === 'area' || saved === 'horizon' || saved === 'context') return saved
@@ -183,13 +222,19 @@ export function KanbanView({ tasks, projects, areas, onOpen, onStatusChange, onQ
     } else if (mode === 'area') {
       const newAreaId = overId === 'none' ? null : overId
       if ((task.areaId ?? null) !== newAreaId) onAreaChange?.(taskId, newAreaId)
+    } else if (mode === 'context') {
+      const newCtx = overId === 'none' ? null : (overId as TaskContext)
+      if ((task.context ?? null) !== newCtx) onContextChange?.(taskId, newCtx)
     }
   }
 
   const activeTask = activeId ? tasks.find(t => t.id === activeId) ?? null : null
 
   let columns: { id: string; label: string; tasks: Task[]; accent?: string }[] = []
-  let droppable = mode === 'status' || mode === 'quadrant' || mode === 'area'
+  let droppable = mode === 'status' || mode === 'quadrant' || mode === 'area' || mode === 'context'
+
+  // Modos não-status só mostram tasks abertas (done/cancelled saem).
+  const openTasks = tasks.filter(isOpen)
 
   if (mode === 'status') {
     columns = STATUS_COLUMNS.map(c => ({
@@ -203,40 +248,32 @@ export function KanbanView({ tasks, projects, areas, onOpen, onStatusChange, onQ
       id: c.key,
       label: c.label,
       accent: QUADRANT_COLORS[c.key],
-      tasks: tasks.filter(t => effQ(t) === c.key),
+      tasks: openTasks.filter(t => effQ(t) === c.key),
     }))
-    const semQuad = tasks.filter(t => !effQ(t))
-    columns.push({ id: 'none', label: 'sem quadrante', tasks: semQuad })
+    columns.push({ id: 'none', label: 'sem quadrante', tasks: openTasks.filter(t => !effQ(t)) })
   } else if (mode === 'area') {
     columns = areas.map(a => ({
       id: a.id,
       label: a.name,
       accent: QUADRANT_COLORS[a.quadrant],
-      tasks: tasks.filter(t => t.areaId === a.id),
+      tasks: openTasks.filter(t => t.areaId === a.id),
     }))
-    const semArea = tasks.filter(t => !t.areaId)
-    columns.push({ id: 'none', label: 'sem área', tasks: semArea })
+    columns.push({ id: 'none', label: 'sem área', tasks: openTasks.filter(t => !t.areaId) })
   } else if (mode === 'horizon') {
-    const projectHorizonMap = new Map<string, HorizonLvl>()
-    for (const p of projects) {
-      const ph = (p as Project & { horizon?: HorizonLvl }).horizon
-      if (ph) projectHorizonMap.set(p.id, ph)
-    }
     columns = HORIZON_COLUMNS.map(c => ({
       id: c.key,
       label: c.label,
-      tasks: tasks.filter(t => projectHorizonMap.get(t.projectId) === c.key),
+      tasks: openTasks.filter(t => taskHorizon(t) === c.key),
     })).filter(c => c.tasks.length > 0)
-    const semHorizon = tasks.filter(t => !projectHorizonMap.get(t.projectId))
-    if (semHorizon.length > 0) columns.push({ id: 'none', label: 'sem horizonte', tasks: semHorizon })
+    const semHorizon = openTasks.filter(t => taskHorizon(t) === null)
+    if (semHorizon.length > 0) columns.push({ id: 'none', label: 'sem data', tasks: semHorizon })
   } else if (mode === 'context') {
     columns = CONTEXT_COLUMNS.map(c => ({
       id: c.key,
       label: c.label,
-      tasks: tasks.filter(t => t.context === c.key),
-    })).filter(c => c.tasks.length > 0)
-    const semCtx = tasks.filter(t => !t.context)
-    if (semCtx.length > 0) columns.push({ id: 'none', label: 'sem contexto', tasks: semCtx })
+      tasks: openTasks.filter(t => t.context === c.key),
+    }))
+    columns.push({ id: 'none', label: 'sem contexto', tasks: openTasks.filter(t => !t.context) })
   }
 
   const body = (

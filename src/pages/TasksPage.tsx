@@ -193,6 +193,12 @@ export function TasksPage() {
             const input = { ...t, id: t.id, projectId: t.projectId, areaId: areaId ?? undefined }
             void save(input)
           }}
+          onContextChange={(id, context) => {
+            const t = tasks.find(x => x.id === id)
+            if (!t) return
+            const input = { ...t, id: t.id, projectId: t.projectId, context: context ?? undefined }
+            void save(input)
+          }}
         />
       )}
 

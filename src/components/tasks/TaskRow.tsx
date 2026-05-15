@@ -28,9 +28,14 @@ export function TaskRow({ task, projects, onOpen, onToggleDone, onSetQuadrant }:
   const isDone = task.status === 'done'
   const q = task.quadrantOverride ?? task.resolvedQuadrant
 
-  const dueLabel = task.dueAt
-    ? new Date(task.dueAt).toLocaleString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    : task.dueDate
+  const sched = task.scheduledAt ? new Date(task.scheduledAt) : null
+  const dueLabel = sched && !isNaN(sched.getTime())
+    ? '◷ ' + sched.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+    : task.dueAt
+      ? new Date(task.dueAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+      : task.dueDate
+        ? task.dueDate.split('-').reverse().slice(0, 2).join('/')
+        : null
 
   return (
     <div
