@@ -19,7 +19,26 @@ self.addEventListener('activate', e => {
   )
 })
 
+// Em dev (localhost / 127.0.0.1) o SW NÃO deve cachear nada — Vite
+// gerencia HMR e o módulo graph muda a cada edição. Cache-first aqui
+// serve módulos velhos pra sempre. Auto-desregistra e limpa cache.
+const IS_DEV = ['localhost', '127.0.0.1'].includes(location.hostname)
+if (IS_DEV) {
+  self.addEventListener('install', () => self.skipWaiting())
+  self.addEventListener('activate', e => {
+    e.waitUntil(
+      caches.keys()
+        .then(keys => Promise.all(keys.map(k => caches.delete(k))))
+        .then(() => self.registration.unregister())
+        .then(() => self.clients.matchAll())
+        .then(cs => cs.forEach(c => c.navigate(c.url)))
+    )
+  })
+}
+
 self.addEventListener('fetch', e => {
+  if (IS_DEV) return
+
   const { request } = e
   const url = new URL(request.url)
 
