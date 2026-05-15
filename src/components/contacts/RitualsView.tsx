@@ -6,6 +6,7 @@ import { usePrincipleOfMonth } from '../../hooks/usePrincipleOfMonth.ts'
 import { useWeeklyReflections } from '../../hooks/useWeeklyReflections.ts'
 import { useGratitudeEntries } from '../../hooks/useGratitudeEntries.ts'
 import { GRATITUDE_CHANNELS } from '../../../api/_schemas/gratitude-entry.ts'
+import { IconSparkle } from '../common/Icon.tsx'
 import { SuggestMessageModal } from './SuggestMessageModal.tsx'
 import type { Contact, ContactChannel } from '../../types/domain.ts'
 
@@ -171,7 +172,7 @@ function ThankYouTourCard({
                   disabled={!full}
                   title="Sugerir mensagem"
                 >
-                  ✨
+                  <IconSparkle size={12} />
                 </button>
               </div>
             )

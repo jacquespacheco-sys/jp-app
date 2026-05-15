@@ -3,6 +3,7 @@ import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { api } from '../../api.ts'
 import { useContacts } from '../../hooks/useContacts.ts'
+import { IconSparkle } from '../common/Icon.tsx'
 import { ContactPanelDatesTab } from './ContactPanelDatesTab.tsx'
 import { ContactPanelComplimentsTab } from './ContactPanelComplimentsTab.tsx'
 import { ContactPanelCategoriesTab } from './ContactPanelCategoriesTab.tsx'
@@ -227,7 +228,7 @@ export function ContactPanel({ contact, onClose }: Props) {
                 style={{ fontSize: '9px', padding: '4px 8px' }}
                 title="Sugerir mensagem (IA)"
               >
-                ✨ Sugerir
+                <IconSparkle size={11} /> Sugerir
               </button>
             )}
             <select

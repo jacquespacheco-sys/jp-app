@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#0a0a0a"/>
-  <!-- padding 15% each side keeps text inside maskable safe zone -->
-  <text x="256" y="295" font-family="system-ui,-apple-system,sans-serif" font-size="210" font-weight="700" fill="#a8ff00" text-anchor="middle" dominant-baseline="middle" letter-spacing="-8">JP</text>
+  <rect width="512" height="512" fill="#FFFFFF"/>
+  <!-- triângulo lilás, pontas próximas das bordas (margem ~10%) -->
+  <polygon points="256,48 48,464 464,464" fill="#DFD0EC"/>
 </svg>

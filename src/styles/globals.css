@@ -662,9 +662,9 @@ html, body {
 
 .task-row:last-child { border-bottom: none; }
 .task-row.done .task-title { text-decoration: line-through; color: var(--fg-dim); }
-.task-row.done .task-check { background: var(--accent); border-color: var(--accent); }
+.task-row.done .task-check { background: var(--color-sage); border-color: var(--color-sage-ink); }
 
-.task-check { width: 16px; height: 16px; border: 1px solid var(--fg-muted); cursor: pointer; margin-top: 2px; flex-shrink: 0; }
+.task-check { width: 16px; height: 16px; border: 1px solid var(--fg-muted); border-radius: 5px; cursor: pointer; margin-top: 2px; flex-shrink: 0; }
 .task-body { min-width: 0; }
 .task-title { font-size: 13px; font-weight: 500; line-height: 1.4; margin-bottom: 4px; }
 
@@ -682,8 +682,8 @@ html, body {
 
 .task-project { color: var(--fg); font-weight: 700; }
 .task-tag { padding: 2px 6px; border: 1px solid var(--border); color: var(--fg-muted); }
-.task-priority-dot { width: 6px; height: 6px; background: var(--accent); flex-shrink: 0; margin-top: 7px; }
-.task-priority-dot.med { background: var(--fg-muted); }
+.task-priority-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-rose-ink); flex-shrink: 0; margin-top: 7px; }
+.task-priority-dot.med { background: var(--color-butter-ink); }
 .task-priority-dot.low { background: var(--fg-dim); }
 
 .empty-state {
