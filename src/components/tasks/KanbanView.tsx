@@ -42,9 +42,9 @@ const QUADRANT_COLUMNS: { key: Quadrant; label: string }[] = [
 ]
 
 const HORIZON_COLUMNS: { key: HorizonLvl; label: string }[] = [
-  { key: 'H0', label: 'H0 · agora' },
-  { key: 'H1', label: 'H1 · hoje' },
-  { key: 'H2', label: 'H2 · áreas' },
+  { key: 'H0', label: 'H0 · hoje/atrasado' },
+  { key: 'H1', label: 'H1 · esta semana' },
+  { key: 'H2', label: 'H2 · trimestre' },
   { key: 'H3', label: 'H3 · 1-2 anos' },
   { key: 'H4', label: 'H4 · 3-5 anos' },
   { key: 'H5', label: 'H5 · vida' },
@@ -162,12 +162,15 @@ const MODE_LABELS: Record<Mode, string> = {
   context: 'Contexto',
 }
 
-/** Horizonte derivado da data de vencimento da task (não do projeto). */
-function taskHorizon(t: Task): HorizonLvl | null {
+/**
+ * Horizonte da task: deriva da data de vencimento; se a task não tem
+ * data, cai no horizonte do projeto. Sem nenhum dos dois → null.
+ */
+function taskHorizon(t: Task, projectHorizon?: HorizonLvl): HorizonLvl | null {
   const iso = t.dueAt ?? (t.dueDate ? `${t.dueDate}T12:00:00` : null)
-  if (!iso) return null
+  if (!iso) return projectHorizon ?? null
   const due = new Date(iso)
-  if (isNaN(due.getTime())) return null
+  if (isNaN(due.getTime())) return projectHorizon ?? null
   const now = new Date()
   const days = Math.floor((due.getTime() - now.getTime()) / 86400000)
   if (days <= 0) return 'H0'        // atrasado ou hoje
@@ -260,13 +263,15 @@ export function KanbanView({ tasks, projects, areas, onOpen, onStatusChange, onQ
     }))
     columns.push({ id: 'none', label: 'sem área', tasks: openTasks.filter(t => !t.areaId) })
   } else if (mode === 'horizon') {
+    const projHorizon = new Map(projects.map(p => [p.id, p.horizon]))
+    const hz = (t: Task) => taskHorizon(t, projHorizon.get(t.projectId))
     columns = HORIZON_COLUMNS.map(c => ({
       id: c.key,
       label: c.label,
-      tasks: openTasks.filter(t => taskHorizon(t) === c.key),
+      tasks: openTasks.filter(t => hz(t) === c.key),
     })).filter(c => c.tasks.length > 0)
-    const semHorizon = openTasks.filter(t => taskHorizon(t) === null)
-    if (semHorizon.length > 0) columns.push({ id: 'none', label: 'sem data', tasks: semHorizon })
+    const semHorizon = openTasks.filter(t => hz(t) === null)
+    if (semHorizon.length > 0) columns.push({ id: 'none', label: 'sem horizonte', tasks: semHorizon })
   } else if (mode === 'context') {
     columns = CONTEXT_COLUMNS.map(c => ({
       id: c.key,
