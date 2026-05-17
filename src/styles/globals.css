@@ -603,7 +603,7 @@ html, body {
 .filter-right { display: flex; align-items: center; gap: 10px; }
 
 .quick-add {
-  padding: 14px 16px;
+  padding: 9px 16px 7px;
   border-bottom: 1px solid var(--border);
   background: var(--bg);
 }
@@ -1302,8 +1302,8 @@ html, body {
 
 /* ---------- Today filter bar ---------- */
 .today-filter-bar {
-  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  display: flex; flex-wrap: wrap; gap: 5px; align-items: center;
+  padding: 5px 18px; border-bottom: 1px solid var(--border);
 }
 .today-filter-label {
   font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.5px;
@@ -1313,7 +1313,7 @@ html, body {
   font-size: 12px; margin: 0 4px; color: var(--fg-dim);
 }
 .today-filter-chip {
-  background: transparent; border: 1px solid var(--border); padding: 4px 9px;
+  background: transparent; border: 1px solid var(--border); padding: 3px 8px;
   border-radius: 12px; font-family: var(--font-mono); font-size: 9px;
   letter-spacing: 0.5px; color: var(--fg-muted); cursor: pointer;
   transition: all 0.15s;
@@ -1333,12 +1333,12 @@ html, body {
 .quick-add-form { display: flex; gap: 8px; align-items: center; }
 .quick-add-input {
   flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--border);
-  padding: 10px 0; font-family: var(--font-sans); font-size: 14px;
+  padding: 6px 0; font-family: var(--font-sans); font-size: 14px;
   color: var(--fg);
 }
 .quick-add-input:focus { outline: none; border-bottom-color: var(--fg); }
 .quick-add-structured-btn {
-  background: transparent; border: 1px solid var(--border); padding: 6px 12px;
+  background: transparent; border: 1px solid var(--border); padding: 4px 12px;
   border-radius: 14px; font-family: var(--font-mono); font-size: 10px;
   letter-spacing: 1px; color: var(--fg-muted); cursor: pointer; white-space: nowrap;
 }
@@ -1354,7 +1354,7 @@ html, body {
   font-size: 10px; margin-top: 6px; letter-spacing: 1px;
 }
 .quick-add-preview {
-  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px;
 }
 .quick-add-chip {
   font-family: var(--font-mono); font-size: 9px;
@@ -1364,8 +1364,8 @@ html, body {
 }
 .quick-add-chip.unresolved { color: var(--danger); border-color: var(--danger); opacity: 0.7; }
 .quick-add-search {
-  display: flex; gap: 8px; align-items: center; margin-top: 8px;
-  padding-top: 8px; border-top: 1px solid var(--border-light);
+  display: flex; gap: 8px; align-items: center; margin-top: 5px;
+  padding-top: 5px; border-top: 1px solid var(--border-light);
 }
 @keyframes toast-in { from { opacity: 0; } to { opacity: 1; } }
 

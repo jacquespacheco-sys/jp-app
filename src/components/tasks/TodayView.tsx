@@ -22,6 +22,22 @@ const isToday = (iso?: string): boolean => {
   return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === today()
 }
 
+const addDays = (iso: string, n: number): string => {
+  const d = new Date(`${iso}T00:00:00`)
+  d.setDate(d.getDate() + n)
+  const pad = (x: number): string => String(x).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+const dueKey = (t: { dueDate?: string; dueAt?: string }): string | null => {
+  if (t.dueDate) return t.dueDate
+  if (t.dueAt) {
+    const d = new Date(t.dueAt)
+    if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10)
+  }
+  return null
+}
+
 const PRIORITY_ORDER: Record<Task['priority'], number> = { high: 0, med: 1, low: 2 }
 
 const CONTEXTS: TaskContext[] = ['deep', 'shallow', 'social', 'criativo', 'somatico', 'offline']
@@ -77,17 +93,33 @@ export function TodayView({ tasks, projects, onOpen, onToggleDone, onSetQuadrant
     return true
   }
 
-  const dueOrToday = tasks.filter(t => {
-    if (!isOpen(t)) return false
-    if (t.status === 'doing') return true
-    if (isToday(t.dueAt) || t.dueDate === todayStr) return true
-    if (t.dueDate && t.dueDate < todayStr) return true
-    if (t.status === 'next' || t.status === 'inbox') return true
-    return false
-  })
+  const in7 = addDays(todayStr, 7)
+  const pool = (hasFilter ? tasks.filter(matchesFilter) : tasks).filter(isOpen)
 
-  const filtered = hasFilter ? dueOrToday.filter(matchesFilter) : dueOrToday
-  filtered.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority])
+  type GroupKey = 'overdue' | 'today' | 'next7' | 'undated'
+  const bucket = (t: Task): GroupKey | null => {
+    const k = dueKey(t)
+    if (k != null && k < todayStr) return 'overdue'
+    if (k === todayStr) return 'today'
+    if (t.status === 'doing' && (k == null || k <= todayStr)) return 'today'
+    if (k != null && k > todayStr && k <= in7) return 'next7'
+    if (k == null) return 'undated'
+    return null
+  }
+
+  const byPriority = (a: Task, b: Task) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]
+  const groups: { key: GroupKey; label: string; tasks: Task[] }[] = [
+    { key: 'overdue', label: 'Atrasadas', tasks: [] },
+    { key: 'today', label: 'Hoje', tasks: [] },
+    { key: 'next7', label: 'Próximos 7 dias', tasks: [] },
+    { key: 'undated', label: 'Sem data marcada', tasks: [] },
+  ]
+  for (const t of pool) {
+    const g = bucket(t)
+    if (g) groups.find(x => x.key === g)?.tasks.push(t)
+  }
+  for (const g of groups) g.tasks.sort(byPriority)
+  const visibleGroups = groups.filter(g => g.tasks.length > 0)
 
   const scheduledToday = tasks.filter(t => isOpen(t) && isToday(t.scheduledAt))
   const completedToday = tasks.filter(t =>
@@ -130,19 +162,23 @@ export function TodayView({ tasks, projects, onOpen, onToggleDone, onSetQuadrant
         )}
       </div>
 
-      <div className="task-group">
-        <div className="task-group-title">
-          {hasFilter ? 'Filtrado' : 'Hoje'}
-          <span className="task-group-count">{filtered.length}</span>
+      {visibleGroups.length === 0 ? (
+        <div className="task-group">
+          <div className="empty-state">{hasFilter ? 'Nada bate com esse filtro' : 'Nenhuma tarefa'}</div>
         </div>
-        {filtered.length === 0 ? (
-          <div className="empty-state">{hasFilter ? 'Nada bate com esse filtro' : 'Nenhuma tarefa para hoje'}</div>
-        ) : (
-          filtered.map(task => (
-            <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} {...(onSetQuadrant ? { onSetQuadrant } : {})} />
-          ))
-        )}
-      </div>
+      ) : (
+        visibleGroups.map(g => (
+          <div className="task-group" key={g.key}>
+            <div className="task-group-title">
+              {g.label}
+              <span className="task-group-count">{g.tasks.length}</span>
+            </div>
+            {g.tasks.map(task => (
+              <TaskRow key={task.id} task={task} projects={projects} onOpen={onOpen} onToggleDone={onToggleDone} {...(onSetQuadrant ? { onSetQuadrant } : {})} />
+            ))}
+          </div>
+        ))
+      )}
 
       {scheduledToday.length > 0 && (
         <div className="task-group">
