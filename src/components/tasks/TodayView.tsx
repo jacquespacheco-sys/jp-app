@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { Task, Project, TaskContext, Quadrant } from '../../types/domain.ts'
 import { TaskRow } from './TaskRow.tsx'
+import { todayStr, addDaysStr, isSameLocalDay, dueDayKey, dueBucket, type TaskGroupKey } from '../../lib/taskDates.ts'
 
 interface Props {
   tasks: Task[]
@@ -8,34 +9,6 @@ interface Props {
   onOpen: (task: Task) => void
   onToggleDone: (task: Task) => void
   onSetQuadrant?: (task: Task, q: Quadrant | null) => void
-}
-
-const today = (): string => {
-  const d = new Date()
-  const pad = (n: number): string => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-}
-
-const isToday = (iso?: string): boolean => {
-  if (!iso) return false
-  const d = new Date(iso)
-  return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === today()
-}
-
-const addDays = (iso: string, n: number): string => {
-  const d = new Date(`${iso}T00:00:00`)
-  d.setDate(d.getDate() + n)
-  const pad = (x: number): string => String(x).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-}
-
-const dueKey = (t: { dueDate?: string; dueAt?: string }): string | null => {
-  if (t.dueDate) return t.dueDate
-  if (t.dueAt) {
-    const d = new Date(t.dueAt)
-    if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10)
-  }
-  return null
 }
 
 const PRIORITY_ORDER: Record<Task['priority'], number> = { high: 0, med: 1, low: 2 }
@@ -67,7 +40,7 @@ function loadFilter(): Filter {
 
 export function TodayView({ tasks, projects, onOpen, onToggleDone, onSetQuadrant }: Props) {
   const [filter, setFilter] = useState<Filter>(loadFilter)
-  const todayStr = today()
+  const today = todayStr()
 
   useEffect(() => {
     try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(filter)) } catch { /* noop */ }
@@ -93,37 +66,26 @@ export function TodayView({ tasks, projects, onOpen, onToggleDone, onSetQuadrant
     return true
   }
 
-  const in7 = addDays(todayStr, 7)
+  const in7 = addDaysStr(today, 7)
   const pool = (hasFilter ? tasks.filter(matchesFilter) : tasks).filter(isOpen)
 
-  type GroupKey = 'overdue' | 'today' | 'next7' | 'undated'
-  const bucket = (t: Task): GroupKey | null => {
-    const k = dueKey(t)
-    if (k != null && k < todayStr) return 'overdue'
-    if (k === todayStr) return 'today'
-    if (t.status === 'doing' && (k == null || k <= todayStr)) return 'today'
-    if (k != null && k > todayStr && k <= in7) return 'next7'
-    if (k == null) return 'undated'
-    return null
-  }
-
   const byPriority = (a: Task, b: Task) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]
-  const groups: { key: GroupKey; label: string; tasks: Task[] }[] = [
+  const groups: { key: TaskGroupKey; label: string; tasks: Task[] }[] = [
     { key: 'overdue', label: 'Atrasadas', tasks: [] },
     { key: 'today', label: 'Hoje', tasks: [] },
     { key: 'next7', label: 'Próximos 7 dias', tasks: [] },
     { key: 'undated', label: 'Sem data marcada', tasks: [] },
   ]
   for (const t of pool) {
-    const g = bucket(t)
+    const g = dueBucket(dueDayKey(t), t.status, today, in7)
     if (g) groups.find(x => x.key === g)?.tasks.push(t)
   }
   for (const g of groups) g.tasks.sort(byPriority)
   const visibleGroups = groups.filter(g => g.tasks.length > 0)
 
-  const scheduledToday = tasks.filter(t => isOpen(t) && isToday(t.scheduledAt))
+  const scheduledToday = tasks.filter(t => isOpen(t) && isSameLocalDay(t.scheduledAt, today))
   const completedToday = tasks.filter(t =>
-    t.status === 'done' && (isToday(t.completedAt) || t.dueDate === todayStr)
+    t.status === 'done' && (isSameLocalDay(t.completedAt, today) || dueDayKey(t) === today)
   )
 
   return (
