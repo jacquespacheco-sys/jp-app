@@ -1,5 +1,5 @@
 /* JP App — Service Worker */
-const CACHE = 'jp-app-v1'
+const CACHE = 'jp-app-v2'
 
 self.addEventListener('install', e => {
   e.waitUntil(
