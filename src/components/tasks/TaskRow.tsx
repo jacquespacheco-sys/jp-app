@@ -34,7 +34,7 @@ export function TaskRow({ task, projects, onOpen, onToggleDone, onSetQuadrant }:
     : task.dueAt
       ? new Date(task.dueAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
       : task.dueDate
-        ? task.dueDate.split('-').reverse().slice(0, 2).join('/')
+        ? task.dueDate.slice(0, 10).split('-').reverse().slice(0, 2).join('/')
         : null
 
   return (

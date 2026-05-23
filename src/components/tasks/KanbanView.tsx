@@ -73,7 +73,7 @@ function whenLabel(task: Task): string | null {
     }
   }
   if (task.dueDate) {
-    const [y, m, dd] = task.dueDate.split('-')
+    const [y, m, dd] = task.dueDate.slice(0, 10).split('-')
     if (y && m && dd) return `${dd}/${m}`
   }
   return null
@@ -167,7 +167,7 @@ const MODE_LABELS: Record<Mode, string> = {
  * data, cai no horizonte do projeto. Sem nenhum dos dois → null.
  */
 function taskHorizon(t: Task, projectHorizon?: HorizonLvl): HorizonLvl | null {
-  const iso = t.dueAt ?? (t.dueDate ? `${t.dueDate}T12:00:00` : null)
+  const iso = t.dueAt ?? (t.dueDate ? `${t.dueDate.slice(0, 10)}T12:00:00` : null)
   if (!iso) return projectHorizon ?? null
   const due = new Date(iso)
   if (isNaN(due.getTime())) return projectHorizon ?? null

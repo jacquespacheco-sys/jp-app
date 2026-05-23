@@ -23,14 +23,33 @@ export function useTasks() {
 
   const save = useCallback(async (input: TaskSaveInput): Promise<Task> => {
     const method = input.id ? 'patch' : 'post'
-    const res = await api[method]<TaskSaveResponse>('/api/tasks-save', input)
-    const task = res.task as Task
-    setTasks(prev =>
-      input.id
-        ? prev.map(t => (t.id === task.id ? task : t))
-        : [task, ...prev]
-    )
-    return task
+    const editId = input.id
+    // Edição otimista: o save bloqueia no push pro Google, então refletimos na
+    // tela antes do round-trip e reconciliamos com a resposta do servidor.
+    let snapshot: Task | undefined
+    if (editId) {
+      setTasks(prev => prev.map(t => {
+        if (t.id !== editId) return t
+        snapshot = t
+        return { ...t, ...input } as Task
+      }))
+    }
+    try {
+      const res = await api[method]<TaskSaveResponse>('/api/tasks-save', input)
+      const task = res.task as Task
+      setTasks(prev =>
+        editId
+          ? prev.map(t => (t.id === task.id ? task : t))
+          : [task, ...prev]
+      )
+      return task
+    } catch (e) {
+      if (editId && snapshot) {
+        const restore = snapshot
+        setTasks(prev => prev.map(t => (t.id === editId ? restore : t)))
+      }
+      throw e
+    }
   }, [])
 
   const archive = useCallback(async (id: string) => {
