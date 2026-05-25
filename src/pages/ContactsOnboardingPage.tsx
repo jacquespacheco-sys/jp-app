@@ -203,7 +203,7 @@ export function ContactsOnboardingPage() {
           {/* Suggestion */}
           {current.suggestedTier && !tierChoice && (
             <div style={{ fontSize: '11px', color: 'var(--fg-muted)', padding: '8px 10px', background: 'var(--accent-faint)', border: '1px solid var(--accent-soft)', marginBottom: '16px', fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>
-              Sugerido: <strong style={{ color: 'var(--accent-ink)' }}>{current.suggestedTier.toUpperCase()}</strong>
+              Sugerido: <strong style={{ color: 'var(--accent)' }}>{current.suggestedTier.toUpperCase()}</strong>
             </div>
           )}
 
