@@ -243,8 +243,8 @@ html, body {
 }
 
 .btn-accent {
-  background: var(--gradient-coach);
-  border-color: var(--color-lilac-border);
+  background: var(--accent);
+  border-color: var(--accent);
   color: var(--accent-ink);
 }
 
@@ -355,7 +355,7 @@ html, body {
 
 .input:focus {
   outline: none;
-  border-color: var(--accent-ink);
+  border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-faint);
 }
 
@@ -1524,7 +1524,7 @@ html, body {
   height: 1px; background: var(--border-light); margin: 6px 0;
 }
 .popover-item-add {
-  color: var(--accent-ink); background: var(--accent-soft);
+  color: var(--accent); background: var(--accent-soft);
   display: inline-flex; align-items: center; gap: 6px;
 }
 .popover-item-add:hover {
@@ -1554,7 +1554,7 @@ html, body {
 }
 .dashboard-card-link {
   font-family: var(--font-mono); font-size: 9px;
-  letter-spacing: 1px; color: var(--accent-ink);
+  letter-spacing: 1px; color: var(--accent);
   text-decoration: none; opacity: 0.7;
 }
 .dashboard-card-link:hover { opacity: 1; }
@@ -1724,7 +1724,7 @@ html, body {
 }
 .view-toggle-item.active {
   background: var(--gradient-coach);
-  color: var(--accent-ink);
+  color: var(--fg);
   font-weight: 600;
 }
 

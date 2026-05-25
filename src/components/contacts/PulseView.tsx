@@ -125,7 +125,7 @@ export function PulseView({ onOpenContact, filter }: Props) {
               Revisar tier + hooks
             </div>
           </div>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent-ink)', letterSpacing: '1.5px' }}>→</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent)', letterSpacing: '1.5px' }}>→</span>
         </div>
       )}
 
