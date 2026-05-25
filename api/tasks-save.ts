@@ -110,41 +110,54 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     await maybeGenerateNextInstance(supabase, row, user.id)
   }
 
-  // Google Tasks push (best-effort)
+  // Google Tasks push (best-effort — local save já sucedeu)
   try {
     const [projRes, userRes] = await Promise.all([
-      supabase.from('projects').select('google_task_list_id').eq('id', d.projectId).eq('user_id', user.id).single(),
+      supabase.from('projects').select('google_task_list_id, name').eq('id', d.projectId).eq('user_id', user.id).single(),
       supabase.from('users').select('google_refresh_token').eq('id', user.id).single(),
     ])
-    const taskListId = projRes.data?.google_task_list_id
     const refreshToken = userRes.data?.google_refresh_token
+    let taskListId = (projRes.data?.google_task_list_id ?? null) as string | null
 
-    if (taskListId && refreshToken) {
+    if (refreshToken) {
       const authClient = await getAuthedClient(refreshToken)
       const tasksApi = google.tasks({ version: 'v1', auth: authClient })
 
-      const body = {
-        title: d.title,
-        notes: d.notes ?? undefined,
-        status: mapStatusToGoogle(d.status),
-        due: d.dueDate ? `${d.dueDate}T00:00:00.000Z` : undefined,
+      // Projeto nativo (sem lista no Google) → cria a lista espelhando o projeto
+      if (!taskListId && projRes.data?.name) {
+        const { data: newList } = await tasksApi.tasklists.insert({ requestBody: { title: projRes.data.name } })
+        if (newList?.id) {
+          taskListId = newList.id
+          await supabase.from('projects').update({ google_task_list_id: newList.id }).eq('id', d.projectId).eq('user_id', user.id)
+        }
       }
 
-      const existingGoogleTaskId = row['google_tasks_id'] as string | null
+      if (taskListId) {
+        // due do Google é date-only; usa dueAt (campo do painel) e cai pra dueDate
+        const dueIso = d.dueAt ?? (d.dueDate ? `${d.dueDate}T00:00:00.000Z` : undefined)
+        const body = {
+          title: d.title,
+          notes: d.notes ?? undefined,
+          status: mapStatusToGoogle(d.status),
+          due: dueIso ? `${new Date(dueIso).toISOString().slice(0, 10)}T00:00:00.000Z` : undefined,
+        }
 
-      if (d.id && existingGoogleTaskId) {
-        await tasksApi.tasks.patch({ tasklist: taskListId, task: existingGoogleTaskId, requestBody: body })
-        await supabase.from('tasks').update({ synced: true }).eq('id', row['id'] as string)
-        row['synced'] = true
-      } else if (!d.id) {
-        const { data: gtask } = await tasksApi.tasks.insert({ tasklist: taskListId, requestBody: body })
-        if (gtask?.id) {
-          await supabase
-            .from('tasks')
-            .update({ google_tasks_id: gtask.id, synced: true })
-            .eq('id', row['id'] as string)
-          row['google_tasks_id'] = gtask.id
+        const existingGoogleTaskId = row['google_tasks_id'] as string | null
+
+        if (existingGoogleTaskId) {
+          await tasksApi.tasks.patch({ tasklist: taskListId, task: existingGoogleTaskId, requestBody: body })
+          await supabase.from('tasks').update({ synced: true }).eq('id', row['id'] as string)
           row['synced'] = true
+        } else {
+          const { data: gtask } = await tasksApi.tasks.insert({ tasklist: taskListId, requestBody: body })
+          if (gtask?.id) {
+            await supabase
+              .from('tasks')
+              .update({ google_tasks_id: gtask.id, synced: true })
+              .eq('id', row['id'] as string)
+            row['google_tasks_id'] = gtask.id
+            row['synced'] = true
+          }
         }
       }
     }

@@ -82,50 +82,64 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     data = row as Record<string, unknown>
   }
 
+  // Google People push (best-effort — local save já sucedeu).
+  // Sem vínculo → cria no Google e guarda o resourceName. Com vínculo → atualiza.
   const googleContactId = data['google_contact_id'] as string | null
-  if (d.id && googleContactId) {
-    try {
-      const { data: userData } = await supabase
-        .from('users')
-        .select('google_refresh_token')
-        .eq('id', user.id)
-        .single()
+  try {
+    const { data: userData } = await supabase
+      .from('users')
+      .select('google_refresh_token')
+      .eq('id', user.id)
+      .single()
 
-      if (userData?.google_refresh_token) {
-        const authClient = await getAuthedClient(userData.google_refresh_token)
-        const peopleApi = google.people({ version: 'v1', auth: authClient })
+    if (userData?.google_refresh_token) {
+      const authClient = await getAuthedClient(userData.google_refresh_token)
+      const peopleApi = google.people({ version: 'v1', auth: authClient })
 
+      let birthdayDate: { day: number; month: number } | undefined
+      if (d.birthday) {
+        const parts = d.birthday.split('/')
+        const day = parseInt(parts[0] ?? '0', 10)
+        const month = parseInt(parts[1] ?? '0', 10)
+        if (day > 0 && month > 0) birthdayDate = { day, month }
+      }
+
+      const personFields = 'names,emailAddresses,phoneNumbers,birthdays,organizations'
+      const personBody = {
+        names: [{ givenName: d.firstName, familyName: d.lastName ?? undefined }],
+        emailAddresses: d.email ? [{ value: d.email }] : [],
+        phoneNumbers: d.phone ? [{ value: d.phone }] : [],
+        birthdays: birthdayDate ? [{ date: birthdayDate }] : [],
+        organizations: (d.company || d.role) ? [{ name: d.company ?? undefined, title: d.role ?? undefined }] : [],
+      }
+
+      if (googleContactId) {
         const { data: current } = await peopleApi.people.get({
           resourceName: googleContactId,
-          personFields: 'names,emailAddresses,phoneNumbers,birthdays,organizations',
+          personFields,
         })
-
         if (current?.etag) {
-          let birthdayDate: { day: number; month: number } | undefined
-          if (d.birthday) {
-            const parts = d.birthday.split('/')
-            const day = parseInt(parts[0] ?? '0', 10)
-            const month = parseInt(parts[1] ?? '0', 10)
-            if (day > 0 && month > 0) birthdayDate = { day, month }
-          }
-
           await peopleApi.people.updateContact({
             resourceName: googleContactId,
-            updatePersonFields: 'names,emailAddresses,phoneNumbers,birthdays,organizations',
-            requestBody: {
-              etag: current.etag,
-              names: [{ givenName: d.firstName, familyName: d.lastName ?? undefined }],
-              emailAddresses: d.email ? [{ value: d.email }] : [],
-              phoneNumbers: d.phone ? [{ value: d.phone }] : [],
-              birthdays: birthdayDate ? [{ date: birthdayDate }] : [],
-              organizations: (d.company || d.role) ? [{ name: d.company ?? undefined, title: d.role ?? undefined }] : [],
-            },
+            updatePersonFields: personFields,
+            requestBody: { etag: current.etag, ...personBody },
           })
         }
+      } else {
+        const { data: created } = await peopleApi.people.createContact({ requestBody: personBody })
+        if (created?.resourceName) {
+          await supabase
+            .from('contacts')
+            .update({ google_contact_id: created.resourceName, synced: true })
+            .eq('id', data['id'] as string)
+            .eq('user_id', user.id)
+          data['google_contact_id'] = created.resourceName
+          data['synced'] = true
+        }
       }
-    } catch (e) {
-      console.error('[contacts-save] google push failed:', e instanceof Error ? e.message : e)
     }
+  } catch (e) {
+    console.error('[contacts-save] google push failed:', e instanceof Error ? e.message : e)
   }
 
   return res.status(d.id ? 200 : 201).json({ contact: mapContact(data) })
