@@ -83,7 +83,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         tasklist: list.id,
         maxResults: 100,
         showCompleted: true,
-        showHidden: false,
+        showHidden: true,
         ...(pageToken ? { pageToken } : {}),
       })
 
@@ -113,14 +113,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({ projects: listUpserts.length, tasks_inserted: 0, tasks_updated: 0, tasks_unchanged: 0 })
   }
 
-  // PASS 1: insert new tasks only. ignoreDuplicates evita sobrescrever existentes.
-  const { error: insertErr } = await supabase
-    .from('tasks')
-    .upsert(taskRows as never[], { onConflict: 'user_id,google_tasks_id', ignoreDuplicates: true })
+  // PASS 1: insere só tasks novas E não-concluídas. Como agora pedimos
+  // showHidden:true, conclusões históricas do Google (que o app nunca teve) viriam
+  // junto — não as importamos pra não floodar o app de "done" antigos. Conclusões
+  // de tasks que o app JÁ conhece são aplicadas no PASS 2.
+  const newRows = taskRows.filter(r => r.status !== 'done')
+  if (newRows.length > 0) {
+    const { error: insertErr } = await supabase
+      .from('tasks')
+      .upsert(newRows as never[], { onConflict: 'user_id,google_tasks_id', ignoreDuplicates: true })
 
-  if (insertErr) {
-    console.error('[tasks-sync] task insert error:', insertErr.message)
-    return res.status(500).json({ error: insertErr.message })
+    if (insertErr) {
+      console.error('[tasks-sync] task insert error:', insertErr.message)
+      return res.status(500).json({ error: insertErr.message })
+    }
   }
 
   // PASS 2: smart merge para tasks já existentes.
@@ -132,29 +138,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const googleIds = taskRows.map(r => r.google_tasks_id)
   const { data: existingRows } = await supabase
     .from('tasks')
-    .select('id, google_tasks_id, status, due_date, updated_at, archived')
+    .select('id, google_tasks_id, status, due_date, updated_at, archived, title, notes')
     .eq('user_id', user.id)
     .in('google_tasks_id', googleIds)
 
   const localByGoogleId = new Map<string, {
-    id: string; status: string; due_date: string | null; updated_at: string; archived: boolean
+    id: string; status: string; due_date: string | null; updated_at: string; archived: boolean; title: string; notes: string | null
   }>()
   for (const r of (existingRows ?? []) as Array<{
-    id: string; google_tasks_id: string; status: string; due_date: string | null; updated_at: string; archived: boolean
+    id: string; google_tasks_id: string; status: string; due_date: string | null; updated_at: string; archived: boolean; title: string; notes: string | null
   }>) {
     localByGoogleId.set(r.google_tasks_id, r)
   }
 
   let updated = 0
   let unchanged = 0
-  let inserted = 0
+  const inserted = newRows.length
 
   for (const row of taskRows) {
     const local = localByGoogleId.get(row.google_tasks_id)
-    if (!local) {
-      inserted++
-      continue
-    }
+    if (!local) continue  // novas não-done já entraram no PASS 1; done-históricas são ignoradas
 
     if (local.archived) {
       // Local archivado — Google ainda mostra. Push delete pra Google (best-effort).
@@ -185,17 +188,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (googleNewer) nextStatus = 'next'
     }
 
-    // Due date: só aplica se Google é mais novo
+    // Due / título / notas: só aplicam se o Google é mais novo (last-write-wins
+    // por timestamp; não sobrescreve edição local mais recente).
     const dueChanged = googleNewer && row.due_date !== local.due_date
     const nextDue = dueChanged ? row.due_date : undefined
+    const titleChanged = googleNewer && row.title !== local.title
+    const notesChanged = googleNewer && (row.notes ?? '') !== (local.notes ?? '')
 
-    const update: { status?: 'done' | 'next'; due_date?: string | null; synced: boolean; updated_at?: string } = {
+    const update: { status?: 'done' | 'next'; due_date?: string | null; title?: string; notes?: string; synced: boolean; updated_at?: string } = {
       synced: true,
     }
     if (nextStatus) update.status = nextStatus
     if (nextDue !== undefined) update.due_date = nextDue
+    if (titleChanged) update.title = row.title
+    if (notesChanged) update.notes = row.notes
 
-    if (update.status || update.due_date !== undefined) {
+    if (update.status || update.due_date !== undefined || update.title !== undefined || update.notes !== undefined) {
       update.updated_at = new Date().toISOString()
       const { error: updErr } = await supabase
         .from('tasks')
