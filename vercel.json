@@ -11,7 +11,10 @@
     "api/coach-checkin-cron.ts": { "maxDuration": 300 },
     "api/special-dates-cron.ts": { "maxDuration": 300 },
     "api/rituals-cron.ts": { "maxDuration": 300 },
-    "api/contacts-suggest-message.ts": { "maxDuration": 30 }
+    "api/contacts-suggest-message.ts": { "maxDuration": 30 },
+    "api/tasks-sync.ts": { "maxDuration": 300 },
+    "api/events-sync.ts": { "maxDuration": 300 },
+    "api/contacts-sync.ts": { "maxDuration": 300 }
   },
   "crons": [
     {
