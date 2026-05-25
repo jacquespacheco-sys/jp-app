@@ -135,12 +135,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   //   - timestamps (updated_at local vs google.updated)
   // Preserva status granular (next/doing/blocked/waiting/scheduled/someday) quando
   // o Google só diz needsAction — o app tem mais granularidade que o Google.
-  const googleIds = taskRows.map(r => r.google_tasks_id)
-  const { data: existingRows } = await supabase
+  // Busca TODAS as tasks já vinculadas ao Google (não um .in() com a lista de ids
+  // puxados — com showHidden:true essa lista fica enorme e estoura o limite de URL,
+  // fazendo a query falhar e o merge não aplicar nada).
+  const { data: existingRows, error: existingErr } = await supabase
     .from('tasks')
     .select('id, google_tasks_id, status, due_date, updated_at, archived, title, notes')
     .eq('user_id', user.id)
-    .in('google_tasks_id', googleIds)
+    .not('google_tasks_id', 'is', null)
+  if (existingErr) {
+    console.error('[tasks-sync] existing fetch error:', existingErr.message)
+    return res.status(500).json({ error: existingErr.message })
+  }
 
   const localByGoogleId = new Map<string, {
     id: string; status: string; due_date: string | null; updated_at: string; archived: boolean; title: string; notes: string | null
