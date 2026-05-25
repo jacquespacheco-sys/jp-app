@@ -256,9 +256,14 @@ export function ConfigPage() {
               </div>
             </div>
             {googleConnected ? (
-              <button className="btn btn-ghost" onClick={() => { void handleSyncGoogle() }} disabled={syncing} style={{ fontSize: '10px' }}>
-                {syncing ? 'Sync…' : 'Sincronizar'}
-              </button>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button className="btn btn-ghost" onClick={() => { void handleSyncGoogle() }} disabled={syncing} style={{ fontSize: '10px' }}>
+                  {syncing ? 'Sync…' : 'Sincronizar'}
+                </button>
+                <button className="btn btn-ghost" onClick={() => { void handleConnectGoogle() }} style={{ fontSize: '10px' }} title="Re-autoriza o Google (atualiza permissões de escrita)">
+                  Reconectar
+                </button>
+              </div>
             ) : (
               <button className="btn btn-accent" onClick={() => { void handleConnectGoogle() }} style={{ fontSize: '10px' }}>
                 Conectar
