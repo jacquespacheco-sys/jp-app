@@ -8,41 +8,41 @@
 /* ---------- Variables: Light (default) — Paleta Seda ---------- */
 :root {
   /* Backgrounds */
-  --bg: #FBF9F5;                /* creme-pérola quente, não branco frio */
-  --bg-elevated: #FFFEFC;       /* branco com 1% de creme */
-  --bg-subtle: #F4EFE8;         /* pílulas inativas, inputs */
+  --bg: #F1ECE1;                /* creme terroso (base) */
+  --bg-elevated: #FAF6EC;       /* cartões/superfícies elevadas */
+  --bg-subtle: #F6F1E6;         /* pílulas inativas, inputs */
 
   /* Foreground */
-  --fg: #3A352F;                /* marrom-tinta, não preto */
-  --fg-muted: #8A8075;          /* taupe */
-  --fg-dim: #A99E91;            /* dim */
+  --fg: #2A211B;                /* marrom-terra escuro */
+  --fg-muted: #6F6256;          /* texto secundário */
+  --fg-dim: #A89C8D;            /* dim */
 
-  /* Accent — lilás (cor do Coach/AI) */
-  --accent: #DFD0EC;
-  --accent-ink: #6B5E72;
-  --accent-soft: rgba(223, 208, 236, 0.5);
-  --accent-faint: rgba(223, 208, 236, 0.18);
+  /* Accent — Transformative Teal (marca) */
+  --accent: #1E5862;
+  --accent-ink: #F1ECE1;
+  --accent-soft: rgba(30, 88, 98, 0.14);
+  --accent-faint: rgba(30, 88, 98, 0.07);
 
   /* Borders */
-  --border: #ECE7DE;
-  --border-light: #F4EFE8;
+  --border: #DDD3C2;
+  --border-light: #E8DFCE;
 
   /* Semantic */
-  --danger: #9B6B73;            /* rosa-vinho, não vermelho agressivo */
-  --danger-soft: rgba(245, 213, 220, 0.5);
-  --success: #5C8159;           /* sage escuro */
-  --success-soft: rgba(201, 221, 201, 0.55);
+  --danger: #A8472C;            /* tijolo/terracota (harmoniza c/ terroso) */
+  --danger-soft: rgba(168, 71, 44, 0.12);
+  --success: #5C7A4A;           /* oliva */
+  --success-soft: rgba(92, 122, 74, 0.14);
 
   /* CTA primary (botão "Add", ações principais) */
-  --cta-bg: #3A352F;
-  --cta-fg: #FBF9F5;
+  --cta-bg: #2A211B;
+  --cta-fg: #F1ECE1;
 
   /* Misc */
-  --shadow: 0 2px 12px rgba(58, 53, 47, 0.04);
-  --overlay-bg: rgba(58, 53, 47, 0.45);
+  --shadow: 0 2px 12px rgba(42, 33, 27, 0.06);
+  --overlay-bg: rgba(42, 33, 27, 0.5);
   --nav-selected: var(--fg);
   --nav-selected-ink: var(--bg);
-  --sync-green: #5C8159;
+  --sync-green: #5C7A4A;
 
   /* Tipografia */
   --font-sans: 'General Sans', system-ui, -apple-system, sans-serif;
@@ -72,10 +72,10 @@
   --color-peach-border: rgba(232, 201, 165, 0.6);
   --color-sky-border: rgba(207, 227, 232, 0.7);
 
-  /* Gradient de personalidade (Coach, view ativa, ícone Today) */
-  --gradient-coach: linear-gradient(135deg, rgba(223, 208, 236, 0.7) 0%, rgba(245, 213, 220, 0.7) 100%);
-  --gradient-coach-strong: linear-gradient(135deg, #DFD0EC 0%, #F5D5DC 50%, #CFE3E8 100%);
-  --gradient-coach-bar: linear-gradient(90deg, #DFD0EC 0%, #F5D5DC 50%, #CFE3E8 100%);
+  /* Gradient de personalidade (Coach, view ativa, ícone Today) — teal → âmbar */
+  --gradient-coach: linear-gradient(135deg, rgba(30, 88, 98, 0.16) 0%, rgba(200, 149, 106, 0.30) 100%);
+  --gradient-coach-strong: linear-gradient(135deg, #1E5862 0%, #3AA0A3 50%, #C8956A 100%);
+  --gradient-coach-bar: linear-gradient(90deg, #1E5862 0%, #3AA0A3 50%, #C8956A 100%);
 
   /* Category chip palette (light) — re-mapeada na paleta seda */
   --chip-gray-bg:   var(--bg-subtle);              --chip-gray-fg:   var(--fg-muted);
@@ -93,36 +93,36 @@
 
 /* ---------- Variables: Dark — preto-tinta com calor ---------- */
 body.dark {
-  --bg: #1A1714;
-  --bg-elevated: #221E1A;
-  --bg-subtle: #2A2520;
+  --bg: #1A130E;                /* cocoa profundo */
+  --bg-elevated: #241A12;
+  --bg-subtle: #1F1610;
 
-  --fg: #E8DDD0;                /* creme claro */
-  --fg-muted: #9A8C7B;
-  --fg-dim: #7A6F62;
+  --fg: #F0E9DF;                /* creme claro quente */
+  --fg-muted: #9A8A78;
+  --fg-dim: #60533F;
 
-  --accent: rgba(223, 208, 236, 0.3);
-  --accent-ink: #DFD0EC;
-  --accent-soft: rgba(223, 208, 236, 0.2);
-  --accent-faint: rgba(223, 208, 236, 0.08);
+  --accent: #3AA0A3;            /* Transformative Teal (vivo no escuro) */
+  --accent-ink: #0D0805;
+  --accent-soft: rgba(58, 160, 163, 0.18);
+  --accent-faint: rgba(58, 160, 163, 0.08);
 
-  --border: #2A2520;
-  --border-light: #221E1A;
+  --border: #34271C;
+  --border-light: #3E3022;
 
-  --danger: #E8B8C2;
-  --danger-soft: rgba(245, 213, 220, 0.15);
-  --success: #A8C0A5;
-  --success-soft: rgba(201, 221, 201, 0.15);
+  --danger: #CC6A4A;
+  --danger-soft: rgba(204, 106, 74, 0.18);
+  --success: #7FA06A;
+  --success-soft: rgba(127, 160, 106, 0.16);
 
   /* CTA primary — inverte no dark */
-  --cta-bg: #E8DDD0;
-  --cta-fg: #1A1714;
+  --cta-bg: #F0E9DF;
+  --cta-fg: #1A130E;
 
-  --shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
-  --overlay-bg: rgba(10, 8, 6, 0.75);
+  --shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+  --overlay-bg: rgba(0, 0, 0, 0.85);
   --nav-selected: var(--fg);
   --nav-selected-ink: var(--bg);
-  --sync-green: #A8C0A5;
+  --sync-green: #7FA06A;
 
   /* Cores funcionais — alpha 0.2 no dark */
   --color-rose: rgba(245, 213, 220, 0.2);
@@ -146,9 +146,9 @@ body.dark {
   --color-sky-border: rgba(207, 227, 232, 0.3);
 
   /* Gradient — mais sutil no dark, mas gradient-coach-bar mantém saturação (fita de seda) */
-  --gradient-coach: linear-gradient(135deg, rgba(223, 208, 236, 0.3) 0%, rgba(245, 213, 220, 0.3) 100%);
-  --gradient-coach-strong: linear-gradient(135deg, rgba(245, 213, 220, 0.4) 0%, rgba(223, 208, 236, 0.4) 50%, rgba(207, 227, 232, 0.4) 100%);
-  --gradient-coach-bar: linear-gradient(90deg, #DFD0EC 0%, #F5D5DC 50%, #CFE3E8 100%);
+  --gradient-coach: linear-gradient(135deg, rgba(58, 160, 163, 0.22) 0%, rgba(214, 160, 63, 0.20) 100%);
+  --gradient-coach-strong: linear-gradient(135deg, rgba(58, 160, 163, 0.40) 0%, rgba(127, 181, 184, 0.40) 50%, rgba(214, 160, 63, 0.35) 100%);
+  --gradient-coach-bar: linear-gradient(90deg, #3AA0A3 0%, #7FB5B8 50%, #D6A03F 100%);
 
   /* Category chip palette (dark) — re-mapeada */
   --chip-gray-bg:   var(--bg-subtle);              --chip-gray-fg:   var(--fg-muted);
