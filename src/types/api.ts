@@ -183,3 +183,9 @@ export interface HillCoachWizardStepResponse { content: string; action: HillCoac
 export interface HillCoachMurmurResponse { content: string | null }
 export interface HillPreferencesResponse { preferences: HillPreferences }
 export interface HillNudgesResponse { nudges: HillNudge[] }
+
+import type { QuarterlyReview, ReviewPending, AffirmationUsageStat } from './domain.ts'
+
+export type ReviewPendingResponse = ReviewPending
+export interface ReviewResponse { review: QuarterlyReview; resumed?: boolean }
+export interface AffirmationUsageStatsResponse { stats: AffirmationUsageStat[]; windowDays: number }

@@ -97,6 +97,12 @@ import hillPreferences from './api/hill-preferences.ts'
 import hillCronDailyNudge from './api/hill-cron-daily-nudge.ts'
 import hillNudges from './api/hill-nudges.ts'
 import hillNudgeFeedback from './api/hill-nudge-feedback.ts'
+import hillAffirmationsRefine from './api/hill-affirmations-refine.ts'
+import hillAffirmationsRetire from './api/hill-affirmations-retire.ts'
+import hillAffirmationsUsageStats from './api/hill-affirmations-usage-stats.ts'
+import hillReviewPending from './api/hill-review-pending.ts'
+import hillReviewStart from './api/hill-review-start.ts'
+import hillReviewSave from './api/hill-review-save.ts'
 
 const app = express()
 app.use(express.json({ limit: '10mb' }))
@@ -230,6 +236,12 @@ app.all('/api/hill-preferences', h(hillPreferences))
 app.all('/api/hill-cron-daily-nudge', h(hillCronDailyNudge))
 app.all('/api/hill-nudges', h(hillNudges))
 app.all('/api/hill-nudge-feedback', h(hillNudgeFeedback))
+app.all('/api/hill-affirmations-refine', h(hillAffirmationsRefine))
+app.all('/api/hill-affirmations-retire', h(hillAffirmationsRetire))
+app.all('/api/hill-affirmations-usage-stats', h(hillAffirmationsUsageStats))
+app.all('/api/hill-review-pending', h(hillReviewPending))
+app.all('/api/hill-review-start', h(hillReviewStart))
+app.all('/api/hill-review-save', h(hillReviewSave))
 
 const API_PORT = Number(process.env.API_PORT) || 3001
 app.listen(API_PORT, () => {

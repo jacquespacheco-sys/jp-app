@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Topbar } from '../components/layout/Topbar.tsx'
 import { ThemeToggle } from '../components/common/ThemeToggle.tsx'
 import { AffirmationCard } from '../components/hill/AffirmationCard.tsx'
 import { ChiefAimEditor } from '../components/hill/ChiefAimEditor.tsx'
 import { useHill } from '../hooks/useHill.ts'
+import { api } from '../api.ts'
+import type { ReviewPendingResponse } from '../types/api.ts'
 
 function daysUntil(dateStr: string): number {
   const today = new Date()
@@ -17,6 +19,18 @@ export function CompassPage() {
   const navigate = useNavigate()
   const { chiefAim, affirmations, ritualStats, loading, saveChiefAim, updateChiefAimMeta } = useHill()
   const [editingAim, setEditingAim] = useState(false)
+  const [reviewPending, setReviewPending] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const r = await api.get<ReviewPendingResponse>('/api/hill-review-pending')
+        if (!cancelled) setReviewPending(r.pending)
+      } catch { /* ignore */ }
+    })()
+    return () => { cancelled = true }
+  }, [])
 
   const actions = (
     <>
@@ -42,6 +56,17 @@ export function CompassPage() {
       <Topbar title="Compass" actions={actions} />
 
       <div className="content">
+        {reviewPending && (
+          <button className="hill-briefing-card" style={{ marginBottom: '20px', background: 'var(--accent-soft)' }} onClick={() => navigate('/hill/review')}>
+            <span style={{ fontSize: '18px', lineHeight: 1 }}>↻</span>
+            <span style={{ flex: 1 }}>
+              <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--fg-muted)', marginBottom: '4px' }}>Revisão trimestral</span>
+              <span style={{ fontSize: '14px', color: 'var(--fg)' }}>Chegou a hora de revisar seu aim e refinar as afirmações.</span>
+            </span>
+            <span style={{ color: 'var(--fg-dim)', fontSize: '18px' }}>→</span>
+          </button>
+        )}
+
         {/* ---------- Chief Aim ---------- */}
         <div className="section">
           <div className="section-title">Chief Aim</div>
