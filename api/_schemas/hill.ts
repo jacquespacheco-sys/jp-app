@@ -120,6 +120,32 @@ export const ReviewSaveSchema = z.object({
 export type ReviewSaveInput = z.input<typeof ReviewSaveSchema>
 
 // -------------------------------------------------------------
+// Mastermind (Invisible Counselors)
+// -------------------------------------------------------------
+export const CounselorSaveSchema = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().min(1).max(100),
+  shortLabel: z.string().min(1).max(4),
+  archetype: z.string().min(1).max(100),
+  isRealPerson: z.boolean().optional(),
+  contextPrompt: z.string().max(2000).optional(),
+  displayOrder: z.number().int().optional(),
+})
+export type CounselorSaveInput = z.input<typeof CounselorSaveSchema>
+
+export const CounselorIdSchema = z.object({ id: z.string().uuid() })
+
+export const MastermindSessionSchema = z.object({ question: z.string().min(1).max(2000) })
+export type MastermindSessionInput = z.input<typeof MastermindSessionSchema>
+
+export const SessionDecisionSchema = z.object({
+  id: z.string().uuid(),
+  userDecision: z.string().min(1).max(2000),
+  decisionReason: z.string().max(2000).optional(),
+})
+export type SessionDecisionInput = z.input<typeof SessionDecisionSchema>
+
+// -------------------------------------------------------------
 // Rituals
 // -------------------------------------------------------------
 export const RitualStartSchema = z.object({

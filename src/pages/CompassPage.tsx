@@ -139,12 +139,17 @@ export function CompassPage() {
           </div>
         </div>
 
-        {/* ---------- Coach ---------- */}
+        {/* ---------- Coach & Mastermind ---------- */}
         <div className="section">
-          <div className="section-title">Coach</div>
-          <button className="btn btn-accent" style={{ width: '100%', justifyContent: 'center' }} onClick={() => navigate('/hill/coach')}>
-            ✦ Falar com o Coach Hill
-          </button>
+          <div className="section-title">Coach & Mastermind</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <button className="btn btn-accent" style={{ width: '100%', justifyContent: 'center' }} onClick={() => navigate('/hill/coach')}>
+              ✦ Falar com o Coach Hill
+            </button>
+            <button className="btn" style={{ width: '100%', justifyContent: 'center' }} onClick={() => navigate('/hill/mastermind')}>
+              ☷ Convocar o Mastermind
+            </button>
+          </div>
         </div>
 
         {/* ---------- Afirmações ---------- */}
