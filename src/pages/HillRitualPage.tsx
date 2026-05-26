@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../api.ts'
 import { AffirmationCard } from '../components/hill/AffirmationCard.tsx'
 import type { Affirmation, ChiefAim, Project, RitualType } from '../types/domain.ts'
 import type {
   ChiefAimResponse, AffirmationsListResponse, ProjectsListResponse,
-  RitualResponse, TaskSaveResponse,
+  RitualResponse, TaskSaveResponse, HillCoachMurmurResponse,
 } from '../types/api.ts'
 
 type Reflection = { what_brought_closer: string; what_pushed_away: string; next_action: string }
@@ -66,6 +66,22 @@ export function HillRitualPage() {
     : [...(chiefAim ? ['chief_aim_read'] : []), ...(affirmations.length ? ['affirmations'] : []), 'daily_action', 'seal']
 
   const stepKey = steps[stepIdx] ?? 'seal'
+
+  // Murmur do coach no passo das afirmações (best-effort, 1x por ritual)
+  const [murmur, setMurmur] = useState<string | null>(null)
+  const murmurDoneRef = useRef(false)
+  useEffect(() => {
+    if (stepKey !== 'affirmations' || murmurDoneRef.current) return
+    murmurDoneRef.current = true
+    void (async () => {
+      try {
+        const res = await api.post<HillCoachMurmurResponse>('/api/hill-coach-murmur', {
+          context: `${isNight ? 'Ritual noturno' : 'Ritual matinal'} — passo das afirmações.`,
+        })
+        setMurmur(res.content)
+      } catch { /* silêncio: o coach acompanha, não interrompe */ }
+    })()
+  }, [stepKey, isNight])
 
   const complete = useCallback(async () => {
     if (!ritualId) return
@@ -139,6 +155,11 @@ export function HillRitualPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {affirmations.map(a => <AffirmationCard key={a.id} affirmation={a} showBelief={false} />)}
             </div>
+            {murmur && (
+              <div className="hill-step-kicker" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '14px', letterSpacing: 0, textTransform: 'none', lineHeight: 1.5, opacity: 0.9 }}>
+                ✦ {murmur}
+              </div>
+            )}
           </>
         )}
 

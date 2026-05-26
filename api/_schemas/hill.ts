@@ -126,3 +126,30 @@ export const RitualCompleteSchema = z.object({
   dailyActionTaskId: z.string().uuid().optional(),
 })
 export type RitualCompleteInput = z.input<typeof RitualCompleteSchema>
+
+// -------------------------------------------------------------
+// Coach Hill (Fase 2)
+// -------------------------------------------------------------
+export const CoachChatSchema = z.object({
+  message: z.string().min(1).max(4000),
+  conversationId: z.string().uuid().optional(),
+})
+export type CoachChatInput = z.input<typeof CoachChatSchema>
+
+export const CoachWizardStepSchema = z.object({
+  dimension: z.enum(DIMENSIONS),
+  draft: z.string().min(1).max(2000),
+})
+export type CoachWizardStepInput = z.input<typeof CoachWizardStepSchema>
+
+export const CoachMurmurSchema = z.object({
+  context: z.string().min(1).max(500),
+})
+export type CoachMurmurInput = z.input<typeof CoachMurmurSchema>
+
+export const HillPreferencesSchema = z.object({
+  coachVoice: z.enum(['strict', 'mixed', 'gentle']).optional(),
+  dailyNudgeEnabled: z.boolean().optional(),
+  ritualMurmursEnabled: z.boolean().optional(),
+})
+export type HillPreferencesInput = z.input<typeof HillPreferencesSchema>

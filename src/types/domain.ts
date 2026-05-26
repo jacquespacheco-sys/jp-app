@@ -7,6 +7,9 @@ import type {
   HillAffirmationDimension as HillAffirmationDimensionDB,
   HillAffirmationStatus as HillAffirmationStatusDB,
   HillRitualType as HillRitualTypeDB,
+  HillCoachMode as HillCoachModeDB,
+  HillMessageRole as HillMessageRoleDB,
+  HillCoachVoice as HillCoachVoiceDB,
 } from './database.ts'
 
 export type Quadrant = QuadrantDB
@@ -849,4 +852,44 @@ export const AFFIRMATION_DIMENSION_LABELS: Record<AffirmationDimension, string> 
   capacidade: 'Capacidade',
   relacoes: 'Relações',
   integracao: 'Integração',
+}
+
+// Coach Hill (Fase 2)
+export type HillCoachMode = HillCoachModeDB
+export type HillMessageRole = HillMessageRoleDB
+export type HillCoachVoice = HillCoachVoiceDB
+
+export interface HillCoachAction {
+  type: string
+  payload: unknown
+}
+
+export interface HillCoachMessage {
+  id: string
+  conversationId: string
+  mode: HillCoachMode
+  role: HillMessageRole
+  content: string
+  actionPayload?: HillCoachAction
+  createdAt: string
+}
+
+export interface HillCoachConversation {
+  conversationId: string
+  lastRole: HillMessageRole
+  lastContent: string
+  lastAt: string
+  count: number
+}
+
+export interface HillPreferences {
+  coachVoice: HillCoachVoice
+  dailyNudgeEnabled: boolean
+  ritualMurmursEnabled: boolean
+}
+
+export const COACH_VOICE_LABELS: Record<HillCoachVoice, string> = {
+  strict: 'Exigente',
+  mixed: 'Firme mas gentil',
+  gentle: 'Acolhedor',
 }

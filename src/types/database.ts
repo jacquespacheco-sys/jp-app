@@ -24,6 +24,9 @@ export type HillGoalStatus = 'active' | 'completed' | 'archived' | 'failed'
 export type HillAffirmationDimension = 'identidade' | 'acao' | 'capacidade' | 'relacoes' | 'integracao'
 export type HillAffirmationStatus = 'active' | 'retired' | 'superseded'
 export type HillRitualType = 'morning' | 'night'
+export type HillCoachMode = 'chat' | 'ritual_murmur' | 'wizard_step' | 'daily_nudge'
+export type HillMessageRole = 'user' | 'coach'
+export type HillCoachVoice = 'strict' | 'mixed' | 'gentle'
 
 // Tasks: status é text com check constraint que aceita valores legados e novos.
 export type TaskStatus =
@@ -397,6 +400,21 @@ type HillRitualLogsInsert = {
   steps_completed?: Json; affirmations_read?: string[]; affirmations_skipped?: string[]
   reflection_data?: Json | null; gratitude_items?: string[] | null
   daily_action_task_id?: string | null; created_at?: string
+}
+
+type HillCoachMessagesInsert = {
+  id?: string; user_id: string; conversation_id: string
+  mode: HillCoachMode; role: HillMessageRole; content: string
+  context_used?: Json | null; tokens_in?: number | null; tokens_out?: number | null
+  model?: string | null; cost?: number | null
+  action_payload?: Json | null; user_action_taken?: boolean | null
+  created_at?: string
+}
+
+type HillPreferencesInsert = {
+  user_id: string; coach_voice?: HillCoachVoice
+  daily_nudge_enabled?: boolean; ritual_murmurs_enabled?: boolean
+  created_at?: string; updated_at?: string
 }
 
 // -------------------------------------------------------------
@@ -955,6 +973,29 @@ export type Database = {
         Update: Partial<HillRitualLogsInsert>
         Relationships: []
       }
+      hill_coach_messages: {
+        Row: {
+          id: string; user_id: string; conversation_id: string
+          mode: HillCoachMode; role: HillMessageRole; content: string
+          context_used: Json | null; tokens_in: number | null; tokens_out: number | null
+          model: string | null; cost: number | null
+          action_payload: Json | null; user_action_taken: boolean | null
+          created_at: string
+        }
+        Insert: HillCoachMessagesInsert
+        Update: Partial<HillCoachMessagesInsert>
+        Relationships: []
+      }
+      hill_preferences: {
+        Row: {
+          user_id: string; coach_voice: HillCoachVoice
+          daily_nudge_enabled: boolean; ritual_murmurs_enabled: boolean
+          created_at: string; updated_at: string
+        }
+        Insert: HillPreferencesInsert
+        Update: Partial<HillPreferencesInsert>
+        Relationships: []
+      }
     }
     Views: {
       v_tasks_resolved: {
@@ -1037,6 +1078,8 @@ export type Database = {
       hill_affirmation_dimension: HillAffirmationDimension
       hill_affirmation_status: HillAffirmationStatus
       hill_ritual_type: HillRitualType
+      hill_coach_mode: HillCoachMode
+      hill_message_role: HillMessageRole
     }
     CompositeTypes: {
       [_ in never]: never

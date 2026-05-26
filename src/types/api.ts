@@ -174,3 +174,11 @@ export interface HillGoalSaveResponse { goal: HillGoal }
 export interface RitualResponse { ritual: RitualLog; resumed?: boolean }
 export interface RitualStatsResponse { stats: RitualStats }
 export interface RitualHistoryResponse { rituals: RitualLog[] }
+
+import type { HillCoachMessage, HillCoachConversation, HillPreferences, HillCoachAction } from './domain.ts'
+
+export interface HillCoachConversationsResponse { conversations: HillCoachConversation[] }
+export interface HillCoachMessagesResponse { messages: HillCoachMessage[] }
+export interface HillCoachWizardStepResponse { content: string; action: HillCoachAction | null; conversationId: string }
+export interface HillCoachMurmurResponse { content: string | null }
+export interface HillPreferencesResponse { preferences: HillPreferences }

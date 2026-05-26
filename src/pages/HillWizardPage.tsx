@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { api } from '../api.ts'
 import { BeliefDots } from '../components/hill/BeliefDots.tsx'
 import { useHill } from '../hooks/useHill.ts'
 import { AFFIRMATION_DIMENSIONS } from '../types/domain.ts'
 import type { AffirmationDimension } from '../types/domain.ts'
+import type { HillCoachWizardStepResponse } from '../types/api.ts'
 
 type Draft = { text: string; beliefScore: number }
 const emptyDrafts = (): Record<AffirmationDimension, Draft> => ({
@@ -24,6 +26,22 @@ export function HillWizardPage() {
   const [drafts, setDrafts] = useState<Record<AffirmationDimension, Draft>>(emptyDrafts)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [coachFeedback, setCoachFeedback] = useState<Partial<Record<AffirmationDimension, string>>>({})
+  const [coachLoading, setCoachLoading] = useState<AffirmationDimension | null>(null)
+
+  const askCoach = async (dim: AffirmationDimension) => {
+    const text = drafts[dim].text.trim()
+    if (!text) return
+    setCoachLoading(dim)
+    try {
+      const res = await api.post<HillCoachWizardStepResponse>('/api/hill-coach-wizard-step', { dimension: dim, draft: text })
+      setCoachFeedback(prev => ({ ...prev, [dim]: res.content }))
+    } catch {
+      setCoachFeedback(prev => ({ ...prev, [dim]: 'O coach não respondeu agora. Siga no seu ritmo.' }))
+    } finally {
+      setCoachLoading(null)
+    }
+  }
 
   if (loading) {
     return <div className="hill-ritual hill-ritual-morning"><div className="hill-step-body">Carregando…</div></div>
@@ -114,6 +132,23 @@ export function HillWizardPage() {
               </span>
               <BeliefDots score={drafts[currentDim.key].beliefScore} onChange={v => setDraft(currentDim.key, { beliefScore: v })} />
             </div>
+
+            <button
+              className="btn btn-ghost"
+              onClick={() => { void askCoach(currentDim.key) }}
+              disabled={!drafts[currentDim.key].text.trim() || coachLoading === currentDim.key}
+              style={{ fontSize: '11px', alignSelf: 'flex-start' }}
+            >
+              {coachLoading === currentDim.key ? 'Analisando…' : '✦ Pedir análise do coach'}
+            </button>
+            {coachFeedback[currentDim.key] && (
+              <div className="hill-affirmation" style={{ borderLeftColor: 'var(--accent)' }}>
+                <div className="hill-affirmation-dim">Coach Hill · 4 testes</div>
+                <div style={{ fontSize: '13px', lineHeight: 1.6, color: 'var(--fg)', whiteSpace: 'pre-wrap' }}>
+                  {coachFeedback[currentDim.key]}
+                </div>
+              </div>
+            )}
           </>
         )}
 

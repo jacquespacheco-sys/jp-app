@@ -89,6 +89,11 @@ import hillRitualsStep from './api/hill-rituals-step.ts'
 import hillRitualsComplete from './api/hill-rituals-complete.ts'
 import hillRitualsStats from './api/hill-rituals-stats.ts'
 import hillRitualsHistory from './api/hill-rituals-history.ts'
+import hillCoachChat from './api/hill-coach-chat.ts'
+import hillCoachWizardStep from './api/hill-coach-wizard-step.ts'
+import hillCoachMurmur from './api/hill-coach-murmur.ts'
+import hillCoachConversations from './api/hill-coach-conversations.ts'
+import hillPreferences from './api/hill-preferences.ts'
 
 const app = express()
 app.use(express.json({ limit: '10mb' }))
@@ -214,6 +219,11 @@ app.all('/api/hill-rituals-step', h(hillRitualsStep))
 app.all('/api/hill-rituals-complete', h(hillRitualsComplete))
 app.all('/api/hill-rituals-stats', h(hillRitualsStats))
 app.all('/api/hill-rituals-history', h(hillRitualsHistory))
+app.all('/api/hill-coach-chat', h(hillCoachChat))
+app.all('/api/hill-coach-wizard-step', h(hillCoachWizardStep))
+app.all('/api/hill-coach-murmur', h(hillCoachMurmur))
+app.all('/api/hill-coach-conversations', h(hillCoachConversations))
+app.all('/api/hill-preferences', h(hillPreferences))
 
 const API_PORT = Number(process.env.API_PORT) || 3001
 app.listen(API_PORT, () => {

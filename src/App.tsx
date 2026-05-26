@@ -23,6 +23,8 @@ const ProjectsPage = lazy(() => import('./pages/ProjectsPage.tsx').then(m => ({ 
 const CompassPage = lazy(() => import('./pages/CompassPage.tsx').then(m => ({ default: m.CompassPage })))
 const HillWizardPage = lazy(() => import('./pages/HillWizardPage.tsx').then(m => ({ default: m.HillWizardPage })))
 const HillRitualPage = lazy(() => import('./pages/HillRitualPage.tsx').then(m => ({ default: m.HillRitualPage })))
+const CoachHillPage = lazy(() => import('./pages/CoachHillPage.tsx').then(m => ({ default: m.CoachHillPage })))
+const HillPreferencesPage = lazy(() => import('./pages/HillPreferencesPage.tsx').then(m => ({ default: m.HillPreferencesPage })))
 
 const PageFallback = () => (
   <div className="empty-state" style={{ paddingTop: '40vh' }}>Carregando…</div>
@@ -116,6 +118,14 @@ function AppRoutes() {
       <Route
         path="/hill/ritual/:type"
         element={<ProtectedBare><HillRitualPage /></ProtectedBare>}
+      />
+      <Route
+        path="/hill/coach"
+        element={<ProtectedRoute><CoachHillPage /></ProtectedRoute>}
+      />
+      <Route
+        path="/hill/preferences"
+        element={<ProtectedRoute><HillPreferencesPage /></ProtectedRoute>}
       />
       <Route path="*" element={<Navigate to="/briefing" replace />} />
     </Routes>

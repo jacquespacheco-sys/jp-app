@@ -21,6 +21,7 @@ export function CompassPage() {
   const actions = (
     <>
       <button className="btn btn-ghost" onClick={() => navigate('/briefing')} style={{ fontSize: '11px' }}>← Briefing</button>
+      <button className="btn btn-ghost" onClick={() => navigate('/hill/preferences')} style={{ fontSize: '11px' }} title="Preferências Hill">⚙</button>
       <ThemeToggle />
     </>
   )
@@ -111,6 +112,14 @@ export function CompassPage() {
               ☾ Ritual da noite
             </button>
           </div>
+        </div>
+
+        {/* ---------- Coach ---------- */}
+        <div className="section">
+          <div className="section-title">Coach</div>
+          <button className="btn btn-accent" style={{ width: '100%', justifyContent: 'center' }} onClick={() => navigate('/hill/coach')}>
+            ✦ Falar com o Coach Hill
+          </button>
         </div>
 
         {/* ---------- Afirmações ---------- */}
