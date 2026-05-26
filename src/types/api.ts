@@ -189,3 +189,10 @@ import type { QuarterlyReview, ReviewPending, AffirmationUsageStat } from './dom
 export type ReviewPendingResponse = ReviewPending
 export interface ReviewResponse { review: QuarterlyReview; resumed?: boolean }
 export interface AffirmationUsageStatsResponse { stats: AffirmationUsageStat[]; windowDays: number }
+
+import type { MastermindCounselor, MastermindSession } from './domain.ts'
+
+export interface MastermindCounselorsResponse { counselors: MastermindCounselor[] }
+export interface MastermindCounselorSaveResponse { counselor: MastermindCounselor }
+export interface MastermindSessionsResponse { sessions: MastermindSession[] }
+export interface MastermindSessionResponse { session: MastermindSession }

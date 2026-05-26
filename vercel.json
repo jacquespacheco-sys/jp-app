@@ -18,7 +18,8 @@
     "api/hill-coach-chat.ts": { "maxDuration": 60 },
     "api/hill-coach-wizard-step.ts": { "maxDuration": 30 },
     "api/hill-coach-murmur.ts": { "maxDuration": 30 },
-    "api/hill-cron-daily-nudge.ts": { "maxDuration": 300 }
+    "api/hill-cron-daily-nudge.ts": { "maxDuration": 300 },
+    "api/hill-mastermind-session.ts": { "maxDuration": 60 }
   },
   "crons": [
     {

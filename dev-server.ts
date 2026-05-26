@@ -103,6 +103,8 @@ import hillAffirmationsUsageStats from './api/hill-affirmations-usage-stats.ts'
 import hillReviewPending from './api/hill-review-pending.ts'
 import hillReviewStart from './api/hill-review-start.ts'
 import hillReviewSave from './api/hill-review-save.ts'
+import hillMastermindCounselors from './api/hill-mastermind-counselors.ts'
+import hillMastermindSession from './api/hill-mastermind-session.ts'
 
 const app = express()
 app.use(express.json({ limit: '10mb' }))
@@ -242,6 +244,8 @@ app.all('/api/hill-affirmations-usage-stats', h(hillAffirmationsUsageStats))
 app.all('/api/hill-review-pending', h(hillReviewPending))
 app.all('/api/hill-review-start', h(hillReviewStart))
 app.all('/api/hill-review-save', h(hillReviewSave))
+app.all('/api/hill-mastermind-counselors', h(hillMastermindCounselors))
+app.all('/api/hill-mastermind-session', h(hillMastermindSession))
 
 const API_PORT = Number(process.env.API_PORT) || 3001
 app.listen(API_PORT, () => {

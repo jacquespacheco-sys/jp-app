@@ -437,6 +437,18 @@ type HillQuarterlyReviewsInsert = {
   created_at?: string
 }
 
+type HillMastermindCounselorsInsert = {
+  id?: string; user_id: string; name: string; short_label: string; archetype: string
+  is_real_person?: boolean; context_prompt?: string | null
+  is_active?: boolean; display_order?: number; created_at?: string
+}
+
+type HillMastermindSessionsInsert = {
+  id?: string; user_id: string; question: string; counselor_responses: Json
+  user_decision?: string | null; decision_reason?: string | null
+  held_at?: string; created_at?: string
+}
+
 // -------------------------------------------------------------
 export type Database = {
   public: {
@@ -1039,6 +1051,26 @@ export type Database = {
         }
         Insert: HillQuarterlyReviewsInsert
         Update: Partial<HillQuarterlyReviewsInsert>
+        Relationships: []
+      }
+      hill_mastermind_counselors: {
+        Row: {
+          id: string; user_id: string; name: string; short_label: string; archetype: string
+          is_real_person: boolean; context_prompt: string | null
+          is_active: boolean; display_order: number; created_at: string
+        }
+        Insert: HillMastermindCounselorsInsert
+        Update: Partial<HillMastermindCounselorsInsert>
+        Relationships: []
+      }
+      hill_mastermind_sessions: {
+        Row: {
+          id: string; user_id: string; question: string; counselor_responses: Json
+          user_decision: string | null; decision_reason: string | null
+          held_at: string; created_at: string
+        }
+        Insert: HillMastermindSessionsInsert
+        Update: Partial<HillMastermindSessionsInsert>
         Relationships: []
       }
     }

@@ -963,3 +963,41 @@ export interface ReviewPending {
   daysUntil: number | null
   activeReview: QuarterlyReview | null
 }
+
+// Mastermind (Invisible Counselors)
+export interface MastermindCounselor {
+  id: string
+  name: string
+  shortLabel: string
+  archetype: string
+  isRealPerson: boolean
+  contextPrompt?: string
+  isActive: boolean
+  displayOrder: number
+  createdAt: string
+}
+
+export interface CounselorResponse {
+  counselorId: string
+  name: string
+  response: string
+}
+
+export interface MastermindSession {
+  id: string
+  question: string
+  counselorResponses: CounselorResponse[]
+  userDecision?: string
+  decisionReason?: string
+  heldAt: string
+  createdAt: string
+}
+
+/** Conselheiros sugeridos (quick-add) — arquétipos editáveis. */
+export const SUGGESTED_COUNSELORS: { name: string; shortLabel: string; archetype: string; contextPrompt: string }[] = [
+  { name: 'O Estrategista', shortLabel: 'ES', archetype: 'Produto · Foco', contextPrompt: 'Pensa em alavancagem e no que NÃO fazer. Corta distrações. Pergunta sempre: isso move o Chief Aim?' },
+  { name: 'O Estoico', shortLabel: 'ST', archetype: 'Disciplina · Serenidade', contextPrompt: 'Foca no que está sob seu controle e aceita o resto. Fala com calma e firmeza, sem drama.' },
+  { name: 'O Visionário', shortLabel: 'VI', archetype: 'Longo prazo · Ambição', contextPrompt: 'Pensa em 10 anos, não 10 dias. Encoraja apostas ousadas e fé no resultado.' },
+  { name: 'O Operador', shortLabel: 'OP', archetype: 'Execução · Sistemas', contextPrompt: 'Pragmático. Transforma intenção em próximos passos concretos com prazo. Odeia vagueza.' },
+  { name: 'O Cético', shortLabel: 'CE', archetype: 'Risco · Advogado do diabo', contextPrompt: 'Aponta o que pode dar errado, os pontos cegos e os custos ignorados. Desconfia do otimismo fácil.' },
+]
