@@ -3,6 +3,13 @@ import type {
   TaskContext as TaskContextDB, ProjectKind as ProjectKindDB,
   ProjectStatusAqal, HabitDose as HabitDoseDB,
   MemoryKind as MemoryKindDB, CaptureSrc as CaptureSrcDB,
+  HillGoalLevel as HillGoalLevelDB, HillGoalStatus as HillGoalStatusDB,
+  HillAffirmationDimension as HillAffirmationDimensionDB,
+  HillAffirmationStatus as HillAffirmationStatusDB,
+  HillRitualType as HillRitualTypeDB,
+  HillCoachMode as HillCoachModeDB,
+  HillMessageRole as HillMessageRoleDB,
+  HillCoachVoice as HillCoachVoiceDB,
 } from './database.ts'
 
 export type Quadrant = QuadrantDB
@@ -730,4 +737,159 @@ export interface ContactFilter {
   hasPromisesOverdue?: boolean
   hasOpenReferrals?: boolean
   archived?: boolean
+}
+
+// =============================================================
+// Módulo Hill (0019) — Chief Aim, Goals, Afirmações, Rituais
+// =============================================================
+
+export type HillGoalLevel = HillGoalLevelDB
+export type HillGoalStatus = HillGoalStatusDB
+export type AffirmationDimension = HillAffirmationDimensionDB
+export type AffirmationStatus = HillAffirmationStatusDB
+export type RitualType = HillRitualTypeDB
+
+export interface ChiefAim {
+  id: string
+  userId: string
+  aimText: string
+  deadline: string
+  exchangeText: string
+  planText?: string
+  isActive: boolean
+  archivedAt?: string
+  nextReview: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface HillGoal {
+  id: string
+  userId: string
+  chiefAimId?: string
+  parentId?: string
+  level: HillGoalLevel
+  title: string
+  metricText?: string
+  metricValue?: number
+  metricUnit?: string
+  progressPct: number
+  deadline?: string
+  status: HillGoalStatus
+  linkedProjectId?: string
+  completedAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Affirmation {
+  id: string
+  userId: string
+  chiefAimId: string
+  dimension: AffirmationDimension
+  text: string
+  beliefScore: number
+  derivedFrom?: { evidences: string[] }
+  status: AffirmationStatus
+  supersededBy?: string
+  retiredReason?: string
+  activeFrom: string
+  activeUntil?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface RitualReflection {
+  what_brought_closer?: string
+  what_pushed_away?: string
+  next_action?: string
+}
+
+export interface RitualLog {
+  id: string
+  userId: string
+  type: RitualType
+  startedAt: string
+  completedAt?: string
+  durationSeconds?: number
+  stepsCompleted: string[]
+  affirmationsRead: string[]
+  affirmationsSkipped: string[]
+  reflectionData?: RitualReflection
+  gratitudeItems?: string[]
+  dailyActionTaskId?: string
+  createdAt: string
+}
+
+export interface RitualTypeStats {
+  completed: number
+  adherencePct: number
+  streak: number
+}
+
+export interface RitualStats {
+  days: number
+  morning: RitualTypeStats
+  night: RitualTypeStats
+}
+
+/** As 5 dimensões da afirmação, na ordem canônica do wizard. */
+export const AFFIRMATION_DIMENSIONS: {
+  key: AffirmationDimension
+  label: string
+  prompt: string
+}[] = [
+  { key: 'identidade', label: 'Identidade', prompt: 'Quem eu sou — a identidade que escolho encarnar.' },
+  { key: 'acao', label: 'Ação', prompt: 'O que eu faço todos os dias rumo ao meu Chief Aim.' },
+  { key: 'capacidade', label: 'Capacidade', prompt: 'O que sou capaz de realizar — sustentado por evidências.' },
+  { key: 'relacoes', label: 'Relações', prompt: 'Como me relaciono e o valor que entrego aos outros.' },
+  { key: 'integracao', label: 'Integração', prompt: 'Como tudo se une no propósito maior.' },
+]
+
+export const AFFIRMATION_DIMENSION_LABELS: Record<AffirmationDimension, string> = {
+  identidade: 'Identidade',
+  acao: 'Ação',
+  capacidade: 'Capacidade',
+  relacoes: 'Relações',
+  integracao: 'Integração',
+}
+
+// Coach Hill (Fase 2)
+export type HillCoachMode = HillCoachModeDB
+export type HillMessageRole = HillMessageRoleDB
+export type HillCoachVoice = HillCoachVoiceDB
+
+export interface HillCoachAction {
+  type: string
+  payload: unknown
+}
+
+export interface HillCoachMessage {
+  id: string
+  conversationId: string
+  mode: HillCoachMode
+  role: HillMessageRole
+  content: string
+  actionPayload?: HillCoachAction
+  createdAt: string
+}
+
+export interface HillCoachConversation {
+  conversationId: string
+  lastRole: HillMessageRole
+  lastContent: string
+  lastAt: string
+  count: number
+}
+
+export interface HillPreferences {
+  coachVoice: HillCoachVoice
+  dailyNudgeEnabled: boolean
+  ritualMurmursEnabled: boolean
+}
+
+export const COACH_VOICE_LABELS: Record<HillCoachVoice, string> = {
+  strict: 'Exigente',
+  mixed: 'Firme mas gentil',
+  gentle: 'Acolhedor',
 }

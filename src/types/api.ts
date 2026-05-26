@@ -161,3 +161,24 @@ export interface CategoryDimensionSaveResponse { dimension: CategoryDimension }
 export interface CategoriesListResponse { categories: Category[] }
 export interface CategorySaveResponse { category: Category }
 export interface ContactSetCategoriesResponse { contact: Contact | null }
+
+import type { ChiefAim, HillGoal, Affirmation, RitualLog, RitualStats } from './domain.ts'
+
+export interface ChiefAimResponse { chiefAim: ChiefAim | null }
+export interface ChiefAimHistoryResponse { chiefAims: ChiefAim[] }
+export interface AffirmationsListResponse { affirmations: Affirmation[] }
+export interface AffirmationSaveResponse { affirmation: Affirmation }
+export interface AffirmationsWizardResponse { affirmations: Affirmation[] }
+export interface HillGoalsListResponse { goals: HillGoal[] }
+export interface HillGoalSaveResponse { goal: HillGoal }
+export interface RitualResponse { ritual: RitualLog; resumed?: boolean }
+export interface RitualStatsResponse { stats: RitualStats }
+export interface RitualHistoryResponse { rituals: RitualLog[] }
+
+import type { HillCoachMessage, HillCoachConversation, HillPreferences, HillCoachAction } from './domain.ts'
+
+export interface HillCoachConversationsResponse { conversations: HillCoachConversation[] }
+export interface HillCoachMessagesResponse { messages: HillCoachMessage[] }
+export interface HillCoachWizardStepResponse { content: string; action: HillCoachAction | null; conversationId: string }
+export interface HillCoachMurmurResponse { content: string | null }
+export interface HillPreferencesResponse { preferences: HillPreferences }

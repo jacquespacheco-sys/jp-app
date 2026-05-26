@@ -74,6 +74,26 @@ import notesList from './api/notes-list.ts'
 import notesSave from './api/notes-save.ts'
 import notesDelete from './api/notes-delete.ts'
 import notesUpload from './api/notes-upload.ts'
+import hillChiefAim from './api/hill-chief-aim.ts'
+import hillChiefAimHistory from './api/hill-chief-aim-history.ts'
+import hillAffirmationsList from './api/hill-affirmations-list.ts'
+import hillAffirmationsWizard from './api/hill-affirmations-wizard.ts'
+import hillAffirmationsSave from './api/hill-affirmations-save.ts'
+import hillGoalsList from './api/hill-goals-list.ts'
+import hillGoalsSave from './api/hill-goals-save.ts'
+import hillGoalsProgress from './api/hill-goals-progress.ts'
+import hillGoalsComplete from './api/hill-goals-complete.ts'
+import hillGoalsDelete from './api/hill-goals-delete.ts'
+import hillRitualsStart from './api/hill-rituals-start.ts'
+import hillRitualsStep from './api/hill-rituals-step.ts'
+import hillRitualsComplete from './api/hill-rituals-complete.ts'
+import hillRitualsStats from './api/hill-rituals-stats.ts'
+import hillRitualsHistory from './api/hill-rituals-history.ts'
+import hillCoachChat from './api/hill-coach-chat.ts'
+import hillCoachWizardStep from './api/hill-coach-wizard-step.ts'
+import hillCoachMurmur from './api/hill-coach-murmur.ts'
+import hillCoachConversations from './api/hill-coach-conversations.ts'
+import hillPreferences from './api/hill-preferences.ts'
 
 const app = express()
 app.use(express.json({ limit: '10mb' }))
@@ -182,6 +202,28 @@ app.all('/api/notes-list', h(notesList))
 app.all('/api/notes-save', h(notesSave))
 app.all('/api/notes-delete', h(notesDelete))
 app.all('/api/notes-upload', h(notesUpload))
+
+// Hill (módulo de propósito — Chief Aim, afirmações, rituais)
+app.all('/api/hill-chief-aim', h(hillChiefAim))
+app.all('/api/hill-chief-aim-history', h(hillChiefAimHistory))
+app.all('/api/hill-affirmations-list', h(hillAffirmationsList))
+app.all('/api/hill-affirmations-wizard', h(hillAffirmationsWizard))
+app.all('/api/hill-affirmations-save', h(hillAffirmationsSave))
+app.all('/api/hill-goals-list', h(hillGoalsList))
+app.all('/api/hill-goals-save', h(hillGoalsSave))
+app.all('/api/hill-goals-progress', h(hillGoalsProgress))
+app.all('/api/hill-goals-complete', h(hillGoalsComplete))
+app.all('/api/hill-goals-delete', h(hillGoalsDelete))
+app.all('/api/hill-rituals-start', h(hillRitualsStart))
+app.all('/api/hill-rituals-step', h(hillRitualsStep))
+app.all('/api/hill-rituals-complete', h(hillRitualsComplete))
+app.all('/api/hill-rituals-stats', h(hillRitualsStats))
+app.all('/api/hill-rituals-history', h(hillRitualsHistory))
+app.all('/api/hill-coach-chat', h(hillCoachChat))
+app.all('/api/hill-coach-wizard-step', h(hillCoachWizardStep))
+app.all('/api/hill-coach-murmur', h(hillCoachMurmur))
+app.all('/api/hill-coach-conversations', h(hillCoachConversations))
+app.all('/api/hill-preferences', h(hillPreferences))
 
 const API_PORT = Number(process.env.API_PORT) || 3001
 app.listen(API_PORT, () => {
