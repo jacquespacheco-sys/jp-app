@@ -27,6 +27,7 @@ export type HillRitualType = 'morning' | 'night'
 export type HillCoachMode = 'chat' | 'ritual_murmur' | 'wizard_step' | 'daily_nudge'
 export type HillMessageRole = 'user' | 'coach'
 export type HillCoachVoice = 'strict' | 'mixed' | 'gentle'
+export type HillAimDecision = 'kept' | 'adjusted' | 'rewritten'
 
 // Tasks: status é text com check constraint que aceita valores legados e novos.
 export type TaskStatus =
@@ -425,6 +426,15 @@ type HillPreferencesInsert = {
 type HillNudgeFeedbackInsert = {
   id?: string; coach_message_id: string; user_id: string
   rating: number; reason?: string | null; created_at?: string
+}
+
+type HillQuarterlyReviewsInsert = {
+  id?: string; user_id: string; chief_aim_id: string
+  triggered_at?: string; completed_at?: string | null
+  aim_decision?: HillAimDecision | null
+  affirmation_decisions?: Json | null; ritual_stats?: Json | null
+  next_review_date: string; exported_pdf_url?: string | null
+  created_at?: string
 }
 
 // -------------------------------------------------------------
@@ -1016,6 +1026,19 @@ export type Database = {
         }
         Insert: HillNudgeFeedbackInsert
         Update: Partial<HillNudgeFeedbackInsert>
+        Relationships: []
+      }
+      hill_quarterly_reviews: {
+        Row: {
+          id: string; user_id: string; chief_aim_id: string
+          triggered_at: string; completed_at: string | null
+          aim_decision: HillAimDecision | null
+          affirmation_decisions: Json | null; ritual_stats: Json | null
+          next_review_date: string; exported_pdf_url: string | null
+          created_at: string
+        }
+        Insert: HillQuarterlyReviewsInsert
+        Update: Partial<HillQuarterlyReviewsInsert>
         Relationships: []
       }
     }

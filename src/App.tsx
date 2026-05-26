@@ -26,6 +26,7 @@ const HillRitualPage = lazy(() => import('./pages/HillRitualPage.tsx').then(m =>
 const CoachHillPage = lazy(() => import('./pages/CoachHillPage.tsx').then(m => ({ default: m.CoachHillPage })))
 const HillPreferencesPage = lazy(() => import('./pages/HillPreferencesPage.tsx').then(m => ({ default: m.HillPreferencesPage })))
 const HillNudgesPage = lazy(() => import('./pages/HillNudgesPage.tsx').then(m => ({ default: m.HillNudgesPage })))
+const HillReviewPage = lazy(() => import('./pages/HillReviewPage.tsx').then(m => ({ default: m.HillReviewPage })))
 
 const PageFallback = () => (
   <div className="empty-state" style={{ paddingTop: '40vh' }}>Carregando…</div>
@@ -131,6 +132,10 @@ function AppRoutes() {
       <Route
         path="/hill/nudges"
         element={<ProtectedRoute><HillNudgesPage /></ProtectedRoute>}
+      />
+      <Route
+        path="/hill/review"
+        element={<ProtectedRoute><HillReviewPage /></ProtectedRoute>}
       />
       <Route path="*" element={<Navigate to="/briefing" replace />} />
     </Routes>

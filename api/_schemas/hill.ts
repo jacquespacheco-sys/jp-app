@@ -93,6 +93,32 @@ export const AffirmationRetireSchema = z.object({
 })
 export type AffirmationRetireInput = z.input<typeof AffirmationRetireSchema>
 
+// Refina (cria nova versão superseding) — só legítimo na revisão trimestral (D3)
+export const AffirmationRefineSchema = z.object({
+  id: z.string().uuid(),
+  text: z.string().min(1).max(2000),
+  beliefScore: z.number().int().min(1).max(5),
+})
+export type AffirmationRefineInput = z.input<typeof AffirmationRefineSchema>
+
+// -------------------------------------------------------------
+// Revisão trimestral (Fase 4)
+// -------------------------------------------------------------
+const AffirmationDecisionSchema = z.object({
+  affId: z.string().uuid(),
+  decision: z.enum(['kept', 'refined', 'replaced', 'retired']),
+  newAffId: z.string().uuid().optional(),
+  reason: z.string().max(500).optional(),
+})
+
+export const ReviewSaveSchema = z.object({
+  id: z.string().uuid(),
+  aimDecision: z.enum(['kept', 'adjusted', 'rewritten']).optional(),
+  affirmationDecisions: z.array(AffirmationDecisionSchema).optional(),
+  complete: z.boolean().optional(),
+})
+export type ReviewSaveInput = z.input<typeof ReviewSaveSchema>
+
 // -------------------------------------------------------------
 // Rituals
 // -------------------------------------------------------------

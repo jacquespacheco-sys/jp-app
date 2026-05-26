@@ -4,6 +4,7 @@ type ChiefAimRow = Database['public']['Tables']['hill_chief_aims']['Row']
 type GoalRow = Database['public']['Tables']['hill_goals']['Row']
 type AffirmationRow = Database['public']['Tables']['hill_affirmations']['Row']
 type RitualLogRow = Database['public']['Tables']['hill_ritual_logs']['Row']
+type ReviewRow = Database['public']['Tables']['hill_quarterly_reviews']['Row']
 
 export function mapChiefAim(r: ChiefAimRow) {
   return {
@@ -58,6 +59,21 @@ export function mapAffirmation(r: AffirmationRow) {
     activeUntil: r.active_until ?? undefined,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
+  }
+}
+
+export function mapReview(r: ReviewRow) {
+  return {
+    id: r.id,
+    userId: r.user_id,
+    chiefAimId: r.chief_aim_id,
+    triggeredAt: r.triggered_at,
+    completedAt: r.completed_at ?? undefined,
+    aimDecision: r.aim_decision ?? undefined,
+    affirmationDecisions: r.affirmation_decisions ?? undefined,
+    ritualStats: r.ritual_stats ?? undefined,
+    nextReviewDate: r.next_review_date,
+    createdAt: r.created_at,
   }
 }
 

@@ -10,6 +10,7 @@ import type {
   HillCoachMode as HillCoachModeDB,
   HillMessageRole as HillMessageRoleDB,
   HillCoachVoice as HillCoachVoiceDB,
+  HillAimDecision as HillAimDecisionDB,
 } from './database.ts'
 
 export type Quadrant = QuadrantDB
@@ -922,3 +923,43 @@ export const NUDGE_CATEGORIES: { slug: string; label: string }[] = [
 export const NUDGE_CATEGORY_LABELS: Record<string, string> = Object.fromEntries(
   NUDGE_CATEGORIES.map(c => [c.slug, c.label]),
 )
+
+// Revisão trimestral (Fase 4)
+export type HillAimDecision = HillAimDecisionDB
+export type AffirmationReviewDecision = 'kept' | 'refined' | 'replaced' | 'retired'
+
+export interface AffirmationUsageStat {
+  id: string
+  dimension: AffirmationDimension
+  text: string
+  beliefScore: number
+  reads: number
+  skips: number
+  skipRate: number
+}
+
+export interface ReviewAffirmationDecision {
+  affId: string
+  decision: AffirmationReviewDecision
+  newAffId?: string
+  reason?: string
+}
+
+export interface QuarterlyReview {
+  id: string
+  chiefAimId: string
+  triggeredAt: string
+  completedAt?: string
+  aimDecision?: HillAimDecision
+  affirmationDecisions?: ReviewAffirmationDecision[]
+  ritualStats?: RitualStats
+  nextReviewDate: string
+  createdAt: string
+}
+
+export interface ReviewPending {
+  pending: boolean
+  nextReview: string | null
+  daysUntil: number | null
+  activeReview: QuarterlyReview | null
+}
