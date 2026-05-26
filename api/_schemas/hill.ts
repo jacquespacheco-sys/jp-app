@@ -151,5 +151,14 @@ export const HillPreferencesSchema = z.object({
   coachVoice: z.enum(['strict', 'mixed', 'gentle']).optional(),
   dailyNudgeEnabled: z.boolean().optional(),
   ritualMurmursEnabled: z.boolean().optional(),
+  disabledCategories: z.array(z.string().max(40)).optional(),
+  nudgeHour: z.number().int().min(0).max(23).optional(),
 })
 export type HillPreferencesInput = z.input<typeof HillPreferencesSchema>
+
+export const NudgeFeedbackSchema = z.object({
+  coachMessageId: z.string().uuid(),
+  rating: z.number().int().min(-1).max(1),
+  reason: z.string().max(500).optional(),
+})
+export type NudgeFeedbackInput = z.input<typeof NudgeFeedbackSchema>
