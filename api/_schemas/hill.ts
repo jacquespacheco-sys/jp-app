@@ -1,0 +1,128 @@
+import { z } from 'zod'
+
+const dateOnly = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'data deve ser YYYY-MM-DD')
+
+// -------------------------------------------------------------
+// Chief Aim
+// -------------------------------------------------------------
+export const ChiefAimCreateSchema = z.object({
+  aimText: z.string().min(1).max(4000),
+  deadline: dateOnly,
+  exchangeText: z.string().min(1).max(4000),
+  planText: z.string().max(8000).optional(),
+  nextReview: dateOnly.optional(),
+})
+export type ChiefAimCreateInput = z.input<typeof ChiefAimCreateSchema>
+
+// aim_text e deadline são imutáveis — só meta editável
+export const ChiefAimPatchSchema = z.object({
+  id: z.string().uuid(),
+  planText: z.string().max(8000).optional(),
+  exchangeText: z.string().min(1).max(4000).optional(),
+})
+export type ChiefAimPatchInput = z.input<typeof ChiefAimPatchSchema>
+
+// -------------------------------------------------------------
+// Goals
+// -------------------------------------------------------------
+const GOAL_LEVELS = ['dream', 'goal', 'quarterly'] as const
+const GOAL_STATUSES = ['active', 'completed', 'archived', 'failed'] as const
+
+export const GoalSaveSchema = z.object({
+  id: z.string().uuid().optional(),
+  level: z.enum(GOAL_LEVELS),
+  title: z.string().min(1).max(500),
+  chiefAimId: z.string().uuid().optional(),
+  parentId: z.string().uuid().optional(),
+  metricText: z.string().max(500).optional(),
+  metricValue: z.number().optional(),
+  metricUnit: z.string().max(100).optional(),
+  progressPct: z.number().min(0).max(100).optional(),
+  deadline: dateOnly.optional(),
+  status: z.enum(GOAL_STATUSES).default('active'),
+  linkedProjectId: z.string().uuid().optional(),
+})
+export type GoalSaveInput = z.input<typeof GoalSaveSchema>
+
+export const GoalProgressSchema = z.object({
+  id: z.string().uuid(),
+  progressPct: z.number().min(0).max(100),
+})
+export type GoalProgressInput = z.input<typeof GoalProgressSchema>
+
+export const GoalIdSchema = z.object({ id: z.string().uuid() })
+export type GoalIdInput = z.input<typeof GoalIdSchema>
+
+// -------------------------------------------------------------
+// Affirmations
+// -------------------------------------------------------------
+const DIMENSIONS = ['identidade', 'acao', 'capacidade', 'relacoes', 'integracao'] as const
+
+const AffirmationItemSchema = z.object({
+  dimension: z.enum(DIMENSIONS),
+  text: z.string().min(1).max(2000),
+  beliefScore: z.number().int().min(1).max(5),
+  derivedFrom: z.object({ evidences: z.array(z.string().uuid()) }).optional(),
+})
+
+// POST de uma sessão inteira do wizard — substitui as ativas atomicamente
+export const AffirmationWizardSchema = z.object({
+  chiefAimId: z.string().uuid(),
+  affirmations: z.array(AffirmationItemSchema).min(1).max(5)
+    .refine(
+      (arr) => new Set(arr.map((a) => a.dimension)).size === arr.length,
+      'dimensões não podem repetir',
+    ),
+})
+export type AffirmationWizardInput = z.input<typeof AffirmationWizardSchema>
+
+// Cria uma (sem id) ou refina uma existente (com id → cria nova superseding)
+export const AffirmationSaveSchema = z.object({
+  id: z.string().uuid().optional(),
+  chiefAimId: z.string().uuid(),
+  dimension: z.enum(DIMENSIONS),
+  text: z.string().min(1).max(2000),
+  beliefScore: z.number().int().min(1).max(5),
+  derivedFrom: z.object({ evidences: z.array(z.string().uuid()) }).optional(),
+})
+export type AffirmationSaveInput = z.input<typeof AffirmationSaveSchema>
+
+export const AffirmationRetireSchema = z.object({
+  id: z.string().uuid(),
+  retiredReason: z.string().max(500).optional(),
+})
+export type AffirmationRetireInput = z.input<typeof AffirmationRetireSchema>
+
+// -------------------------------------------------------------
+// Rituals
+// -------------------------------------------------------------
+export const RitualStartSchema = z.object({
+  type: z.enum(['morning', 'night']),
+})
+export type RitualStartInput = z.input<typeof RitualStartSchema>
+
+export const RitualStepSchema = z.object({
+  id: z.string().uuid(),
+  step: z.string().min(1).max(100),
+  affirmationRead: z.string().uuid().optional(),
+  affirmationSkipped: z.string().uuid().optional(),
+})
+export type RitualStepInput = z.input<typeof RitualStepSchema>
+
+const ReflectionSchema = z.object({
+  what_brought_closer: z.string().max(2000).optional(),
+  what_pushed_away: z.string().max(2000).optional(),
+  next_action: z.string().max(2000).optional(),
+}).partial()
+
+export const RitualCompleteSchema = z.object({
+  id: z.string().uuid(),
+  durationSeconds: z.number().int().nonnegative().optional(),
+  stepsCompleted: z.array(z.string().max(100)).optional(),
+  affirmationsRead: z.array(z.string().uuid()).optional(),
+  affirmationsSkipped: z.array(z.string().uuid()).optional(),
+  reflectionData: ReflectionSchema.optional(),
+  gratitudeItems: z.array(z.string().max(500)).optional(),
+  dailyActionTaskId: z.string().uuid().optional(),
+})
+export type RitualCompleteInput = z.input<typeof RitualCompleteSchema>

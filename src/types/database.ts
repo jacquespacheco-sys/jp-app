@@ -18,6 +18,13 @@ export type CoachKind = 'briefing' | 'check_in' | 'callout' | 'celebration' | 'c
 export type MemoryKind = 'fact' | 'pattern' | 'promise' | 'concern' | 'preference'
 export type CaptureSrc = 'manual' | 'voice' | 'email' | 'briefing' | 'coach' | 'google'
 
+// Módulo Hill (0019)
+export type HillGoalLevel = 'dream' | 'goal' | 'quarterly'
+export type HillGoalStatus = 'active' | 'completed' | 'archived' | 'failed'
+export type HillAffirmationDimension = 'identidade' | 'acao' | 'capacidade' | 'relacoes' | 'integracao'
+export type HillAffirmationStatus = 'active' | 'retired' | 'superseded'
+export type HillRitualType = 'morning' | 'night'
+
 // Tasks: status é text com check constraint que aceita valores legados e novos.
 export type TaskStatus =
   | 'inbox' | 'next' | 'doing' | 'blocked' | 'done'    // legado
@@ -354,6 +361,42 @@ type ReviewsInsert = {
   quadrant_distribution: Json; habit_completion: Json; metrics: Json
   alerts?: Json; insights_md?: string | null; model_used?: string | null
   created_at?: string
+}
+
+// Módulo Hill (0019)
+type HillChiefAimsInsert = {
+  id?: string; user_id: string
+  aim_text: string; deadline: string; exchange_text: string
+  plan_text?: string | null; is_active?: boolean; archived_at?: string | null
+  next_review?: string; created_at?: string; updated_at?: string
+}
+
+type HillGoalsInsert = {
+  id?: string; user_id: string
+  chief_aim_id?: string | null; parent_id?: string | null
+  level: HillGoalLevel; title: string
+  metric_text?: string | null; metric_value?: number | null; metric_unit?: string | null
+  progress_pct?: number; deadline?: string | null
+  status?: HillGoalStatus; linked_project_id?: string | null
+  completed_at?: string | null; created_at?: string; updated_at?: string
+}
+
+type HillAffirmationsInsert = {
+  id?: string; user_id: string; chief_aim_id: string
+  dimension: HillAffirmationDimension; text: string
+  belief_score: number; derived_from?: Json | null
+  status?: HillAffirmationStatus; superseded_by?: string | null
+  retired_reason?: string | null
+  active_from?: string; active_until?: string | null
+  created_at?: string; updated_at?: string
+}
+
+type HillRitualLogsInsert = {
+  id?: string; user_id: string; type: HillRitualType
+  started_at?: string; completed_at?: string | null; duration_seconds?: number | null
+  steps_completed?: Json; affirmations_read?: string[]; affirmations_skipped?: string[]
+  reflection_data?: Json | null; gratitude_items?: string[] | null
+  daily_action_task_id?: string | null; created_at?: string
 }
 
 // -------------------------------------------------------------
@@ -860,6 +903,58 @@ export type Database = {
         Update: Partial<ReviewsInsert>
         Relationships: []
       }
+      // Módulo Hill (0019)
+      hill_chief_aims: {
+        Row: {
+          id: string; user_id: string
+          aim_text: string; deadline: string; exchange_text: string
+          plan_text: string | null; is_active: boolean; archived_at: string | null
+          next_review: string; created_at: string; updated_at: string
+        }
+        Insert: HillChiefAimsInsert
+        Update: Partial<HillChiefAimsInsert>
+        Relationships: []
+      }
+      hill_goals: {
+        Row: {
+          id: string; user_id: string
+          chief_aim_id: string | null; parent_id: string | null
+          level: HillGoalLevel; title: string
+          metric_text: string | null; metric_value: number | null; metric_unit: string | null
+          progress_pct: number; deadline: string | null
+          status: HillGoalStatus; linked_project_id: string | null
+          completed_at: string | null; created_at: string; updated_at: string
+        }
+        Insert: HillGoalsInsert
+        Update: Partial<HillGoalsInsert>
+        Relationships: []
+      }
+      hill_affirmations: {
+        Row: {
+          id: string; user_id: string; chief_aim_id: string
+          dimension: HillAffirmationDimension; text: string
+          belief_score: number; derived_from: Json | null
+          status: HillAffirmationStatus; superseded_by: string | null
+          retired_reason: string | null
+          active_from: string; active_until: string | null
+          created_at: string; updated_at: string
+        }
+        Insert: HillAffirmationsInsert
+        Update: Partial<HillAffirmationsInsert>
+        Relationships: []
+      }
+      hill_ritual_logs: {
+        Row: {
+          id: string; user_id: string; type: HillRitualType
+          started_at: string; completed_at: string | null; duration_seconds: number | null
+          steps_completed: Json; affirmations_read: string[]; affirmations_skipped: string[]
+          reflection_data: Json | null; gratitude_items: string[] | null
+          daily_action_task_id: string | null; created_at: string
+        }
+        Insert: HillRitualLogsInsert
+        Update: Partial<HillRitualLogsInsert>
+        Relationships: []
+      }
     }
     Views: {
       v_tasks_resolved: {
@@ -937,6 +1032,11 @@ export type Database = {
       coach_kind: CoachKind
       memory_kind: MemoryKind
       capture_src: CaptureSrc
+      hill_goal_level: HillGoalLevel
+      hill_goal_status: HillGoalStatus
+      hill_affirmation_dimension: HillAffirmationDimension
+      hill_affirmation_status: HillAffirmationStatus
+      hill_ritual_type: HillRitualType
     }
     CompositeTypes: {
       [_ in never]: never
