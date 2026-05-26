@@ -20,6 +20,9 @@ const NewsPage = lazy(() => import('./pages/NewsPage.tsx').then(m => ({ default:
 const AreasPage = lazy(() => import('./pages/AreasPage.tsx').then(m => ({ default: m.AreasPage })))
 const DashboardPage = lazy(() => import('./pages/DashboardPage.tsx').then(m => ({ default: m.DashboardPage })))
 const ProjectsPage = lazy(() => import('./pages/ProjectsPage.tsx').then(m => ({ default: m.ProjectsPage })))
+const CompassPage = lazy(() => import('./pages/CompassPage.tsx').then(m => ({ default: m.CompassPage })))
+const HillWizardPage = lazy(() => import('./pages/HillWizardPage.tsx').then(m => ({ default: m.HillWizardPage })))
+const HillRitualPage = lazy(() => import('./pages/HillRitualPage.tsx').then(m => ({ default: m.HillRitualPage })))
 
 const PageFallback = () => (
   <div className="empty-state" style={{ paddingTop: '40vh' }}>Carregando…</div>
@@ -37,6 +40,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
       <BottomNav />
     </div>
   )
+}
+
+// Telas imersivas (wizard, rituais): full-screen, sem bottom-nav nem CoachFab
+function ProtectedBare({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth()
+  if (loading) return <div className="empty-state" style={{ paddingTop: '40vh' }}>Carregando…</div>
+  if (!user) return <Navigate to="/login" replace />
+  return <Suspense fallback={<PageFallback />}>{children}</Suspense>
 }
 
 function AppRoutes() {
@@ -93,6 +104,18 @@ function AppRoutes() {
       <Route
         path="/projects"
         element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>}
+      />
+      <Route
+        path="/hill"
+        element={<ProtectedRoute><CompassPage /></ProtectedRoute>}
+      />
+      <Route
+        path="/hill/wizard"
+        element={<ProtectedBare><HillWizardPage /></ProtectedBare>}
+      />
+      <Route
+        path="/hill/ritual/:type"
+        element={<ProtectedBare><HillRitualPage /></ProtectedBare>}
       />
       <Route path="*" element={<Navigate to="/briefing" replace />} />
     </Routes>

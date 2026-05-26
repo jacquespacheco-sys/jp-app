@@ -4,6 +4,7 @@ import { ptBR } from 'date-fns/locale'
 import { Topbar } from '../components/layout/Topbar.tsx'
 import { Subtabs } from '../components/layout/Subtabs.tsx'
 import { ThemeToggle } from '../components/common/ThemeToggle.tsx'
+import { HillBriefingCard } from '../components/hill/HillBriefingCard.tsx'
 import { api } from '../api.ts'
 import type { Briefing, BriefingItem } from '../types/domain.ts'
 import type { BriefingHistoryResponse, BriefingResponse } from '../types/api.ts'
@@ -170,6 +171,8 @@ export function BriefingPage() {
 
       {tab === 'Hoje' && (
         <>
+          <HillBriefingCard />
+
           {loading && <div className="empty-state">Carregando…</div>}
 
           {!loading && !todayBriefing && (
