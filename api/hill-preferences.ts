@@ -6,13 +6,21 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 type Row = Database['public']['Tables']['hill_preferences']['Row']
 
-const DEFAULTS = { coachVoice: 'mixed' as const, dailyNudgeEnabled: true, ritualMurmursEnabled: true }
+const DEFAULTS = {
+  coachVoice: 'mixed' as const,
+  dailyNudgeEnabled: true,
+  ritualMurmursEnabled: true,
+  disabledCategories: [] as string[],
+  nudgeHour: 8,
+}
 
 function mapPrefs(r: Row) {
   return {
     coachVoice: r.coach_voice,
     dailyNudgeEnabled: r.daily_nudge_enabled,
     ritualMurmursEnabled: r.ritual_murmurs_enabled,
+    disabledCategories: r.disabled_categories,
+    nudgeHour: r.nudge_hour,
   }
 }
 
@@ -39,6 +47,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ...(d.coachVoice !== undefined ? { coach_voice: d.coachVoice } : {}),
       ...(d.dailyNudgeEnabled !== undefined ? { daily_nudge_enabled: d.dailyNudgeEnabled } : {}),
       ...(d.ritualMurmursEnabled !== undefined ? { ritual_murmurs_enabled: d.ritualMurmursEnabled } : {}),
+      ...(d.disabledCategories !== undefined ? { disabled_categories: d.disabledCategories } : {}),
+      ...(d.nudgeHour !== undefined ? { nudge_hour: d.nudgeHour } : {}),
       updated_at: new Date().toISOString(),
     }
     const { data, error } = await supabase.from('hill_preferences')

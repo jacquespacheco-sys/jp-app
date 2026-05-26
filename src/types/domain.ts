@@ -886,6 +886,8 @@ export interface HillPreferences {
   coachVoice: HillCoachVoice
   dailyNudgeEnabled: boolean
   ritualMurmursEnabled: boolean
+  disabledCategories: string[]
+  nudgeHour: number
 }
 
 export const COACH_VOICE_LABELS: Record<HillCoachVoice, string> = {
@@ -893,3 +895,30 @@ export const COACH_VOICE_LABELS: Record<HillCoachVoice, string> = {
   mixed: 'Firme mas gentil',
   gentle: 'Acolhedor',
 }
+
+export interface HillNudge {
+  id: string
+  content: string
+  category?: string
+  trigger?: string
+  actionPayload?: HillCoachAction
+  feedback?: number
+  dismissed: boolean
+  createdAt: string
+}
+
+/** Categorias de nudge (espelha NUDGE_CATEGORIES do backend). */
+export const NUDGE_CATEGORIES: { slug: string; label: string }[] = [
+  { slug: 'procrastination', label: 'Procrastinação em tasks ligadas ao aim' },
+  { slug: 'affirmation_skip', label: 'Afirmações com baixa adesão' },
+  { slug: 'goal_risk', label: 'Goals com risco de prazo' },
+  { slug: 'streak_broken', label: 'Streaks quebradas' },
+  { slug: 'goal_near', label: 'Goals quase concluídos' },
+  { slug: 'inactivity', label: 'Inatividade no app' },
+  { slug: 'gratitude_skip', label: 'Padrão de gratidão' },
+  { slug: 'milestone', label: 'Marcos de tempo' },
+]
+
+export const NUDGE_CATEGORY_LABELS: Record<string, string> = Object.fromEntries(
+  NUDGE_CATEGORIES.map(c => [c.slug, c.label]),
+)

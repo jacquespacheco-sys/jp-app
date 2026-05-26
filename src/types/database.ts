@@ -409,12 +409,22 @@ type HillCoachMessagesInsert = {
   model?: string | null; cost?: number | null
   action_payload?: Json | null; user_action_taken?: boolean | null
   created_at?: string
+  // Nudge (0021)
+  nudge_category?: string | null; nudge_trigger?: string | null
+  user_dismissed?: boolean; user_feedback?: number | null
 }
 
 type HillPreferencesInsert = {
   user_id: string; coach_voice?: HillCoachVoice
   daily_nudge_enabled?: boolean; ritual_murmurs_enabled?: boolean
   created_at?: string; updated_at?: string
+  // Nudge (0021)
+  disabled_categories?: string[]; nudge_hour?: number
+}
+
+type HillNudgeFeedbackInsert = {
+  id?: string; coach_message_id: string; user_id: string
+  rating: number; reason?: string | null; created_at?: string
 }
 
 // -------------------------------------------------------------
@@ -981,6 +991,8 @@ export type Database = {
           model: string | null; cost: number | null
           action_payload: Json | null; user_action_taken: boolean | null
           created_at: string
+          nudge_category: string | null; nudge_trigger: string | null
+          user_dismissed: boolean; user_feedback: number | null
         }
         Insert: HillCoachMessagesInsert
         Update: Partial<HillCoachMessagesInsert>
@@ -991,9 +1003,19 @@ export type Database = {
           user_id: string; coach_voice: HillCoachVoice
           daily_nudge_enabled: boolean; ritual_murmurs_enabled: boolean
           created_at: string; updated_at: string
+          disabled_categories: string[]; nudge_hour: number
         }
         Insert: HillPreferencesInsert
         Update: Partial<HillPreferencesInsert>
+        Relationships: []
+      }
+      hill_nudge_feedback: {
+        Row: {
+          id: string; coach_message_id: string; user_id: string
+          rating: number; reason: string | null; created_at: string
+        }
+        Insert: HillNudgeFeedbackInsert
+        Update: Partial<HillNudgeFeedbackInsert>
         Relationships: []
       }
     }

@@ -94,6 +94,9 @@ import hillCoachWizardStep from './api/hill-coach-wizard-step.ts'
 import hillCoachMurmur from './api/hill-coach-murmur.ts'
 import hillCoachConversations from './api/hill-coach-conversations.ts'
 import hillPreferences from './api/hill-preferences.ts'
+import hillCronDailyNudge from './api/hill-cron-daily-nudge.ts'
+import hillNudges from './api/hill-nudges.ts'
+import hillNudgeFeedback from './api/hill-nudge-feedback.ts'
 
 const app = express()
 app.use(express.json({ limit: '10mb' }))
@@ -224,6 +227,9 @@ app.all('/api/hill-coach-wizard-step', h(hillCoachWizardStep))
 app.all('/api/hill-coach-murmur', h(hillCoachMurmur))
 app.all('/api/hill-coach-conversations', h(hillCoachConversations))
 app.all('/api/hill-preferences', h(hillPreferences))
+app.all('/api/hill-cron-daily-nudge', h(hillCronDailyNudge))
+app.all('/api/hill-nudges', h(hillNudges))
+app.all('/api/hill-nudge-feedback', h(hillNudgeFeedback))
 
 const API_PORT = Number(process.env.API_PORT) || 3001
 app.listen(API_PORT, () => {

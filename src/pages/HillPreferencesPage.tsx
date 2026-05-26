@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Topbar } from '../components/layout/Topbar.tsx'
 import { api } from '../api.ts'
 import type { HillPreferences, HillCoachVoice } from '../types/domain.ts'
-import { COACH_VOICE_LABELS } from '../types/domain.ts'
+import { COACH_VOICE_LABELS, NUDGE_CATEGORIES } from '../types/domain.ts'
 import type { HillPreferencesResponse } from '../types/api.ts'
 import type { HillPreferencesInput } from '../../api/_schemas/hill.ts'
 
@@ -80,6 +80,31 @@ export function HillPreferencesPage() {
                 <input type="checkbox" checked={prefs.dailyNudgeEnabled} disabled={saving}
                   onChange={e => { void update({ dailyNudgeEnabled: e.target.checked }) }} />
               </label>
+            </div>
+
+            <div className="section">
+              <div className="section-title">Categorias de nudge</div>
+              {NUDGE_CATEGORIES.map(cat => {
+                const enabled = !prefs.disabledCategories.includes(cat.slug)
+                return (
+                  <label key={cat.slug} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid var(--border-light)', opacity: prefs.dailyNudgeEnabled ? 1 : 0.5 }}>
+                    <span style={{ fontSize: '13px' }}>{cat.label}</span>
+                    <input
+                      type="checkbox"
+                      checked={enabled}
+                      disabled={saving || !prefs.dailyNudgeEnabled}
+                      onChange={e => {
+                        const set = new Set(prefs.disabledCategories)
+                        if (e.target.checked) set.delete(cat.slug); else set.add(cat.slug)
+                        void update({ disabledCategories: [...set] })
+                      }}
+                    />
+                  </label>
+                )
+              })}
+              <button className="btn btn-ghost" style={{ fontSize: '11px', marginTop: '14px' }} onClick={() => navigate('/hill/nudges')}>
+                Ver histórico de nudges →
+              </button>
             </div>
           </>
         )}

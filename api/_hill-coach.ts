@@ -147,6 +147,8 @@ interface PersistInput {
   model?: string
   cost?: number
   actionPayload?: unknown
+  nudgeCategory?: string
+  nudgeTrigger?: string
 }
 
 export async function persistMessage(p: PersistInput): Promise<{ id: string; createdAt: string } | null> {
@@ -163,6 +165,8 @@ export async function persistMessage(p: PersistInput): Promise<{ id: string; cre
     ...(p.model != null ? { model: p.model } : {}),
     ...(p.cost != null ? { cost: p.cost } : {}),
     ...(p.actionPayload != null ? { action_payload: p.actionPayload as never } : {}),
+    ...(p.nudgeCategory != null ? { nudge_category: p.nudgeCategory } : {}),
+    ...(p.nudgeTrigger != null ? { nudge_trigger: p.nudgeTrigger } : {}),
   }).select('id,created_at').single()
   return data ? { id: data.id, createdAt: data.created_at } : null
 }
@@ -176,6 +180,7 @@ export interface GenerateInput {
   draft?: string
   trigger?: string
   murmurContext?: string
+  nudgeCategory?: string
 }
 
 export interface GenerateOutput {
@@ -223,6 +228,8 @@ export async function generateCoachMessage(input: GenerateInput): Promise<Genera
     model,
     cost,
     ...(action != null ? { actionPayload: action } : {}),
+    ...(input.nudgeCategory != null ? { nudgeCategory: input.nudgeCategory } : {}),
+    ...(input.trigger != null && input.mode === 'daily_nudge' ? { nudgeTrigger: input.trigger } : {}),
   })
 
   return { content, action, conversationId, cost }
