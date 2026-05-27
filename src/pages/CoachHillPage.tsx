@@ -23,10 +23,10 @@ export function CoachHillPage() {
   )
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
       <Topbar title="Coach Hill" actions={actions} />
 
-      <div className="content" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '14px', paddingBottom: '140px' }}>
+      <div className="content" style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {messages.length === 0 && (
           <div className="hill-affirmation" style={{ borderLeftColor: 'var(--accent)' }}>
             <div className="hill-affirmation-dim">Coach Hill</div>
@@ -59,7 +59,7 @@ export function CoachHillPage() {
       </div>
 
       <div style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0,
+        flexShrink: 0,
         background: 'var(--bg)', borderTop: '1px solid var(--border)',
         padding: '12px 16px', display: 'flex', gap: '8px', alignItems: 'flex-end',
       }}>

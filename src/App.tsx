@@ -124,7 +124,7 @@ function AppRoutes() {
       />
       <Route
         path="/hill/coach"
-        element={<ProtectedRoute><CoachHillPage /></ProtectedRoute>}
+        element={<ProtectedBare><CoachHillPage /></ProtectedBare>}
       />
       <Route
         path="/hill/preferences"
