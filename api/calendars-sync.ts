@@ -1,7 +1,7 @@
 import { requireAuth } from './_middleware.js'
 import { getSupabase } from './_supabase.js'
 import { getAuthedClient, GOOGLE_COLORS } from './_google.js'
-import { google } from 'googleapis'
+import { google, type calendar_v3 } from 'googleapis'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -25,8 +25,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const authClient = await getAuthedClient(userData.google_refresh_token)
   const calendarApi = google.calendar({ version: 'v3', auth: authClient })
 
-  const { data } = await calendarApi.calendarList.list({ maxResults: 100 })
-  const items = data.items ?? []
+  const items: calendar_v3.Schema$CalendarListEntry[] = []
+  let listPageToken: string | undefined
+  do {
+    const { data } = await calendarApi.calendarList.list({ maxResults: 100, pageToken: listPageToken })
+    items.push(...(data.items ?? []))
+    listPageToken = data.nextPageToken ?? undefined
+  } while (listPageToken)
 
   const upserts = items.map(cal => ({
     user_id: user.id,
@@ -55,13 +60,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .order('is_primary', { ascending: false })
 
   // Calendários removidos no Google somem da lista: apaga as linhas órfãs
-  // (cascade limpa calendar_events) para não persistirem como fantasmas
+  // (cascade limpa calendar_events) para não persistirem como fantasmas.
+  // Guard: só prunar se o Google devolveu algo — uma lista vazia (blip
+  // transitório, escopo degradado) não pode disparar deleção em massa.
   const googleIds = new Set(items.map(cal => cal.id ?? ''))
-  const stale = (calendars ?? []).filter(c => !googleIds.has(c.google_calendar_id))
+  const stale = items.length > 0
+    ? (calendars ?? []).filter(c => !googleIds.has(c.google_calendar_id))
+    : []
+  let pruned = false
   if (stale.length > 0) {
-    await supabase.from('calendars').delete().in('id', stale.map(c => c.id))
+    const { error: deleteErr } = await supabase
+      .from('calendars')
+      .delete()
+      .eq('user_id', user.id)
+      .in('id', stale.map(c => c.id))
+    if (deleteErr) console.error('[calendars-sync] prune failed:', deleteErr.message)
+    else pruned = true
   }
-  const live = (calendars ?? []).filter(c => googleIds.has(c.google_calendar_id))
+  const staleIds = new Set(stale.map(c => c.id))
+  const live = pruned
+    ? (calendars ?? []).filter(c => !staleIds.has(c.id))
+    : (calendars ?? [])
 
   return res.status(200).json({
     calendars: live.map(c => ({
