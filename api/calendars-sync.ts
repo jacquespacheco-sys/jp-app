@@ -54,8 +54,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .eq('user_id', user.id)
     .order('is_primary', { ascending: false })
 
+  // Calendários removidos no Google somem da lista: apaga as linhas órfãs
+  // (cascade limpa calendar_events) para não persistirem como fantasmas
+  const googleIds = new Set(items.map(cal => cal.id ?? ''))
+  const stale = (calendars ?? []).filter(c => !googleIds.has(c.google_calendar_id))
+  if (stale.length > 0) {
+    await supabase.from('calendars').delete().in('id', stale.map(c => c.id))
+  }
+  const live = (calendars ?? []).filter(c => googleIds.has(c.google_calendar_id))
+
   return res.status(200).json({
-    calendars: (calendars ?? []).map(c => ({
+    calendars: live.map(c => ({
       id: c.id, userId: c.user_id, googleCalendarId: c.google_calendar_id,
       summary: c.summary, description: c.description ?? undefined,
       googleColorId: c.google_color_id ?? undefined,

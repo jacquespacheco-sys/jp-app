@@ -50,53 +50,57 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let pageToken: string | undefined
     const upserts: object[] = []
 
-    do {
-      const { data } = await calendarApi.events.list({
-        calendarId: cal.google_calendar_id,
-        timeMin, timeMax,
-        singleEvents: true,
-        maxResults: 250,
-        pageToken,
-      })
-
-      for (const ev of data.items ?? []) {
-        if (!ev.id) continue
-        const allDay = !ev.start?.dateTime
-        upserts.push({
-          user_id: user.id,
-          calendar_id: cal.id,
-          google_event_id: ev.id,
-          ical_uid: ev.iCalUID ?? null,
-          summary: ev.summary ?? '(sem título)',
-          description: ev.description ?? null,
-          location: ev.location ?? null,
-          start_at: toISO(ev.start?.dateTime, ev.start?.date),
-          end_at: toISO(ev.end?.dateTime, ev.end?.date),
-          all_day: allDay,
-          timezone: ev.start?.timeZone ?? null,
-          status: ev.status ?? 'confirmed',
-          recurrence: ev.recurrence ?? null,
-          recurring_event_id: ev.recurringEventId ?? null,
-          attendees: ev.attendees ?? null,
-          organizer_email: ev.organizer?.email ?? null,
-          is_organizer: ev.organizer?.self === true,
-          source: 'google',
-          synced: true,
-          etag: ev.etag ?? null,
-          updated_at: new Date().toISOString(),
+    try {
+      do {
+        const { data } = await calendarApi.events.list({
+          calendarId: cal.google_calendar_id,
+          timeMin, timeMax,
+          singleEvents: true,
+          maxResults: 250,
+          pageToken,
         })
+
+        for (const ev of data.items ?? []) {
+          if (!ev.id) continue
+          const allDay = !ev.start?.dateTime
+          upserts.push({
+            user_id: user.id,
+            calendar_id: cal.id,
+            google_event_id: ev.id,
+            ical_uid: ev.iCalUID ?? null,
+            summary: ev.summary ?? '(sem título)',
+            description: ev.description ?? null,
+            location: ev.location ?? null,
+            start_at: toISO(ev.start?.dateTime, ev.start?.date),
+            end_at: toISO(ev.end?.dateTime, ev.end?.date),
+            all_day: allDay,
+            timezone: ev.start?.timeZone ?? null,
+            status: ev.status ?? 'confirmed',
+            recurrence: ev.recurrence ?? null,
+            recurring_event_id: ev.recurringEventId ?? null,
+            attendees: ev.attendees ?? null,
+            organizer_email: ev.organizer?.email ?? null,
+            is_organizer: ev.organizer?.self === true,
+            source: 'google',
+            synced: true,
+            etag: ev.etag ?? null,
+            updated_at: new Date().toISOString(),
+          })
+        }
+
+        pageToken = data.nextPageToken ?? undefined
+      } while (pageToken)
+
+      console.log(`[events-sync] cal ${cal.google_calendar_id}: ${upserts.length} events to upsert`)
+      if (upserts.length > 0) {
+        const { error: upsertErr } = await supabase
+          .from('calendar_events')
+          .upsert(upserts as never[], { onConflict: 'user_id,google_event_id' })
+        if (upsertErr) console.error('[events-sync] upsert error:', upsertErr.message)
+        else totalSynced += upserts.length
       }
-
-      pageToken = data.nextPageToken ?? undefined
-    } while (pageToken)
-
-    console.log(`[events-sync] cal ${cal.google_calendar_id}: ${upserts.length} events to upsert`)
-    if (upserts.length > 0) {
-      const { error: upsertErr } = await supabase
-        .from('calendar_events')
-        .upsert(upserts as never[], { onConflict: 'user_id,google_event_id' })
-      if (upsertErr) console.error('[events-sync] upsert error:', upsertErr.message)
-      else totalSynced += upserts.length
+    } catch (e) {
+      console.error(`[events-sync] cal ${cal.google_calendar_id} failed:`, e instanceof Error ? e.message : e)
     }
   }
 
