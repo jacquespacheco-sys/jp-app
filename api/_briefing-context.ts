@@ -18,7 +18,8 @@ export async function fetchAqalContext(userId: string): Promise<AqalContextSnaps
   const [resolvedRes, areasRes, projectsRes] = await Promise.all([
     supabase.from('v_tasks_resolved')
       .select('user_id,area_id,status,completed_at,resolved_quadrant,time_estimate_min')
-      .eq('user_id', userId),
+      .eq('user_id', userId)
+      .eq('archived', false),
     supabase.from('areas')
       .select('id,name,quadrant')
       .eq('user_id', userId)
