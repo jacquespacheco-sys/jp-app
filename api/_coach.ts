@@ -78,6 +78,7 @@ export async function buildCoachSnapshot(opts: BuildSnapshotOpts): Promise<Coach
     supabase.from('v_tasks_resolved')
       .select('title,status,resolved_quadrant,due_at,area_id')
       .eq('user_id', opts.userId)
+      .eq('archived', false)
       .not('status', 'in', '(done,cancelled)')
       .order('due_at', { ascending: true, nullsFirst: false })
       .limit(SNAPSHOT_TOP_TASKS),
