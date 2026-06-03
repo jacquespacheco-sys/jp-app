@@ -1,5 +1,5 @@
 import './_env.js'
-import { fromZonedTime } from 'date-fns-tz'
+import { fromZonedTime, formatInTimeZone } from 'date-fns-tz'
 import { getSupabase } from './_supabase.js'
 import { fetchAqalContext, type AqalContextSnapshot } from './_briefing-context.js'
 import { getAnthropic } from './_anthropic.js'
@@ -46,6 +46,7 @@ export interface CoachSnapshot {
   }>
   todayEvents: Array<{ summary: string; startAt: string; allDay: boolean }>
   todayHabits: Array<{ title: string; dose: 'full' | 'min' | 'skip' | null }>
+  tz: string
 }
 
 export interface BuildSnapshotOpts {
@@ -64,6 +65,11 @@ export async function buildCoachSnapshot(opts: BuildSnapshotOpts): Promise<Coach
   const dayStartUtc = fromZonedTime(`${todayDateStr}T00:00:00`, tz).toISOString()
   const dayEndUtc = fromZonedTime(`${todayDateStr}T23:59:59`, tz).toISOString()
   const nowIso = new Date().toISOString()
+  // Janela de cobrança: vencidas + próximos 7 dias (exclui prazo distante e
+  // sem-prazo, que não devem virar cobrança e geram ansiedade).
+  const dueHorizonUtc = fromZonedTime(`${todayDateStr}T23:59:59`, tz)
+  dueHorizonUtc.setDate(dueHorizonUtc.getDate() + 7)
+  const dueHorizonIso = dueHorizonUtc.toISOString()
 
   const [profileRes, memRes, aqal, tasksRes, eventsRes, habitsRes, logsRes] = await Promise.all([
     supabase.from('coach_profile').select('*').eq('user_id', opts.userId).maybeSingle(),
@@ -80,7 +86,8 @@ export async function buildCoachSnapshot(opts: BuildSnapshotOpts): Promise<Coach
       .eq('user_id', opts.userId)
       .eq('archived', false)
       .not('status', 'in', '(done,cancelled)')
-      .order('due_at', { ascending: true, nullsFirst: false })
+      .lte('due_at', dueHorizonIso)
+      .order('due_at', { ascending: true })
       .limit(SNAPSHOT_TOP_TASKS),
     supabase.from('calendar_events')
       .select('summary,start_at,all_day')
@@ -151,7 +158,7 @@ export async function buildCoachSnapshot(opts: BuildSnapshotOpts): Promise<Coach
     dose: doseMap.get(h.id) ?? null,
   }))
 
-  return { profile, memories, aqal, tasksTop, todayEvents, todayHabits }
+  return { profile, memories, aqal, tasksTop, todayEvents, todayHabits, tz }
 }
 
 export function formatSnapshotForPrompt(s: CoachSnapshot, userName: string): string {
@@ -164,15 +171,15 @@ export function formatSnapshotForPrompt(s: CoachSnapshot, userName: string): str
     .map(q => `${q.quadrant}=${q.completed} (${q.minutes}min)`)
     .join(' · ') || '(nenhuma task concluída em 7d)'
 
-  const taskLines = s.tasksTop.length === 0 ? '(nenhuma task aberta)' : s.tasksTop.map(t => {
+  const taskLines = s.tasksTop.length === 0 ? '(nenhuma task vencida ou vencendo em 7 dias)' : s.tasksTop.map(t => {
     const parts = [`- ${t.title}`, `[${t.status}]`]
     if (t.quadrant) parts.push(`q=${t.quadrant}`)
-    if (t.dueAt) parts.push(`due=${t.dueAt.slice(0, 10)}`)
+    if (t.dueAt) parts.push(`due=${formatInTimeZone(t.dueAt, s.tz, 'yyyy-MM-dd')}`)
     return parts.join(' ')
   }).join('\n')
 
   const evLines = s.todayEvents.length === 0 ? '(sem eventos hoje)' : s.todayEvents.map(e => {
-    const time = e.allDay ? 'dia todo' : e.startAt.slice(11, 16)
+    const time = e.allDay ? 'dia todo' : formatInTimeZone(e.startAt, s.tz, 'HH:mm')
     return `- ${time} ${e.summary}`
   }).join('\n')
 
@@ -197,7 +204,7 @@ export function formatSnapshotForPrompt(s: CoachSnapshot, userName: string): str
     `AQAL 7d: ${quadLine}`,
     `Concluídas 7d: ${s.aqal.totals.completedThisWeek} · Abertas: ${s.aqal.totals.openTasks}`,
     `\nÁreas top:\n${areaLines}`,
-    `\nTasks abertas top:\n${taskLines}`,
+    `\nTasks com prazo (vencidas + próximos 7 dias):\n${taskLines}`,
     `\nAgenda hoje:\n${evLines}`,
     `\nHábitos hoje:\n${habLines}`,
   ].filter(Boolean).join('\n')
@@ -223,6 +230,7 @@ ${snapshotBlock}
 REGRAS:
 - Responda em PT-BR.
 - Conecte o que ele diz a memórias/snapshot quando faz sentido.
+- Cobre apenas tasks vencidas ou que vencem em até 7 dias (a lista "Tasks com prazo"). Nunca cobre tasks de prazo distante — o número total de "Abertas" é só panorama, não lista de cobrança.
 - Se ele divagar, traga de volta pro norte.
 - Você NÃO cria tasks/notas. Se ele deveria criar algo, diga: "ponha X como next em [área Y]".
 - Se ele pergunta "o que faço", responda direto.`

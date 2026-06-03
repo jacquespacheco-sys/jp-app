@@ -6,6 +6,8 @@ import Parser from 'rss-parser'
 import { Resend } from 'resend'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { formatInTimeZone } from 'date-fns-tz'
+import { defaultTz } from './_tz.js'
 
 const rssParser = new Parser()
 
@@ -61,8 +63,9 @@ function buildEmailHtml(params: {
   ctx?: AqalContextSnapshot
   carnegie?: CarnegieContextSnapshot
   coachParagraph?: string | null
+  tz: string
 }): string {
-  const { highlight, dateLabel, global, brasil, newsletters, agenda, tasks, ctx, carnegie, coachParagraph } = params
+  const { highlight, dateLabel, global, brasil, newsletters, agenda, tasks, ctx, carnegie, coachParagraph, tz } = params
 
   function newsBlock(label: string, items: NewsItem[]) {
     if (!items.length) return ''
@@ -174,7 +177,7 @@ function buildEmailHtml(params: {
     <div style="margin-bottom:28px">
       <div style="font-family:monospace;font-size:9px;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:12px">Agenda de hoje</div>
       ${agenda.map(ev => {
-        const time = ev.all_day ? 'DIA' : format(parseISO(ev.start_at), 'HH:mm')
+        const time = ev.all_day ? 'DIA' : formatInTimeZone(ev.start_at, tz, 'HH:mm')
         return `
           <div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid #1c1c1c;align-items:baseline">
             <div style="font-family:monospace;font-size:10px;color:#7dd3fc;min-width:32px">${time}</div>
@@ -256,7 +259,7 @@ export async function generateBriefing(
 
   const supabase = getSupabase()
 
-  const [{ data: sources }, { data: tasks }, { data: visibleCals }, { data: events }, ctx, carnegie] = await Promise.all([
+  const [{ data: sources }, { data: tasks }, { data: visibleCals }, { data: events }, ctx, carnegie, { data: userRow }] = await Promise.all([
     supabase.from('sources').select('*').eq('user_id', userId).eq('active', true),
     supabase.from('tasks')
       .select('title,status,due_date')
@@ -275,7 +278,9 @@ export async function generateBriefing(
       .order('start_at', { ascending: true }),
     fetchAqalContext(userId),
     fetchCarnegieContext(userId),
+    supabase.from('users').select('name,timezone').eq('id', userId).single(),
   ])
+  const tz = defaultTz((userRow as { timezone: string | null } | null)?.timezone)
 
   type EventRow = { summary: string; start_at: string; end_at: string; all_day: boolean; calendar_id: string }
   const visibleCalIds = new Set((visibleCals ?? []).map(c => (c as { id: string }).id))
@@ -299,13 +304,12 @@ export async function generateBriefing(
     .join('\n')
 
   const eventsLines = filteredEvents
-    .map(e => `- ${e.all_day ? '(dia todo)' : new Date(e.start_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} ${e.summary}`)
+    .map(e => `- ${e.all_day ? '(dia todo)' : formatInTimeZone(e.start_at, tz, 'HH:mm')} ${e.summary}`)
     .join('\n')
 
   const aqalLines = aqalContextLines(ctx)
 
-  const userRow = await supabase.from('users').select('name').eq('id', userId).single()
-  const userName = (userRow.data as { name: string } | null)?.name ?? 'Jorge'
+  const userName = (userRow as { name: string } | null)?.name ?? 'Jorge'
 
   const coachParagraph = await generateCoachParagraph(userId, userName)
 
@@ -379,6 +383,7 @@ Regras:
         ctx,
         carnegie,
         coachParagraph,
+        tz,
       })
       const { error: emailError } = await resend.emails.send({
         from: fromEmail,
@@ -397,7 +402,7 @@ Regras:
   const contentMd = buildContentMarkdown({
     highlight, ctx, carnegie, agenda: filteredEvents, tasks: (tasks ?? []) as TaskItem[],
     global: content.global, brasil: content.brasil,
-    coachParagraph,
+    coachParagraph, tz,
   })
 
   const { data: briefing, error: dbError } = await supabase
@@ -446,6 +451,7 @@ function buildContentMarkdown(p: {
   tasks: TaskItem[];
   global: NewsItem[]; brasil: NewsItem[];
   coachParagraph?: string | null;
+  tz: string;
 }): string {
   const parts: string[] = []
   parts.push(`# ${p.highlight}`)
@@ -490,7 +496,7 @@ function buildContentMarkdown(p: {
   if (p.agenda.length > 0) {
     parts.push(`\n## Agenda`)
     for (const e of p.agenda) {
-      const time = e.all_day ? 'dia todo' : new Date(e.start_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      const time = e.all_day ? 'dia todo' : formatInTimeZone(e.start_at, p.tz, 'HH:mm')
       parts.push(`- ${time} — ${e.summary}`)
     }
   }
