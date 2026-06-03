@@ -29,6 +29,7 @@ const baseSnapshot: CoachSnapshot = {
   ],
   todayEvents: [{ summary: 'call investidor', startAt: '2026-05-12T14:00:00Z', allDay: false }],
   todayHabits: [{ title: 'leitura', dose: 'full' }, { title: 'caminhada', dose: null }],
+  tz: 'America/Sao_Paulo',
 }
 
 describe('formatSnapshotForPrompt', () => {
@@ -56,6 +57,12 @@ describe('formatSnapshotForPrompt', () => {
     const out = formatSnapshotForPrompt(baseSnapshot, 'Jorge')
     expect(out).toContain('leitura: full')
     expect(out).toContain('caminhada: pendente')
+  })
+
+  it('renderiza horário do evento no fuso do usuário, não em UTC', () => {
+    const out = formatSnapshotForPrompt(baseSnapshot, 'Jorge')
+    expect(out).toContain('11:00 call investidor') // 14:00Z → 11:00 em America/Sao_Paulo
+    expect(out).not.toContain('14:00')
   })
 
   it('lida com snapshot sem memórias', () => {
