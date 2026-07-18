@@ -91,7 +91,7 @@ Recorrência: api/_lib/rrule.ts (RRULE RFC 5545 para tasks recorrentes)
 | **Reviews** | schema pronto, UI não | reviews | AQAL, Habits, Tasks | (futuro: coach gera) | — | — |
 | **Integrations** | schema pronto, parcial | integrations, external_tasks | Google | Google sync já funciona via users.google_refresh_token; tabela é para multi-conta | — | — |
 
-Total: **15 módulos**, **84+ endpoints**, **11 páginas**, **19 hooks**, **13 migrations** (0001–0013).
+Total: **141 endpoints**, **20 páginas**, **31 hooks**, **23 migrations** (0001–0023). _Contagens verificadas em 2026-07-18._
 
 ### Quem é a fonte de verdade de cada conceito
 
@@ -337,7 +337,11 @@ Quando você for desenvolver uma feature nova, percorra esta lista **antes** de 
 
 ## 7. Data model completo
 
-13 migrations em ordem (`supabase/migrations/`):
+23 migrations em ordem (`supabase/migrations/`):
+
+> **Última migration aplicada no Supabase: `0023_hill_mastermind.sql`** (verificado 2026-07-18 — banco em dia com o repo).
+>
+> **Atenção:** as migrations são aplicadas à mão pelo SQL Editor, não pela CLI. A tabela `supabase_migrations.schema_migrations` está vazia, ou seja **não existe ledger no banco**. Esta linha é a única fonte de verdade sobre o que já rodou — **atualize-a sempre que aplicar uma migration nova**. Na dúvida, confira as tabelas reais (`information_schema.tables`) antes de assumir que um schema existe.
 
 ### Migration 0001 — schema inicial
 - `users` (id, email, password_hash, name, city, timezone, google_refresh_token, anthropic_api_key, theme, coach_last_read_at)
@@ -424,6 +428,29 @@ View com counts: `task_open_count`, `task_count`, `child_count`, `resolved_quadr
 - `briefings.coach_paragraph` — parágrafo do coach no topo do briefing
 - `coach_log.conversation_id` (uuid, opcional, sem FK ainda)
 - Index `coach_log_user_kind_recent_idx`
+
+### Migration 0014 — Carnegie base
+Estende `contacts`/`interactions` com a camada de relacionamento (tier, cadência, hooks, family). Adiciona `special_dates` (celebrate/acknowledge/silence/check_in), `referrals` (loop de indicação, follow-up 30d), `compliments_received` (retribuição sugerida em 120–180d).
+
+### Migration 0015 — Rituais pessoais Carnegie
+`principle_of_month` (foco mensal nos 30 princípios), `weekly_reflections` (reflexão dominical, 3 perguntas — Q3 vira card no Pulso de segunda), `gratitude_entries` (diário de sexta 18h, vira retrospectiva anual).
+
+### Migration 0016 — Categorias multidimensionais de contatos
+`category_dimensions` (dimensões criadas pelo usuário: Perfil, Assunto, Aproximação), `categories` (opções dentro da dimensão), `contact_categories` (junção N:N). View `v_contacts_with_categories`.
+
+### Migrations 0017–0018 — fixes
+- 0017: permite `source='derived_birthday'` em `special_dates` (aniversários auto-gerados de `contacts.birthday`)
+- 0018: remove `archived = false` hard-coded de `v_contacts_with_categories` — o filtro passa a viver no handler (`includeArchived`)
+
+### Migrations 0019–0023 — módulo Hill (camada de propósito)
+Todas com prefixo `hill_`, **sem RLS** (app usa JWT próprio + service key). Specs em `jp_app_hill_package/`.
+- **0019 (MVP):** `hill_chief_aims` (1 ativo/user, `aim_text` imutável, versionado por archive), `hill_goals` (Dream/Goal/Quarterly, liga a `projects` via `linked_project_id`), `hill_affirmations` (5 ativas, 1/dimensão, versionadas por `superseded_by`), `hill_ritual_logs` (`daily_action_task_id` faz ponte com Tasks)
+- **0020 (Coach IA):** `hill_coach_messages` (persona Napoleon Hill, 4 modos — **separado** de `coach_log`), `hill_preferences` (voz strict/mixed/gentle, toggles)
+- **0021 (Daily Nudges):** metadados de nudge em `hill_coach_messages`, `hill_nudge_feedback` (-1/0/+1; 3 negativos seguidos pausam a categoria por 30d), `disabled_categories`
+- **0022 (Revisão Trimestral):** `hill_quarterly_reviews` — único ponto legítimo de mudar afirmações
+- **0023 (Mastermind):** `hill_mastermind_counselors` (Invisible Counselors), `hill_mastermind_sessions` (pergunta → respostas das vozes → decisão)
+
+> `src/types/database.ts` é mantido **à mão** para as tabelas `hill_*`. **Não rodar `npm run db:types`** — regenerar reintroduz o ciclo de inferência do supabase-js.
 
 ### Padrões de schema (recap)
 - IDs sempre `uuid` (`gen_random_uuid()`)
