@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JP App — Wizard das Afirmações</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #fafaf7;
+    --bg-elevated: #ffffff;
+    --bg-deep: #f4ede0;
+    --fg: #0a0a0a;
+    --fg-muted: #6b6b6b;
+    --fg-dim: #a0a0a0;
+    --accent: #a8ff00;
+    --accent-warm: #ffb84d;
+    --accent-ink: #0a0a0a;
+    --border: #e8e8e3;
+    --border-light: #f0f0eb;
+    --danger: #d9342b;
+    --success: #2da14a;
+    --hill-paper: #f4ede0;
+    --hill-ink: #1a1308;
+    --murphy-glow: rgba(255, 184, 77, 0.12);
+  }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: #d8d4cc;
+    color: var(--fg);
+    min-height: 100vh;
+    padding: 24px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
+  }
+
+  /* ---------- Intro ---------- */
+  .intro {
+    width: 100%;
+    max-width: 1200px;
+    background: #fff;
+    color: #0a0a0a;
+    border: 1px solid #0a0a0a;
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-bottom: 8px;
+    box-shadow: 4px 4px 0 var(--accent-warm);
+  }
+  .intro h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  .intro h1 span { color: #c97a1f; }
+  .intro p {
+    font-size: 14px;
+    line-height: 1.55;
+    color: #333;
+    margin-bottom: 8px;
+    max-width: 920px;
+  }
+  .intro p strong { color: #c97a1f; }
+  .intro-tags {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border: 1px solid #0a0a0a;
+    border-radius: 4px;
+    background: var(--accent-warm);
+  }
+  .tag.alt { background: var(--hill-paper); }
+  .tag.dark { background: #0a0a0a; color: #fff; }
+
+  .phone-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .phone-step {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    color: #fff;
+    letter-spacing: 0.04em;
+    text-align: center;
+    max-width: 380px;
+  }
+  .phone-step span {
+    color: var(--accent-warm);
+  }
+  .phone-step small {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: #aaa;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+
+  .phone {
+    width: 380px;
+    height: 780px;
+    background: var(--bg);
+    border-radius: 36px;
+    border: 10px solid #0a0a0a;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.18);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------- Topbar ---------- */
+  .topbar {
+    height: 52px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .topbar-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+  }
+  .topbar-logo span.dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--accent-warm);
+    border-radius: 50%;
+    margin: 0 4px 1px 4px;
+    vertical-align: middle;
+  }
+  .topbar-mode {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    border: 1px solid var(--border);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .topbar-x {
+    font-size: 18px;
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+
+  /* ---------- Page ---------- */
+  .page {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 18px 24px 18px;
+  }
+  .page::-webkit-scrollbar { width: 4px; }
+  .page::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ---------- Step progress ---------- */
+  .step-progress {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+  .step-bar {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+  }
+  .step-bar.done { background: var(--accent-warm); }
+  .step-bar.current {
+    background: var(--accent-warm);
+    box-shadow: 0 0 8px rgba(255, 184, 77, 0.5);
+  }
+  .step-meta {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+  }
+  .step-meta strong { color: var(--fg); }
+  .step-meta .session-tag {
+    background: var(--bg-deep);
+    color: var(--hill-ink);
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 8.5px;
+  }
+
+  /* ---------- Hero ---------- */
+  .step-hero {
+    margin-bottom: 18px;
+  }
+  .step-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fg-muted);
+    margin-bottom: 6px;
+  }
+  .step-eyebrow .pill {
+    background: var(--accent-warm);
+    color: var(--accent-ink);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+  .step-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    letter-spacing: 0.02em;
+    line-height: 1.0;
+    margin-bottom: 12px;
+  }
+  .step-sub {
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--fg-muted);
+    line-height: 1.5;
+  }
+
+  /* ---------- Coach blocks ---------- */
+  .coach-block {
+    background: var(--hill-paper);
+    color: var(--hill-ink);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+  .coach-block-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #c97a1f;
+    margin-bottom: 8px;
+  }
+  .coach-block-text {
+    font-family: 'Crimson Pro', serif;
+    font-size: 14.5px;
+    line-height: 1.55;
+  }
+  .coach-block-text em { font-style: italic; }
+  .coach-block-text strong { font-weight: 600; }
+
+  /* ---------- Tests panel (4 testes) ---------- */
+  .test-panel {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .test-panel-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--fg-muted);
+    margin-bottom: 10px;
+  }
+  .test-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .test-row:last-child { border-bottom: none; }
+  .test-check {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    color: var(--fg-dim);
+    margin-top: 1px;
+  }
+  .test-check.pass {
+    background: var(--success);
+    color: white;
+    border-color: var(--success);
+  }
+  .test-check.fail {
+    background: var(--danger);
+    color: white;
+    border-color: var(--danger);
+  }
+  .test-body { flex: 1; }
+  .test-name {
+    font-size: 12.5px;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .test-name strong { color: var(--success); }
+  .test-name.failed strong { color: var(--danger); }
+  .test-desc {
+    font-size: 11px;
+    color: var(--fg-muted);
+    line-height: 1.4;
+  }
+
+  /* ---------- Affirmation editor ---------- */
+  .editor-frame {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .editor-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--fg-muted);
+    margin-bottom: 8px;
+  }
+  .editor-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--fg);
+    font-family: 'Crimson Pro', serif;
+    font-size: 18px;
+    line-height: 1.4;
+    resize: none;
+    font-style: italic;
+  }
+  .editor-input:focus { outline: none; }
+  .editor-meta {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    letter-spacing: 0.06em;
+  }
+  .editor-meta .word-count strong { color: var(--fg); }
+  .editor-meta .belief-meter {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .belief-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .belief-dot.on { background: var(--accent-warm); }
+
+  /* ---------- Dimensions chart ---------- */
+  .dim-chart {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .dim-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .dim-row:last-child { border-bottom: none; }
+  .dim-icon {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    background: var(--border-light);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    color: var(--fg-muted);
+    flex-shrink: 0;
+  }
+  .dim-row.filled .dim-icon { background: var(--accent-warm); color: var(--accent-ink); }
+  .dim-body { flex: 1; }
+  .dim-name {
+    font-size: 12.5px;
+    font-weight: 500;
+    margin-bottom: 1px;
+  }
+  .dim-aff {
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 11.5px;
+    color: var(--fg-muted);
+    line-height: 1.35;
+  }
+  .dim-aff.empty { color: var(--fg-dim); }
+
+  /* ---------- Final review list ---------- */
+  .final-list {
+    background: var(--bg-elevated);
+    border: 1px solid var(--fg);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .final-list::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px;
+    width: 40px; height: 6px;
+    background: var(--accent-warm);
+    border-radius: 12px 0 0 0;
+  }
+  .final-list-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-bottom: 12px;
+  }
+  .final-aff {
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    line-height: 1.45;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--fg);
+  }
+  .final-aff:last-child { border-bottom: none; }
+  .final-aff strong { font-weight: 600; }
+
+  /* ---------- Buttons ---------- */
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: var(--fg);
+    color: var(--bg);
+    border: none;
+    border-radius: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .btn-primary.accent {
+    background: var(--accent-warm);
+    color: var(--accent-ink);
+  }
+  .btn-secondary {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    color: var(--fg-muted);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .btn-row .btn-primary { flex: 1; }
+
+  /* ---------- Suggestion chips ---------- */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .chip {
+    padding: 8px 12px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    font-size: 11.5px;
+    color: var(--fg);
+    cursor: pointer;
+  }
+  .chip:hover { border-color: var(--fg); }
+
+  /* ---------- Comparison box ---------- */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .compare-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .compare-card.bad {
+    border-color: rgba(217, 52, 43, 0.3);
+    background: rgba(217, 52, 43, 0.04);
+  }
+  .compare-card.good {
+    border-color: rgba(45, 161, 74, 0.3);
+    background: rgba(45, 161, 74, 0.04);
+  }
+  .compare-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .compare-tag.bad { color: var(--danger); }
+  .compare-tag.good { color: var(--success); }
+  .compare-text {
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .compare-note {
+    font-size: 11px;
+    color: var(--fg-muted);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  /* ---------- Session breakdown ---------- */
+  .sess-card {
+    background: var(--hill-paper);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .sess-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.04em;
+    color: var(--hill-ink);
+    margin-bottom: 12px;
+  }
+  .sess-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(26,19,8,0.1);
+  }
+  .sess-row:last-child { border-bottom: none; }
+  .sess-num {
+    width: 22px; height: 22px;
+    background: var(--hill-ink);
+    color: var(--hill-paper);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .sess-num.done {
+    background: var(--accent-warm);
+    color: var(--accent-ink);
+  }
+  .sess-body { flex: 1; }
+  .sess-when {
+    font-size: 12px;
+    color: var(--hill-ink);
+    font-weight: 500;
+    margin-bottom: 1px;
+  }
+  .sess-desc {
+    font-size: 11.5px;
+    color: rgba(26,19,8,0.7);
+    line-height: 1.4;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>WIZARD DAS <span>AFIRMAÇÕES MURPHY</span></h1>
+  <p>Sequência de 7 telas que guiam o usuário a escrever 5 afirmações sólidas, distribuídas em <strong>3 sessões ao longo de 3 dias</strong>. O coach refina mas nunca escreve no lugar do usuário. Cada afirmação passa por 4 testes técnicos antes de ser aceita: <strong>Presente · Positiva · Pessoal · Plausível</strong>.</p>
+  <div class="intro-tags">
+    <span class="tag">1. Boas-vindas + os 4 testes</span>
+    <span class="tag">2. Boa vs. má afirmação</span>
+    <span class="tag">3. Dimensão "Identidade"</span>
+    <span class="tag">4. Refinamento ao vivo</span>
+    <span class="tag">5. Mapa das 5 dimensões</span>
+    <span class="tag">6. Última afirmação</span>
+    <span class="tag dark">7. Revisão final + selar</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 1 — Welcome + The 4 Tests
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>01 /</span> Boas-vindas + os 4 testes<small>Sessão 1 · Dia 1 · 15 min</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Wizard</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar current"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 1</strong> de 7</span>
+        <span class="session-tag">Sessão 1 · Dia 1</span>
+      </div>
+
+      <div class="step-hero">
+        <div class="step-eyebrow"><span class="pill">Setup</span>Afirmações</div>
+        <h1 class="step-headline">Você vai escrever<br>5 afirmações.</h1>
+        <div class="step-sub">Suas. Não minhas. Eu vou apenas refinar. Murphy era categórico: afirmação que você não sente como possível ativa o subconsciente <em>contra</em> você.</div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach Hill</div>
+        <div class="coach-block-text">
+          Antes de escrever, deixe-me te mostrar os <strong>quatro testes</strong> que Murphy ensinava. Uma afirmação que não passa neles é pior que nenhuma — porque programa <em>contra</em>.
+        </div>
+      </div>
+
+      <div class="test-panel">
+        <div class="test-panel-title">Os 4 testes</div>
+
+        <div class="test-row">
+          <div class="test-check pass">✓</div>
+          <div class="test-body">
+            <div class="test-name">No <strong>presente</strong></div>
+            <div class="test-desc">"Eu sou" / "Eu ajo", nunca "Eu serei" / "Eu vou ter". O subconsciente só entende agora.</div>
+          </div>
+        </div>
+
+        <div class="test-row">
+          <div class="test-check pass">✓</div>
+          <div class="test-body">
+            <div class="test-name"><strong>Positiva</strong></div>
+            <div class="test-desc">"Eu durmo em paz", nunca "Eu não me preocupo". O subconsciente ignora "não" e foca em "preocupo".</div>
+          </div>
+        </div>
+
+        <div class="test-row">
+          <div class="test-check pass">✓</div>
+          <div class="test-body">
+            <div class="test-name"><strong>Pessoal</strong></div>
+            <div class="test-desc">Sobre você, não sobre os outros. "As pessoas me valorizam" é mais fraco que "Eu mereço ser valorizado".</div>
+          </div>
+        </div>
+
+        <div class="test-row">
+          <div class="test-check pass">✓</div>
+          <div class="test-body">
+            <div class="test-name"><strong>Plausível</strong></div>
+            <div class="test-desc">Você precisa conseguir <em>sentir</em> que pode ser verdade. Se está longe demais, comece menor.</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary accent">Entendi · começar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 2 — Bad vs Good comparison
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>02 /</span> Boa vs. má afirmação<small>Calibrando seu ouvido</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Wizard</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar done"></div>
+        <div class="step-bar current"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 2</strong> de 7</span>
+        <span class="session-tag">Sessão 1 · Dia 1</span>
+      </div>
+
+      <div class="step-hero">
+        <div class="step-eyebrow"><span class="pill">Calibragem</span>Antes de escrever</div>
+        <h1 class="step-headline">Veja a diferença.</h1>
+        <div class="step-sub">Três exemplos, todos sobre o mesmo tema. Note o que muda.</div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-card bad">
+          <div class="compare-tag bad">✗ Má — futuro + negação</div>
+          <div class="compare-text">"Eu vou parar de procrastinar."</div>
+          <div class="compare-note">Coloca a mudança no futuro (sempre depois) e foca o subconsciente em "procrastinar".</div>
+        </div>
+
+        <div class="compare-card bad">
+          <div class="compare-tag bad">✗ Má — implausível</div>
+          <div class="compare-text">"Sou o empreendedor mais produtivo do mundo."</div>
+          <div class="compare-note">Seu próprio sistema rejeita. Murphy chamava isso de "voo cego" — palavras sem fé.</div>
+        </div>
+
+        <div class="compare-card good">
+          <div class="compare-tag good">✓ Boa — presente, positiva, plausível</div>
+          <div class="compare-text">"Eu ajo no que importa, todos os dias."</div>
+          <div class="compare-note">No presente. Foco no que você quer fazer. Acreditável — você já age, às vezes.</div>
+        </div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach</div>
+        <div class="coach-block-text">
+          Note: a boa afirmação não é "perfeita". É <strong>direcional</strong>. Ela aponta o subconsciente pro lado certo, com palavras que você consegue <em>sentir</em> como possíveis. Esse é o segredo.
+        </div>
+      </div>
+
+      <button class="btn-primary accent">Pronto · vamos escrever →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 3 — Dimension 1: Identity (start writing)
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>03 /</span> Dimensão Identidade<small>Sua 1ª afirmação</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Wizard</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar current"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 3</strong> de 7 · 1ª afirmação</span>
+        <span class="session-tag">Sessão 1 · Dia 1</span>
+      </div>
+
+      <div class="step-hero">
+        <div class="step-eyebrow"><span class="pill">Dimensão 1/5</span>Identidade</div>
+        <h1 class="step-headline">Quem você<br>está se tornando?</h1>
+        <div class="step-sub">Não o que você faz. Não o que você tem. <strong>Quem você é.</strong> Comece com "Eu sou".</div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach Hill</div>
+        <div class="coach-block-text">
+          Olhei seu Chief Aim: <em>"liderar o JP App até 10.000 usuários pagantes"</em>. Pergunto: <strong>que tipo de fundador</strong> faz isso acontecer? Comece daí.
+        </div>
+      </div>
+
+      <div style="font-family: 'Space Mono', monospace; font-size: 9px; text-transform: uppercase; color: var(--fg-muted); letter-spacing: 0.08em; margin-bottom: 8px;">Sugestões para começar — toque para usar</div>
+      <div class="chips">
+        <div class="chip">Eu sou o tipo de fundador que...</div>
+        <div class="chip">Eu sou um líder...</div>
+        <div class="chip">Eu sou alguém que...</div>
+      </div>
+
+      <div class="editor-frame">
+        <div class="editor-label">Sua afirmação · escreva e edite à vontade</div>
+        <textarea class="editor-input" rows="3" placeholder="Eu sou...">Eu sou o fundador que o JP App precisa — calmo, focado e decidido.</textarea>
+        <div class="editor-meta">
+          <span class="word-count"><strong>12</strong> palavras</span>
+          <span class="belief-meter">
+            Fé:
+            <span class="belief-dot on"></span>
+            <span class="belief-dot on"></span>
+            <span class="belief-dot on"></span>
+            <span class="belief-dot on"></span>
+            <span class="belief-dot"></span>
+          </span>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary accent">Testar afirmação →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 4 — Refinement (testing the affirmation)
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>04 /</span> Refinamento ao vivo<small>4 testes aplicados</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Wizard</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar current"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 3</strong> de 7 · refinando</span>
+        <span class="session-tag">Sessão 1 · Dia 1</span>
+      </div>
+
+      <div class="step-hero">
+        <div class="step-eyebrow"><span class="pill">Testando</span>1ª afirmação</div>
+        <h1 class="step-headline">Vamos passar<br>pelos quatro.</h1>
+      </div>
+
+      <div class="editor-frame" style="background: var(--bg-deep); border-color: rgba(255,184,77,0.4);">
+        <div class="editor-label">Sua afirmação atual</div>
+        <div style="font-family: 'Crimson Pro', serif; font-size: 17px; line-height: 1.4; font-style: italic; color: var(--fg);">
+          "Eu sou o fundador que o JP App precisa — calmo, focado e decidido."
+        </div>
+      </div>
+
+      <div class="test-panel">
+        <div class="test-panel-title">Resultado dos 4 testes</div>
+
+        <div class="test-row">
+          <div class="test-check pass">✓</div>
+          <div class="test-body">
+            <div class="test-name">Presente · <strong>passou</strong></div>
+            <div class="test-desc">"Eu sou" — perfeito.</div>
+          </div>
+        </div>
+
+        <div class="test-row">
+          <div class="test-check pass">✓</div>
+          <div class="test-body">
+            <div class="test-name">Positiva · <strong>passou</strong></div>
+            <div class="test-desc">Sem "não", sem "deixar de". Você diz o que é.</div>
+          </div>
+        </div>
+
+        <div class="test-row">
+          <div class="test-check pass">✓</div>
+          <div class="test-body">
+            <div class="test-name">Pessoal · <strong>passou</strong></div>
+            <div class="test-desc">Sobre você. Não depende dos outros.</div>
+          </div>
+        </div>
+
+        <div class="test-row">
+          <div class="test-check pass">✓</div>
+          <div class="test-body">
+            <div class="test-name">Plausível · <strong>passou</strong></div>
+            <div class="test-desc">Você marcou 4/5 de fé. Forte o suficiente para o subconsciente aceitar.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach</div>
+        <div class="coach-block-text">
+          Boa. Uma sugestão: você usou três adjetivos — <em>calmo, focado, decidido</em>. Murphy aprovaria, mas Hill diria pra escolher <strong>um só, o mais escasso em você hoje</strong>. Os outros virão. Quer ajustar?
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" style="background: transparent; color: var(--fg); border: 1px solid var(--border);">Ajustar</button>
+        <button class="btn-primary accent">Aceitar e continuar →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 5 — Five Dimensions Map (progress visualization)
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>05 /</span> Mapa das 5 dimensões<small>Sessão 2 · Dia 2</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Wizard</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar current"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 5</strong> de 7 · 4ª afirmação</span>
+        <span class="session-tag">Sessão 2 · Dia 2</span>
+      </div>
+
+      <div class="step-hero">
+        <div class="step-eyebrow"><span class="pill">Dimensão 4/5</span>Relações</div>
+        <h1 class="step-headline">Você não chega lá<br>sozinho.</h1>
+        <div class="step-sub">A 4ª dimensão é sobre as pessoas — quem te cerca, quem você atrai, como você dá e recebe.</div>
+      </div>
+
+      <div class="dim-chart">
+        <div class="dim-row filled">
+          <div class="dim-icon">I</div>
+          <div class="dim-body">
+            <div class="dim-name">Identidade · "Eu sou"</div>
+            <div class="dim-aff">"Eu sou o fundador que o JP App precisa — calmo, focado e decidido."</div>
+          </div>
+        </div>
+        <div class="dim-row filled">
+          <div class="dim-icon">A</div>
+          <div class="dim-body">
+            <div class="dim-name">Ação · "Eu ajo"</div>
+            <div class="dim-aff">"O JP App cresce porque eu ajo no que importa, todos os dias."</div>
+          </div>
+        </div>
+        <div class="dim-row filled">
+          <div class="dim-icon">C</div>
+          <div class="dim-body">
+            <div class="dim-name">Capacidade · "Eu sou capaz"</div>
+            <div class="dim-aff">"Tenho histórico de transformar visões em realidade. Confio nisso."</div>
+          </div>
+        </div>
+        <div class="dim-row" style="background: var(--murphy-glow); border-radius: 6px; padding: 10px 6px; margin: 4px 0;">
+          <div class="dim-icon" style="background: var(--accent-warm); color: var(--accent-ink);">R</div>
+          <div class="dim-body">
+            <div class="dim-name">Relações · "Eu atraio / recebo"</div>
+            <div class="dim-aff empty">Escrevendo agora →</div>
+          </div>
+        </div>
+        <div class="dim-row">
+          <div class="dim-icon">∞</div>
+          <div class="dim-body">
+            <div class="dim-name">Integração · "Tudo avança junto"</div>
+            <div class="dim-aff empty">Sessão 3 · amanhã</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach</div>
+        <div class="coach-block-text">
+          Suas três anteriores estão sólidas — todas passaram nos testes. Vamos pra <strong>Relações</strong>. Esta é a dimensão que mais gente esquece, e Hill alertava: <em>"nenhuma riqueza grande foi construída por uma pessoa sozinha"</em>.
+        </div>
+      </div>
+
+      <button class="btn-primary accent">Escrever a 4ª →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 6 — Last affirmation (Integration)
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>06 /</span> 5ª afirmação · Integração<small>Sessão 3 · Dia 3</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Wizard</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar current"></div>
+        <div class="step-bar"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 6</strong> de 7 · 5ª afirmação</span>
+        <span class="session-tag">Sessão 3 · Dia 3</span>
+      </div>
+
+      <div class="step-hero">
+        <div class="step-eyebrow"><span class="pill">Dimensão 5/5</span>Integração</div>
+        <h1 class="step-headline">A última é a<br>mais importante.</h1>
+        <div class="step-sub">Carreira não é tudo. Esta afirmação diz que o ambicioso <em>e</em> o humano avançam juntos — saúde, família, paz.</div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach Hill</div>
+        <div class="coach-block-text">
+          Aqui é onde muitos empreendedores tropeçam. Eles afirmam o objetivo profissional com fé total, e o subconsciente entrega — junto com casamento desfeito, saúde quebrada. A 5ª afirmação <strong>protege o resto</strong>. Faz Murphy e Hill concordarem.
+        </div>
+      </div>
+
+      <div style="font-family: 'Space Mono', monospace; font-size: 9px; text-transform: uppercase; color: var(--fg-muted); letter-spacing: 0.08em; margin-bottom: 8px;">Templates para começar</div>
+      <div class="chips">
+        <div class="chip">Minha família e meu trabalho avançam juntos</div>
+        <div class="chip">Trabalho, saúde e amor crescem na mesma direção</div>
+        <div class="chip">Vivo presente em cada parte da minha vida</div>
+      </div>
+
+      <div class="editor-frame">
+        <div class="editor-label">Sua 5ª afirmação · personalize</div>
+        <textarea class="editor-input" rows="3" placeholder="Eu...">Minha família, minha saúde e meu trabalho crescem juntos — nada à custa do outro.</textarea>
+        <div class="editor-meta">
+          <span class="word-count"><strong>14</strong> palavras</span>
+          <span class="belief-meter">
+            Fé:
+            <span class="belief-dot on"></span>
+            <span class="belief-dot on"></span>
+            <span class="belief-dot on"></span>
+            <span class="belief-dot"></span>
+            <span class="belief-dot"></span>
+          </span>
+        </div>
+      </div>
+
+      <button class="btn-primary accent">Testar e finalizar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 7 — Final Review and Seal
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>07 /</span> Revisão final · selar<small>Pronto para usar</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Wizard</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar current"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 7</strong> de 7 · revisão</span>
+        <span class="session-tag">Sessão 3 · Dia 3</span>
+      </div>
+
+      <div class="step-hero">
+        <div class="step-eyebrow"><span class="pill">Final</span>Suas 5 afirmações</div>
+        <h1 class="step-headline">Estas são as<br>suas palavras.</h1>
+        <div class="step-sub">Leia uma vez agora, em voz baixa, sentindo. A partir desta noite, elas entram no ritual.</div>
+      </div>
+
+      <div class="final-list">
+        <div class="final-list-title">Manifesto da auto-sugestão</div>
+        <div class="final-aff">
+          <strong>I.</strong> Eu sou o fundador que o JP App precisa — <em>calmo, focado e decidido</em>.
+        </div>
+        <div class="final-aff">
+          <strong>II.</strong> O JP App cresce porque eu <em>ajo</em> no que importa, todos os dias.
+        </div>
+        <div class="final-aff">
+          <strong>III.</strong> Tenho histórico de transformar visões em realidade. <em>Confio nisso</em>.
+        </div>
+        <div class="final-aff">
+          <strong>IV.</strong> Atraio as pessoas certas, no momento certo, para o que construo.
+        </div>
+        <div class="final-aff">
+          <strong>V.</strong> Minha família, minha saúde e meu trabalho crescem <em>juntos</em> — nada à custa do outro.
+        </div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach Hill + Murphy</div>
+        <div class="coach-block-text">
+          Você revisita estas afirmações <strong>trimestralmente</strong>. Não antes, a menos que algo grande mude. Elas precisam de tempo no subconsciente para criar raiz. Mude cedo demais e nunca germinam.
+        </div>
+      </div>
+
+      <button class="btn-primary accent">✦ Selar minhas afirmações</button>
+      <button class="btn-secondary">Editar uma antes de selar</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

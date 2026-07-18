@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JP App — Modo Hill (Mockup)</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #fafaf7;
+    --bg-elevated: #ffffff;
+    --fg: #0a0a0a;
+    --fg-muted: #6b6b6b;
+    --fg-dim: #a0a0a0;
+    --accent: #a8ff00;
+    --accent-ink: #0a0a0a;
+    --border: #e8e8e3;
+    --border-light: #f0f0eb;
+    --danger: #d9342b;
+    --shadow: 0 2px 12px rgba(0,0,0,0.04);
+    --hill-paper: #f4ede0;
+    --hill-ink: #1a1308;
+  }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: #d8d4cc;
+    color: var(--fg);
+    min-height: 100vh;
+    padding: 24px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
+  }
+
+  .phone-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .phone-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #555;
+  }
+  .phone-label strong { color: #000; font-weight: 700; }
+
+  .phone {
+    width: 380px;
+    height: 780px;
+    background: var(--bg);
+    border-radius: 36px;
+    border: 10px solid #0a0a0a;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.18);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------- Topbar ---------- */
+  .topbar {
+    height: 52px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .topbar-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+  }
+  .topbar-logo span.dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin: 0 4px 1px 4px;
+    vertical-align: middle;
+  }
+  .topbar-mode {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    border: 1px solid var(--border);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  /* ---------- Subtabs ---------- */
+  .subtabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    flex-shrink: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .subtabs::-webkit-scrollbar { display: none; }
+  .subtab {
+    padding: 14px 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--fg-muted);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .subtab.active {
+    color: var(--fg);
+    border-bottom-color: var(--fg);
+  }
+  .subtab:hover { color: var(--fg); }
+
+  /* ---------- Page content ---------- */
+  .page {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 18px 24px 18px;
+    display: none;
+  }
+  .page.active { display: block; }
+  .page::-webkit-scrollbar { width: 4px; }
+  .page::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ---------- Cards & sections ---------- */
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--fg-dim);
+    margin-bottom: 8px;
+  }
+  .card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .card-accent {
+    background: var(--bg-elevated);
+    border: 1px solid var(--fg);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .card-accent::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px;
+    width: 40px; height: 6px;
+    background: var(--accent);
+    border-radius: 12px 0 0 0;
+  }
+
+  /* ---------- Chief Aim screen ---------- */
+  .aim-paper {
+    background: var(--hill-paper);
+    color: var(--hill-ink);
+    padding: 22px 18px;
+    border-radius: 4px;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.06);
+    margin-bottom: 16px;
+    font-family: 'Crimson Pro', serif;
+    position: relative;
+  }
+  .aim-paper::before {
+    content: '"My Definite Chief Aim"';
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(26,19,8,0.55);
+    margin-bottom: 10px;
+    font-style: normal;
+  }
+  .aim-text {
+    font-size: 17px;
+    line-height: 1.55;
+    font-style: italic;
+  }
+  .aim-text strong { font-weight: 600; font-style: normal; }
+  .aim-meta {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(26,19,8,0.2);
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(26,19,8,0.65);
+    font-style: normal;
+  }
+  .aim-meta strong { color: var(--hill-ink); }
+
+  .aim-section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    margin: 16px 0 6px 0;
+  }
+  .aim-exchange {
+    font-size: 13px;
+    color: var(--fg-muted);
+    line-height: 1.5;
+  }
+
+  /* ---------- Goals tree ---------- */
+  .goal-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .goal-row:last-child { border-bottom: none; }
+  .goal-icon {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--fg-muted);
+  }
+  .goal-icon.d { background: #f0f0eb; color: #333; }
+  .goal-icon.g { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .goal-icon.q { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .goal-body { flex: 1; }
+  .goal-title { font-size: 14px; font-weight: 500; line-height: 1.35; margin-bottom: 3px; }
+  .goal-meta {
+    display: flex; gap: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+  }
+  .goal-progress {
+    margin-top: 6px;
+    height: 3px;
+    background: var(--border-light);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .goal-progress-fill { height: 100%; background: var(--fg); }
+  .goal-progress-fill.accent { background: var(--accent); }
+
+  /* ---------- Ritual screen ---------- */
+  .ritual-hero {
+    background: var(--fg);
+    color: var(--bg);
+    border-radius: 12px;
+    padding: 22px 18px;
+    margin-bottom: 16px;
+  }
+  .ritual-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .ritual-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.02em;
+    line-height: 1.05;
+    margin-bottom: 12px;
+  }
+  .ritual-quote {
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(255,255,255,0.85);
+    padding-left: 12px;
+    border-left: 2px solid var(--accent);
+  }
+  .ritual-quote-author {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-style: normal;
+    font-size: 9px;
+    text-transform: uppercase;
+    margin-top: 6px;
+    color: var(--fg-dim);
+    letter-spacing: 0.08em;
+  }
+  .ritual-step {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .ritual-step-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 8px;
+  }
+  .step-num {
+    width: 22px; height: 22px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .step-num.done { background: var(--fg); color: var(--bg); }
+  .step-title { font-size: 13px; font-weight: 600; }
+  .step-desc { font-size: 12px; color: var(--fg-muted); line-height: 1.4; padding-left: 32px; }
+
+  .btn-confirm {
+    margin-top: 10px;
+    margin-left: 32px;
+    padding: 8px 14px;
+    background: var(--fg);
+    color: var(--bg);
+    border: none;
+    border-radius: 6px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .btn-confirm.accent { background: var(--accent); color: var(--accent-ink); }
+  .btn-confirm.done { background: transparent; color: var(--fg-muted); border: 1px solid var(--border); }
+
+  .visualize-box {
+    margin-top: 8px;
+    margin-left: 32px;
+    padding: 12px;
+    background: var(--bg);
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--fg-muted);
+    font-style: italic;
+  }
+  .timer-display {
+    font-family: 'Space Mono', monospace;
+    font-size: 20px;
+    color: var(--fg);
+    text-align: center;
+    margin-top: 6px;
+    font-style: normal;
+  }
+
+  /* ---------- Coach Hill chat ---------- */
+  .coach-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px;
+    background: var(--fg);
+    color: var(--bg);
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+  .coach-portrait {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #d4c5a0 0%, #8b6f3a 100%);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: #1a1308;
+    border: 2px solid var(--accent);
+  }
+  .coach-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.04em;
+  }
+  .coach-status {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+  }
+
+  .msg {
+    margin-bottom: 14px;
+    max-width: 90%;
+  }
+  .msg-hill {
+    background: var(--hill-paper);
+    color: var(--hill-ink);
+    padding: 14px 16px;
+    border-radius: 14px 14px 14px 4px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 14.5px;
+    line-height: 1.5;
+  }
+  .msg-hill em { font-style: italic; }
+  .msg-hill strong { font-weight: 600; }
+  .msg-user {
+    background: var(--fg);
+    color: var(--bg);
+    padding: 12px 14px;
+    border-radius: 14px 14px 4px 14px;
+    font-size: 13px;
+    line-height: 1.4;
+    margin-left: auto;
+  }
+  .msg-time {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--fg-dim);
+    margin-top: 4px;
+    text-transform: uppercase;
+  }
+
+  .chat-input {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+  }
+  .chat-input input {
+    flex: 1;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    background: var(--bg-elevated);
+  }
+  .chat-input input:focus { outline: none; border-color: var(--fg); }
+  .chat-send {
+    width: 40px; height: 40px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: none;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  /* ---------- Mastermind ---------- */
+  .mm-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .mm-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+  }
+  .mm-card.active {
+    border-color: var(--fg);
+    background: var(--fg);
+    color: var(--bg);
+  }
+  .mm-portrait {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    margin: 0 auto 6px auto;
+    background: #c8b89c;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    color: #1a1308;
+  }
+  .mm-card.active .mm-portrait { background: var(--accent); }
+  .mm-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+  .mm-role {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-top: 2px;
+  }
+  .mm-card.active .mm-role { color: rgba(255,255,255,0.7); }
+
+  /* ---------- Principles tracker ---------- */
+  .principle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .principle-row:last-child { border-bottom: none; }
+  .principle-name {
+    flex: 1;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .principle-dots {
+    display: flex; gap: 4px;
+  }
+  .pdot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+  }
+  .pdot.on { background: var(--fg); border-color: var(--fg); }
+  .pdot.on.accent { background: var(--accent); border-color: var(--accent); }
+
+  /* ---------- Bottom nav ---------- */
+  .bottom-nav {
+    display: flex;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+  .nav-item {
+    flex: 1;
+    padding: 12px 4px 14px 4px;
+    text-align: center;
+    cursor: pointer;
+    color: var(--fg-dim);
+    border-top: 2px solid transparent;
+  }
+  .nav-item.active {
+    color: var(--fg);
+    border-top-color: var(--accent);
+  }
+  .nav-icon {
+    font-size: 18px;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .nav-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 8.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* ---------- Affirmation card on briefing ---------- */
+  .affirm-card {
+    background: var(--accent);
+    color: var(--accent-ink);
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.45;
+    position: relative;
+  }
+  .affirm-card::before {
+    content: '✦';
+    position: absolute;
+    top: 8px; right: 12px;
+    font-size: 14px;
+  }
+  .affirm-label {
+    font-family: 'Space Mono', monospace;
+    font-style: normal;
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+    opacity: 0.7;
+  }
+
+  /* ---------- Nudge banner ---------- */
+  .nudge {
+    background: var(--fg);
+    color: var(--bg);
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .nudge-icon {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-ink);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+  }
+  .nudge-text {
+    font-family: 'Crimson Pro', serif;
+    font-size: 13.5px;
+    line-height: 1.45;
+    font-style: italic;
+  }
+  .nudge-text strong { font-style: normal; font-weight: 600; }
+  .nudge-author {
+    display: block;
+    margin-top: 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 8.5px;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    font-style: normal;
+    letter-spacing: 0.06em;
+  }
+
+  /* ---------- Annotations ---------- */
+  .annot {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #0a0a0a;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    line-height: 1.4;
+    max-width: 200px;
+    box-shadow: 2px 2px 0 #0a0a0a;
+    z-index: 5;
+  }
+  .annot strong { display: block; text-transform: uppercase; font-size: 9px; letter-spacing: 0.06em; margin-bottom: 3px; color: var(--danger); }
+
+  /* ---------- Intro panel ---------- */
+  .intro {
+    width: 100%;
+    max-width: 1200px;
+    background: #fff;
+    border: 1px solid #0a0a0a;
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-bottom: 8px;
+    box-shadow: 4px 4px 0 #0a0a0a;
+  }
+  .intro h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  .intro h1 span { color: #8b6f3a; }
+  .intro p {
+    font-size: 14px;
+    line-height: 1.55;
+    color: #333;
+    margin-bottom: 8px;
+    max-width: 920px;
+  }
+  .intro-tags {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border: 1px solid #0a0a0a;
+    border-radius: 4px;
+    background: var(--accent);
+  }
+  .tag.alt { background: #f4ede0; }
+  .tag.dark { background: #0a0a0a; color: #fff; }
+
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>JP App — <span>MODO HILL</span></h1>
+  <p>Mockup interativo de um sistema inspirado em <strong>Napoleon Hill</strong> dentro do JP App. Cinco telas navegáveis através do menu inferior. Tom: voz do Hill em momentos de impacto (rituais, nudges, coach), neutro nas telas de gestão. Use o menu de baixo nos celulares para navegar.</p>
+  <div class="intro-tags">
+    <span class="tag">1. Compass (Chief Aim)</span>
+    <span class="tag">2. Goals (desdobramento)</span>
+    <span class="tag">3. Ritual diário</span>
+    <span class="tag">4. Coach Hill</span>
+    <span class="tag">5. Mastermind</span>
+    <span class="tag alt">+ integração no Briefing</span>
+  </div>
+</div>
+
+<!-- ====================== PHONE 1: COMPASS / CHIEF AIM ====================== -->
+<div class="phone-wrap">
+  <div class="phone-label"><strong>01.</strong> Compass — a âncora do sistema</div>
+  <div class="phone" id="phone1">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Modo Hill</div>
+    </div>
+
+    <div class="subtabs">
+      <div class="subtab active" data-page="p1-compass">Compass</div>
+      <div class="subtab" data-page="p1-goals">Goals</div>
+      <div class="subtab" data-page="p1-principles">Princípios</div>
+    </div>
+
+    <!-- COMPASS -->
+    <div class="page active" id="p1-compass">
+      <div class="section-label">Atualizado em 04.MAR.2026 · próxima revisão em 87 dias</div>
+
+      <div class="aim-paper">
+        <div class="aim-text">
+          Eu, <strong>Jorge Pinheiro</strong>, vou liderar o <strong>JP App</strong> até a marca de <strong>10.000 usuários ativos pagantes</strong> até <strong>31 de dezembro de 2027</strong>, consolidando-o como referência em sistemas operacionais pessoais no Brasil. Em troca, eu darei trabalho consistente, foco diário, e a coragem de envelhecer publicamente esta criação.
+        </div>
+        <div class="aim-meta">
+          <span>Prazo: <strong>31.DEZ.2027</strong></span>
+          <span>Faltam: <strong>665 dias</strong></span>
+        </div>
+      </div>
+
+      <div class="aim-section-title">Plano Definido</div>
+      <div class="card">
+        <div style="font-size: 12.5px; line-height: 1.55; color: var(--fg-muted);">
+          1. Lançar v1 pública em Q3 2026<br>
+          2. Conquistar 100 beta users até jun/26<br>
+          3. Construir pipeline de marketing orgânico via newsletter STATE<br>
+          4. Levantar pre-seed quando atingir 500 MAU pagantes
+        </div>
+      </div>
+
+      <div class="aim-section-title">O que estou disposto a dar em troca</div>
+      <div class="card">
+        <div class="aim-exchange">
+          Manhãs antes das 7h, 5 dias/semana, dedicadas exclusivamente. Saída intencional de projetos paralelos não-essenciais. Disciplina de não terceirizar decisões de produto até atingir product-market fit.
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top: 18px;">Próximo trimestre · Q2 2026</div>
+      <div class="card-accent">
+        <div style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">Onboarding fluido + 50 beta users</div>
+        <div style="font-size: 11px; color: var(--fg-muted); line-height: 1.4;">Métrica: time-to-first-task &lt; 90s · NPS beta &gt; 50</div>
+        <div class="goal-progress" style="margin-top: 10px;">
+          <div class="goal-progress-fill accent" style="width: 38%"></div>
+        </div>
+        <div style="font-family: 'Space Mono', monospace; font-size: 9px; color: var(--fg-muted); margin-top: 4px; text-transform: uppercase;">38% · 19/50 users</div>
+      </div>
+    </div>
+
+    <!-- GOALS -->
+    <div class="page" id="p1-goals">
+      <div class="section-label">Dreams · Goals · Quarterly · Hierarquia</div>
+
+      <div class="card" style="padding: 8px 14px;">
+        <div class="goal-row">
+          <div class="goal-icon d">D</div>
+          <div class="goal-body">
+            <div class="goal-title">Construir o sistema operacional pessoal de referência no Brasil</div>
+            <div class="goal-meta"><span>HORIZONTE 10 ANOS</span></div>
+          </div>
+        </div>
+        <div class="goal-row">
+          <div class="goal-icon g">G</div>
+          <div class="goal-body">
+            <div class="goal-title">10k usuários pagantes do JP App até dez/2027</div>
+            <div class="goal-meta"><span>665 DIAS</span><span>1,9% feito</span></div>
+            <div class="goal-progress"><div class="goal-progress-fill" style="width: 1.9%"></div></div>
+          </div>
+        </div>
+        <div class="goal-row">
+          <div class="goal-icon g">G</div>
+          <div class="goal-body">
+            <div class="goal-title">STATE Innovation Center em 2 cidades novas até 2027</div>
+            <div class="goal-meta"><span>22 MESES</span><span>0% feito</span></div>
+            <div class="goal-progress"><div class="goal-progress-fill" style="width: 5%"></div></div>
+          </div>
+        </div>
+        <div class="goal-row">
+          <div class="goal-icon q">Q</div>
+          <div class="goal-body">
+            <div class="goal-title">Onboarding fluido + 50 beta users (Q2/26)</div>
+            <div class="goal-meta"><span>62 DIAS</span><span>38% feito</span></div>
+            <div class="goal-progress"><div class="goal-progress-fill accent" style="width: 38%"></div></div>
+          </div>
+        </div>
+        <div class="goal-row">
+          <div class="goal-icon q">Q</div>
+          <div class="goal-body">
+            <div class="goal-title">Fechar 3 eventos corporativos &gt; R$ 200k</div>
+            <div class="goal-meta"><span>62 DIAS</span><span>67% feito</span></div>
+            <div class="goal-progress"><div class="goal-progress-fill accent" style="width: 67%"></div></div>
+          </div>
+        </div>
+        <div class="goal-row">
+          <div class="goal-icon q">Q</div>
+          <div class="goal-body">
+            <div class="goal-title">Ler 8 livros · escrever 4 ensaios públicos</div>
+            <div class="goal-meta"><span>62 DIAS</span><span>25% feito</span></div>
+            <div class="goal-progress"><div class="goal-progress-fill accent" style="width: 25%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRINCIPLES -->
+    <div class="page" id="p1-principles">
+      <div class="section-label">Os 13 princípios — práticas de hoje</div>
+      <div class="card">
+        <div class="principle-row">
+          <div class="principle-name">Desejo</div>
+          <div class="principle-dots">
+            <div class="pdot on"></div><div class="pdot on"></div><div class="pdot on"></div><div class="pdot on"></div><div class="pdot"></div>
+          </div>
+        </div>
+        <div class="principle-row">
+          <div class="principle-name">Fé</div>
+          <div class="principle-dots">
+            <div class="pdot on"></div><div class="pdot on"></div><div class="pdot on"></div><div class="pdot"></div><div class="pdot"></div>
+          </div>
+        </div>
+        <div class="principle-row">
+          <div class="principle-name">Auto-sugestão</div>
+          <div class="principle-dots">
+            <div class="pdot on accent"></div><div class="pdot on accent"></div><div class="pdot on accent"></div><div class="pdot on accent"></div><div class="pdot on accent"></div>
+          </div>
+        </div>
+        <div class="principle-row">
+          <div class="principle-name">Conhecimento especializado</div>
+          <div class="principle-dots">
+            <div class="pdot on"></div><div class="pdot on"></div><div class="pdot on"></div><div class="pdot on"></div><div class="pdot"></div>
+          </div>
+        </div>
+        <div class="principle-row">
+          <div class="principle-name">Imaginação</div>
+          <div class="principle-dots">
+            <div class="pdot on"></div><div class="pdot on"></div><div class="pdot"></div><div class="pdot"></div><div class="pdot"></div>
+          </div>
+        </div>
+        <div class="principle-row">
+          <div class="principle-name">Plano organizado</div>
+          <div class="principle-dots">
+            <div class="pdot on"></div><div class="pdot on"></div><div class="pdot on"></div><div class="pdot"></div><div class="pdot"></div>
+          </div>
+        </div>
+        <div class="principle-row">
+          <div class="principle-name">Decisão</div>
+          <div class="principle-dots">
+            <div class="pdot on"></div><div class="pdot on"></div><div class="pdot"></div><div class="pdot"></div><div class="pdot"></div>
+          </div>
+        </div>
+        <div class="principle-row">
+          <div class="principle-name">Persistência</div>
+          <div class="principle-dots">
+            <div class="pdot on"></div><div class="pdot on"></div><div class="pdot on"></div><div class="pdot on"></div><div class="pdot"></div>
+          </div>
+        </div>
+        <div class="principle-row">
+          <div class="principle-name">Mastermind</div>
+          <div class="principle-dots">
+            <div class="pdot on"></div><div class="pdot"></div><div class="pdot"></div><div class="pdot"></div><div class="pdot"></div>
+          </div>
+        </div>
+        <div class="principle-row">
+          <div class="principle-name">Subconsciente</div>
+          <div class="principle-dots">
+            <div class="pdot on"></div><div class="pdot on"></div><div class="pdot"></div><div class="pdot"></div><div class="pdot"></div>
+          </div>
+        </div>
+      </div>
+      <div class="section-label" style="margin-top: 10px;">Auto-sugestão foi o princípio mais praticado nos últimos 7 dias 🟢</div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item active"><div class="nav-icon">◆</div><div class="nav-label">Compass</div></div>
+      <div class="nav-item"><div class="nav-icon">☼</div><div class="nav-label">Ritual</div></div>
+      <div class="nav-item"><div class="nav-icon">●</div><div class="nav-label">Coach</div></div>
+      <div class="nav-item"><div class="nav-icon">◯◯</div><div class="nav-label">Mastermind</div></div>
+      <div class="nav-item"><div class="nav-icon">≡</div><div class="nav-label">Briefing</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== PHONE 2: MORNING RITUAL ====================== -->
+<div class="phone-wrap">
+  <div class="phone-label"><strong>02.</strong> Ritual da manhã — voz do Hill</div>
+  <div class="phone" id="phone2">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Ritual · 06:42</div>
+    </div>
+
+    <div class="subtabs">
+      <div class="subtab active">Manhã</div>
+      <div class="subtab">Noite</div>
+      <div class="subtab">Histórico</div>
+    </div>
+
+    <div class="page active">
+      <div class="ritual-hero">
+        <div class="ritual-time">SEG · 11.MAI.2026 · 06:42</div>
+        <div class="ritual-headline">Antes de tudo,<br>relembre o aim.</div>
+        <div class="ritual-quote">
+          "A maioria das grandes fortunas começou no momento exato em que uma pessoa, paralisada pela necessidade, descobriu aquele <em>algo</em> dentro de si que era mais forte que qualquer obstáculo."
+          <span class="ritual-quote-author">— Napoleon Hill, Think and Grow Rich</span>
+        </div>
+      </div>
+
+      <div class="ritual-step">
+        <div class="ritual-step-head">
+          <div class="step-num done">1</div>
+          <div class="step-title">Leia seu Chief Aim em voz alta</div>
+        </div>
+        <div class="step-desc">Com emoção. Não pule.</div>
+        <button class="btn-confirm done">✓ Concluído · 06:38</button>
+      </div>
+
+      <div class="ritual-step">
+        <div class="ritual-step-head">
+          <div class="step-num">2</div>
+          <div class="step-title">Visualize-se já tendo conquistado</div>
+        </div>
+        <div class="step-desc">Sinta. Não pense — sinta.</div>
+        <div class="visualize-box">
+          Feche os olhos. Veja 10.000 usuários ativos. Sinta o produto rodando. Ouça os e-mails chegando.
+          <div class="timer-display">00:30</div>
+        </div>
+        <button class="btn-confirm accent">Iniciar timer</button>
+      </div>
+
+      <div class="ritual-step">
+        <div class="ritual-step-head">
+          <div class="step-num">3</div>
+          <div class="step-title">Defina o ato do dia</div>
+        </div>
+        <div class="step-desc">Um passo concreto, hoje, em direção ao aim. Vira task automaticamente.</div>
+        <input style="margin-left: 32px; margin-top: 6px; width: calc(100% - 32px); padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 12px;" placeholder="Ex.: Mandar mockup do onboarding para 5 testers..." value="Mandar mockup do onboarding para 5 testers">
+        <button class="btn-confirm">Adicionar à Kanban</button>
+      </div>
+
+      <div class="nudge" style="margin-top: 16px;">
+        <div class="nudge-icon">N</div>
+        <div>
+          <div class="nudge-text">
+            "<em>Você completou 14 rituais matinais consecutivos.</em> A repetição é o sussurro que vira voz no subconsciente. Continue."
+            <span class="nudge-author">— Coach Hill</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon">◆</div><div class="nav-label">Compass</div></div>
+      <div class="nav-item active"><div class="nav-icon">☼</div><div class="nav-label">Ritual</div></div>
+      <div class="nav-item"><div class="nav-icon">●</div><div class="nav-label">Coach</div></div>
+      <div class="nav-item"><div class="nav-icon">◯◯</div><div class="nav-label">Mastermind</div></div>
+      <div class="nav-item"><div class="nav-icon">≡</div><div class="nav-label">Briefing</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== PHONE 3: COACH HILL CHAT ====================== -->
+<div class="phone-wrap">
+  <div class="phone-label"><strong>03.</strong> Coach Hill — chat on-demand</div>
+  <div class="phone" id="phone3">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Coach</div>
+    </div>
+
+    <div class="page active" style="padding-bottom: 12px;">
+      <div class="coach-header">
+        <div class="coach-portrait">NH</div>
+        <div>
+          <div class="coach-name">Napoleon Hill</div>
+          <div class="coach-status">● Online · conhece seu aim e suas tasks</div>
+        </div>
+      </div>
+
+      <div class="msg">
+        <div class="msg-hill">
+          Bom dia, Jorge. Vi que você adiou <strong>"Preparar pitch deck Bimbo"</strong> pela quarta vez. Quero te fazer uma pergunta direta: <em>qual medo está se escondendo atrás dessa procrastinação?</em>
+        </div>
+        <span class="msg-time">06:55</span>
+      </div>
+
+      <div class="msg" style="margin-left: auto;">
+        <div class="msg-user">
+          Não é medo. Tô só esperando o feedback do João sobre os números.
+        </div>
+        <span class="msg-time" style="text-align: right;">06:58</span>
+      </div>
+
+      <div class="msg">
+        <div class="msg-hill">
+          Talvez. Ou talvez seja o que chamo de <strong>álibi</strong> — uma das 30 razões pelas quais homens fracassam. Eu listei elas. Esperar uma resposta perfeita antes de agir é uma delas.
+          <br><br>
+          Te proponho: <em>monte o deck hoje com os números que você já tem.</em> Quando o João responder, você ajusta. Decisão tomada com informação suficiente é melhor que decisão atrasada por informação perfeita.
+        </div>
+        <span class="msg-time">06:59</span>
+      </div>
+
+      <div class="msg" style="margin-left: auto;">
+        <div class="msg-user">
+          Tá, faz sentido. Vou fazer agora.
+        </div>
+        <span class="msg-time" style="text-align: right;">07:01</span>
+      </div>
+
+      <div class="msg">
+        <div class="msg-hill">
+          Boa. Adicionei a task para hoje 09:00 — bloco protegido. Vou te checar às 11.
+        </div>
+        <span class="msg-time">07:01</span>
+      </div>
+
+      <div class="chat-input">
+        <input type="text" placeholder="Pergunte algo ao Hill...">
+        <button class="chat-send">→</button>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon">◆</div><div class="nav-label">Compass</div></div>
+      <div class="nav-item"><div class="nav-icon">☼</div><div class="nav-label">Ritual</div></div>
+      <div class="nav-item active"><div class="nav-icon">●</div><div class="nav-label">Coach</div></div>
+      <div class="nav-item"><div class="nav-icon">◯◯</div><div class="nav-label">Mastermind</div></div>
+      <div class="nav-item"><div class="nav-icon">≡</div><div class="nav-label">Briefing</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== PHONE 4: MASTERMIND ====================== -->
+<div class="phone-wrap">
+  <div class="phone-label"><strong>04.</strong> Mastermind — seus Invisible Counselors</div>
+  <div class="phone" id="phone4">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Mastermind</div>
+    </div>
+
+    <div class="subtabs">
+      <div class="subtab active">Conselho</div>
+      <div class="subtab">Reuniões</div>
+      <div class="subtab">Configurar</div>
+    </div>
+
+    <div class="page active">
+      <div class="section-label">Seu conselho invisível · 5 mentores</div>
+
+      <div class="mm-grid">
+        <div class="mm-card active">
+          <div class="mm-portrait">SJ</div>
+          <div class="mm-name">Steve Jobs</div>
+          <div class="mm-role">Produto · Foco</div>
+        </div>
+        <div class="mm-card">
+          <div class="mm-portrait">WB</div>
+          <div class="mm-name">Warren Buffett</div>
+          <div class="mm-role">Capital · Paciência</div>
+        </div>
+        <div class="mm-card">
+          <div class="mm-portrait">PD</div>
+          <div class="mm-name">Peter Drucker</div>
+          <div class="mm-role">Gestão</div>
+        </div>
+        <div class="mm-card">
+          <div class="mm-portrait">JL</div>
+          <div class="mm-name">João L. (pai)</div>
+          <div class="mm-role">Pessoa real</div>
+        </div>
+        <div class="mm-card">
+          <div class="mm-portrait">NS</div>
+          <div class="mm-name">Naval Ravikant</div>
+          <div class="mm-role">Filosofia</div>
+        </div>
+        <div class="mm-card" style="background: transparent; border-style: dashed;">
+          <div class="mm-portrait" style="background: transparent; border: 1px dashed var(--border);">+</div>
+          <div class="mm-name" style="color: var(--fg-muted);">Adicionar</div>
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top: 8px;">Reunião desta semana · domingo 19h</div>
+      <div class="card-accent">
+        <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">Pauta: precificação do JP App</div>
+        <div style="font-size: 12px; color: var(--fg-muted); line-height: 1.5;">
+          O coach vai simular o que <strong>cada um dos 5</strong> diria sobre a sua dúvida. Você lê, anota, decide. <br><br>
+          <em>Não é "o que a IA acha" — é a destilação de cada mente que você escolheu como referência, aplicada ao seu contexto.</em>
+        </div>
+        <button style="margin-top: 12px; padding: 10px 16px; background: var(--accent); color: var(--accent-ink); border: none; border-radius: 6px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 0.04em;">Iniciar reunião →</button>
+      </div>
+
+      <div class="section-label">Última reunião · 04.MAI</div>
+      <div class="card">
+        <div style="font-size: 12px; font-weight: 500; margin-bottom: 6px;">"Devo aceitar o investidor do evento Nike?"</div>
+        <div style="font-size: 11px; color: var(--fg-muted); line-height: 1.5;">Decisão: <strong>Não.</strong> Buffett alertou sobre dependência prematura; Jobs apontou que o cliente errado define o produto errado.</div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon">◆</div><div class="nav-label">Compass</div></div>
+      <div class="nav-item"><div class="nav-icon">☼</div><div class="nav-label">Ritual</div></div>
+      <div class="nav-item"><div class="nav-icon">●</div><div class="nav-label">Coach</div></div>
+      <div class="nav-item active"><div class="nav-icon">◯◯</div><div class="nav-label">Mastermind</div></div>
+      <div class="nav-item"><div class="nav-icon">≡</div><div class="nav-label">Briefing</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== PHONE 5: BRIEFING INTEGRADO ====================== -->
+<div class="phone-wrap">
+  <div class="phone-label"><strong>05.</strong> Briefing existente + camada Hill</div>
+  <div class="phone" id="phone5">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Briefing</div>
+    </div>
+
+    <div class="subtabs">
+      <div class="subtab active">Hoje</div>
+      <div class="subtab">Global</div>
+      <div class="subtab">Brasil</div>
+      <div class="subtab">Agenda</div>
+    </div>
+
+    <div class="page active">
+
+      <!-- INTEGRAÇÃO HILL no topo -->
+      <div class="affirm-card">
+        <div class="affirm-label">Sua afirmação · auto-sugestão</div>
+        Eu lidero o JP App rumo aos 10.000 usuários ativos pagantes até dezembro de 2027 — com foco diário, coragem e disciplina.
+      </div>
+
+      <div class="nudge">
+        <div class="nudge-icon">N</div>
+        <div>
+          <div class="nudge-text">
+            "Hoje 3 das suas 7 tasks são ligadas ao seu Chief Aim. <strong>Bom.</strong> Mas 4 não. Pergunte-se: <em>elas existem por necessidade ou por hábito?</em>"
+            <span class="nudge-author">— Coach Hill · 07:12</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Briefing normal abaixo -->
+      <div class="section-label">Highlight do dia</div>
+      <div class="card">
+        <div style="font-size: 13px; line-height: 1.5; margin-bottom: 6px;">Fed mantém taxa, sinaliza dois cortes em 2026; bolsa BR sobe 1,4%.</div>
+        <div style="font-family: 'Space Mono', monospace; font-size: 9px; text-transform: uppercase; color: var(--fg-muted);">Valor · 8 min de leitura</div>
+      </div>
+
+      <div class="section-label">Global · 4 itens</div>
+      <div class="card" style="padding: 10px 14px;">
+        <div style="font-size: 12.5px; padding: 6px 0; border-bottom: 1px solid var(--border-light);">UE aprova pacote de defesa de €800bi</div>
+        <div style="font-size: 12.5px; padding: 6px 0; border-bottom: 1px solid var(--border-light);">China desacelera, exportações caem 4,2%</div>
+        <div style="font-size: 12.5px; padding: 6px 0; border-bottom: 1px solid var(--border-light);">Tesla recall de 1,1M veículos</div>
+        <div style="font-size: 12.5px; padding: 6px 0;">OpenAI lança GPT-6 enterprise</div>
+      </div>
+
+      <div class="section-label">Tasks vinculadas ao seu aim</div>
+      <div class="card-accent">
+        <div style="font-size: 12px; padding: 5px 0; display: flex; justify-content: space-between;">
+          <span>◆ Mandar mockup onboarding</span>
+          <span style="color: var(--fg-muted); font-family: 'Space Mono', monospace; font-size: 9px;">09:00</span>
+        </div>
+        <div style="font-size: 12px; padding: 5px 0; display: flex; justify-content: space-between;">
+          <span>◆ Call com beta tester #18</span>
+          <span style="color: var(--fg-muted); font-family: 'Space Mono', monospace; font-size: 9px;">14:00</span>
+        </div>
+        <div style="font-size: 12px; padding: 5px 0; display: flex; justify-content: space-between;">
+          <span>◆ Refinar pricing v2</span>
+          <span style="color: var(--fg-muted); font-family: 'Space Mono', monospace; font-size: 9px;">16:30</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon">◆</div><div class="nav-label">Compass</div></div>
+      <div class="nav-item"><div class="nav-icon">☼</div><div class="nav-label">Ritual</div></div>
+      <div class="nav-item"><div class="nav-icon">●</div><div class="nav-label">Coach</div></div>
+      <div class="nav-item"><div class="nav-icon">◯◯</div><div class="nav-label">Mastermind</div></div>
+      <div class="nav-item active"><div class="nav-icon">≡</div><div class="nav-label">Briefing</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Subtab navigation dentro do phone1
+  (function() {
+    var phone1 = document.getElementById('phone1');
+    var subtabs = phone1.querySelectorAll('.subtab');
+    var pages = phone1.querySelectorAll('.page');
+    subtabs.forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        var target = tab.getAttribute('data-page');
+        if (!target) return;
+        subtabs.forEach(function(t) { t.classList.remove('active'); });
+        pages.forEach(function(p) { p.classList.remove('active'); });
+        tab.classList.add('active');
+        document.getElementById(target).classList.add('active');
+      });
+    });
+  })();
+
+  // Bottom nav: scroll to correspondent phone
+  document.querySelectorAll('.bottom-nav .nav-item').forEach(function(item, idx) {
+    item.addEventListener('click', function() {
+      var label = item.querySelector('.nav-label').textContent.trim();
+      var map = { 'Compass': 'phone1', 'Ritual': 'phone2', 'Coach': 'phone3', 'Mastermind': 'phone4', 'Briefing': 'phone5' };
+      var target = document.getElementById(map[label]);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+
+  // Principle dots toggle
+  document.querySelectorAll('.pdot').forEach(function(dot) {
+    dot.addEventListener('click', function() {
+      dot.classList.toggle('on');
+    });
+  });
+</script>
+
+</body>
+</html>

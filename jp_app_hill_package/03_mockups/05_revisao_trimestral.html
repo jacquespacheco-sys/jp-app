@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JP App — Revisão Trimestral</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #fafaf7;
+    --bg-elevated: #ffffff;
+    --bg-deep: #f4ede0;
+    --fg: #0a0a0a;
+    --fg-muted: #6b6b6b;
+    --fg-dim: #a0a0a0;
+    --accent: #a8ff00;
+    --accent-warm: #ffb84d;
+    --accent-ink: #0a0a0a;
+    --border: #e8e8e3;
+    --border-light: #f0f0eb;
+    --danger: #d9342b;
+    --success: #2da14a;
+    --hill-paper: #f4ede0;
+    --hill-ink: #1a1308;
+    --murphy-glow: rgba(255, 184, 77, 0.12);
+  }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: #d8d4cc;
+    color: var(--fg);
+    min-height: 100vh;
+    padding: 24px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
+  }
+
+  .intro {
+    width: 100%;
+    max-width: 1200px;
+    background: #fff;
+    color: #0a0a0a;
+    border: 1px solid #0a0a0a;
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-bottom: 8px;
+    box-shadow: 4px 4px 0 var(--hill-paper);
+  }
+  .intro h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  .intro h1 span { color: #8b6f3a; }
+  .intro p {
+    font-size: 14px;
+    line-height: 1.55;
+    color: #333;
+    margin-bottom: 8px;
+    max-width: 920px;
+  }
+  .intro p strong { color: #8b6f3a; }
+
+  .intro-tags {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border: 1px solid #0a0a0a;
+    border-radius: 4px;
+    background: var(--hill-paper);
+  }
+
+  .phone-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .phone-step {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    color: #fff;
+    letter-spacing: 0.04em;
+    text-align: center;
+    max-width: 380px;
+  }
+  .phone-step span { color: var(--accent-warm); }
+  .phone-step small {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: #aaa;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+
+  .phone {
+    width: 380px;
+    height: 780px;
+    background: var(--bg);
+    border-radius: 36px;
+    border: 10px solid #0a0a0a;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.18);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topbar {
+    height: 52px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .topbar-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+  }
+  .topbar-logo span.dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: #8b6f3a;
+    border-radius: 50%;
+    margin: 0 4px 1px 4px;
+    vertical-align: middle;
+  }
+  .topbar-mode {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    border: 1px solid var(--border);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .page {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 18px 24px 18px;
+  }
+  .page::-webkit-scrollbar { width: 4px; }
+  .page::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .step-progress {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+  .step-bar {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+  }
+  .step-bar.done { background: #8b6f3a; }
+  .step-bar.current { background: #8b6f3a; box-shadow: 0 0 8px rgba(139, 111, 58, 0.5); }
+  .step-meta {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+  }
+  .step-meta strong { color: var(--fg); }
+  .step-meta .quarter-tag {
+    background: var(--bg-deep);
+    color: var(--hill-ink);
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 8.5px;
+  }
+
+  .step-hero { margin-bottom: 16px; }
+  .step-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #8b6f3a;
+    margin-bottom: 6px;
+  }
+  .step-eyebrow .pill {
+    background: var(--hill-paper);
+    color: var(--hill-ink);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+  .step-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    letter-spacing: 0.02em;
+    line-height: 1.0;
+    margin-bottom: 12px;
+  }
+  .step-headline em {
+    font-style: italic;
+    color: #8b6f3a;
+  }
+  .step-sub {
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--fg-muted);
+    line-height: 1.5;
+  }
+
+  .coach-block {
+    background: var(--hill-paper);
+    color: var(--hill-ink);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .coach-block-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #8b6f3a;
+    margin-bottom: 8px;
+  }
+  .coach-block-text {
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .coach-block-text em { font-style: italic; }
+  .coach-block-text strong { font-weight: 600; }
+
+  /* ---------- Stats card (90-day overview) ---------- */
+  .stats-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .stats-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--fg-muted);
+    margin-bottom: 12px;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .stat-box {
+    background: var(--bg-deep);
+    border-radius: 8px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--hill-ink);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    letter-spacing: 0.06em;
+  }
+  .stat-num.accent { color: #8b6f3a; }
+
+  /* ---------- Chief Aim card (review) ---------- */
+  .aim-paper {
+    background: var(--hill-paper);
+    color: var(--hill-ink);
+    padding: 18px 16px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    font-family: 'Crimson Pro', serif;
+    position: relative;
+  }
+  .aim-paper-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(26,19,8,0.55);
+    margin-bottom: 10px;
+  }
+  .aim-text {
+    font-size: 14.5px;
+    line-height: 1.5;
+    font-style: italic;
+  }
+  .aim-text strong { font-weight: 600; font-style: normal; }
+  .aim-meta {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(26,19,8,0.2);
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: rgba(26,19,8,0.65);
+    font-style: normal;
+  }
+
+  .aim-decision {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .aim-decision button {
+    flex: 1;
+    padding: 12px 8px;
+    border-radius: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--fg);
+  }
+  .aim-decision button.primary {
+    background: #8b6f3a;
+    color: white;
+    border-color: #8b6f3a;
+  }
+
+  /* ---------- Diagnostic table (5 affirmations) ---------- */
+  .diag-list {
+    margin-bottom: 14px;
+  }
+  .diag-row {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+  .diag-row.alert {
+    border-color: rgba(217, 52, 43, 0.4);
+    background: rgba(217, 52, 43, 0.03);
+  }
+  .diag-row.strong {
+    border-color: rgba(45, 161, 74, 0.3);
+    background: rgba(45, 161, 74, 0.02);
+  }
+  .diag-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .diag-num {
+    width: 22px; height: 22px;
+    background: var(--bg-deep);
+    color: var(--hill-ink);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .diag-text {
+    flex: 1;
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--fg);
+  }
+  .diag-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-left: 32px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    letter-spacing: 0.04em;
+  }
+  .diag-meta .badge {
+    padding: 2px 5px;
+    border-radius: 3px;
+    background: var(--border-light);
+  }
+  .diag-meta .badge.high { background: rgba(45, 161, 74, 0.15); color: var(--success); }
+  .diag-meta .badge.mid { background: var(--bg-deep); color: var(--hill-ink); }
+  .diag-meta .badge.low { background: rgba(217, 52, 43, 0.12); color: var(--danger); }
+
+  /* ---------- Decision buttons ---------- */
+  .decision-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .decision-btn {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 10px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .decision-btn:hover { border-color: var(--fg); }
+  .decision-btn.selected {
+    border-color: #8b6f3a;
+    background: var(--hill-paper);
+  }
+  .decision-icon {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    color: #8b6f3a;
+    margin-bottom: 6px;
+    letter-spacing: 0.04em;
+  }
+  .decision-label {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .decision-desc {
+    font-size: 11px;
+    color: var(--fg-muted);
+    line-height: 1.35;
+  }
+
+  /* ---------- Editor for refinement ---------- */
+  .editor-pair {
+    margin-bottom: 14px;
+  }
+  .editor-old, .editor-new {
+    background: var(--bg-elevated);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .editor-old {
+    border: 1px solid var(--border);
+    background: var(--bg-deep);
+  }
+  .editor-new {
+    border: 1px solid #8b6f3a;
+    background: var(--bg-elevated);
+  }
+  .editor-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 8.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--fg-muted);
+    margin-bottom: 6px;
+  }
+  .editor-tag.new { color: #8b6f3a; font-weight: 700; }
+  .editor-content {
+    font-family: 'Crimson Pro', serif;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--fg);
+    font-style: italic;
+  }
+  .editor-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--fg);
+    font-family: 'Crimson Pro', serif;
+    font-size: 15px;
+    line-height: 1.45;
+    resize: none;
+    font-style: italic;
+  }
+  .editor-input:focus { outline: none; }
+  .editor-meta {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    letter-spacing: 0.06em;
+  }
+  .belief-meter {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .belief-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .belief-dot.on { background: #8b6f3a; }
+
+  /* ---------- Seal screen ---------- */
+  .seal-hero {
+    text-align: center;
+    padding: 18px 12px 12px;
+  }
+  .seal-icon {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    background: radial-gradient(circle, rgba(139, 111, 58, 0.25) 0%, transparent 70%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    color: #8b6f3a;
+  }
+  .seal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  .seal-sub {
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--fg-muted);
+    line-height: 1.5;
+    max-width: 280px;
+    margin: 0 auto;
+  }
+  .seal-list {
+    background: var(--bg-elevated);
+    border: 1px solid var(--fg);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 18px 0;
+    position: relative;
+  }
+  .seal-list::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px;
+    width: 40px; height: 6px;
+    background: #8b6f3a;
+    border-radius: 12px 0 0 0;
+  }
+  .seal-list-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-bottom: 12px;
+  }
+  .seal-aff {
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    line-height: 1.45;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--fg);
+  }
+  .seal-aff:last-child { border-bottom: none; }
+  .seal-aff strong { font-weight: 600; }
+  .seal-aff .changed-tag {
+    display: inline-block;
+    background: #8b6f3a;
+    color: white;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    font-weight: 400;
+    font-style: normal;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-left: 6px;
+    vertical-align: 2px;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: var(--fg);
+    color: var(--bg);
+    border: none;
+    border-radius: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .btn-primary.hill {
+    background: #8b6f3a;
+    color: white;
+  }
+  .btn-secondary {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    color: var(--fg-muted);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .btn-row .btn-primary { flex: 1; margin-top: 0; }
+
+  /* ---------- Invitation card (Phone 1 hero) ---------- */
+  .invite-card {
+    background: var(--hill-paper);
+    border-radius: 14px;
+    padding: 22px 18px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .invite-icon {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: #8b6f3a;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+  .invite-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+    color: var(--hill-ink);
+    margin-bottom: 8px;
+  }
+  .invite-sub {
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(26,19,8,0.7);
+  }
+
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>REVISÃO <span>TRIMESTRAL</span></h1>
+  <p>A cada 90 dias o sistema convida para uma revisão estruturada. <strong>Não é refazer do zero</strong> — é avaliar, refinar, aposentar o que cumpriu papel. O tom é reflexivo (não didático como o wizard inicial) e o coach usa os dados de uso reais ("você pulou a 4ª 23 vezes") para iniciar a conversa.</p>
+  <div class="intro-tags">
+    <span class="tag">1. Convite + stats de 90 dias</span>
+    <span class="tag">2. Chief Aim ainda serve?</span>
+    <span class="tag">3. Diagnóstico das 5</span>
+    <span class="tag">4. Decisão por afirmação</span>
+    <span class="tag">5. Refinar uma específica</span>
+    <span class="tag">6. Selar nova versão</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 1 — Convite + overview de 90 dias
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>01 /</span> Convite + 90 dias<small>Notificação às 9h de uma sexta</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Revisão Q1</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar current"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 1</strong> de 6</span>
+        <span class="quarter-tag">Q1 → Q2 · 2026</span>
+      </div>
+
+      <div class="invite-card">
+        <div class="invite-icon">90</div>
+        <div class="invite-title">90 DIAS COMPLETOS</div>
+        <div class="invite-sub">Hora de revisar — sem pressa, sem culpa. O que serviu? O que cansou? O que mudou em você?</div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach Hill</div>
+        <div class="coach-block-text">
+          Você usou suas afirmações por <strong>90 dias</strong>. O ciclo está completo. Murphy dizia: <em>"o subconsciente leva 90 dias para tornar uma afirmação parte da identidade — ou para sinalizar que ela nunca encaixou"</em>.
+          <br><br>
+          Hoje vamos olhar os dados, escutar seu instinto, e decidir <strong>com calma</strong> o que segue para Q2.
+        </div>
+      </div>
+
+      <div class="stats-card">
+        <div class="stats-title">Seus 90 dias · dados de uso</div>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-num accent">76</div>
+            <div class="stat-label">Rituais matinais</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num accent">81</div>
+            <div class="stat-label">Rituais noturnos</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num">84%</div>
+            <div class="stat-label">Aderência</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num">3</div>
+            <div class="stat-label">Goals batidos</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary hill">Começar revisão · 15-20 min →</button>
+      <button class="btn-secondary">Adiar para domingo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 2 — Revisar o Chief Aim primeiro
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>02 /</span> O Aim ainda serve?<small>Antes das afirmações, a fundação</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Revisão Q1</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar done"></div>
+        <div class="step-bar current"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 2</strong> de 6</span>
+        <span class="quarter-tag">Chief Aim</span>
+      </div>
+
+      <div class="step-hero">
+        <div class="step-eyebrow"><span class="pill">Fundação</span>Chief Aim</div>
+        <h1 class="step-headline">Antes das frases,<br>a <em>fundação</em>.</h1>
+        <div class="step-sub">Afirmações servem ao seu aim. Se ele mudou, elas precisam mudar junto. Releia abaixo.</div>
+      </div>
+
+      <div class="aim-paper">
+        <div class="aim-paper-label">Seu Chief Aim · escrito em fev/2026</div>
+        <div class="aim-text">
+          Eu, <strong>Jorge Pinheiro</strong>, vou liderar o <strong>JP App</strong> até a marca de <strong>10.000 usuários ativos pagantes</strong> até <strong>31 de dezembro de 2027</strong>, consolidando-o como referência em sistemas operacionais pessoais no Brasil.
+        </div>
+        <div class="aim-meta">
+          <span>Prazo: 31.DEZ.2027</span>
+          <span>Faltam: 575 dias</span>
+        </div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach</div>
+        <div class="coach-block-text">
+          Pergunta direta: <em>esse aim, hoje, te acende ou te pesa?</em>
+          <br><br>
+          Se acende, mantenha. Se pesa, talvez tenha mudado algo importante — pode ser hora de ajustar prazos, números, ou até a essência. Sem culpa.
+        </div>
+      </div>
+
+      <div class="aim-decision">
+        <button class="primary">✓ Acende · manter</button>
+        <button>Ajustar números</button>
+      </div>
+      <div class="aim-decision">
+        <button>Reescrever do zero</button>
+        <button>Conversar com coach</button>
+      </div>
+
+      <button class="btn-primary hill" style="margin-top: 8px;">Aim mantido · seguir para afirmações →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 3 — Diagnóstico das 5 afirmações
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>03 /</span> Diagnóstico<small>Dados + sentimento sobre cada afirmação</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Revisão Q1</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar current"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 3</strong> de 6</span>
+        <span class="quarter-tag">Diagnóstico</span>
+      </div>
+
+      <div class="step-hero">
+        <div class="step-eyebrow"><span class="pill">Análise</span>Suas 5 afirmações</div>
+        <h1 class="step-headline">Os dados<br>contam algo.</h1>
+        <div class="step-sub">Frequência de leitura, atenção, e quantas vezes você pulou. Não é julgamento — é informação.</div>
+      </div>
+
+      <div class="diag-list">
+        <div class="diag-row strong">
+          <div class="diag-top">
+            <div class="diag-num">I</div>
+            <div class="diag-text">"Eu sou o fundador que o JP App precisa — calmo, focado e decidido."</div>
+          </div>
+          <div class="diag-meta">
+            <span class="badge high">87× lida</span>
+            <span class="badge high">Nunca pulou</span>
+            <span class="badge high">Forte</span>
+          </div>
+        </div>
+
+        <div class="diag-row strong">
+          <div class="diag-top">
+            <div class="diag-num">II</div>
+            <div class="diag-text">"O JP App cresce porque eu ajo no que importa, todos os dias."</div>
+          </div>
+          <div class="diag-meta">
+            <span class="badge high">87× lida</span>
+            <span class="badge mid">Pulou 2×</span>
+            <span class="badge high">Forte</span>
+          </div>
+        </div>
+
+        <div class="diag-row">
+          <div class="diag-top">
+            <div class="diag-num">III</div>
+            <div class="diag-text">"Tenho histórico de transformar visões em realidade. Confio nisso."</div>
+          </div>
+          <div class="diag-meta">
+            <span class="badge mid">85× lida</span>
+            <span class="badge mid">Pulou 4×</span>
+            <span class="badge mid">Estável</span>
+          </div>
+        </div>
+
+        <div class="diag-row alert">
+          <div class="diag-top">
+            <div class="diag-num">IV</div>
+            <div class="diag-text">"Atraio as pessoas certas, no momento certo, para o que estou construindo."</div>
+          </div>
+          <div class="diag-meta">
+            <span class="badge low">64× lida</span>
+            <span class="badge low">Pulou 23×</span>
+            <span class="badge low">Atenção</span>
+          </div>
+        </div>
+
+        <div class="diag-row strong">
+          <div class="diag-top">
+            <div class="diag-num">V</div>
+            <div class="diag-text">"Minha família, minha saúde e meu trabalho crescem juntos — nada à custa do outro."</div>
+          </div>
+          <div class="diag-meta">
+            <span class="badge high">86× lida</span>
+            <span class="badge mid">Pulou 1×</span>
+            <span class="badge high">Forte</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach</div>
+        <div class="coach-block-text">
+          Quatro das suas afirmações estão sólidas. A <strong>IV</strong> (Relações) você pulou <em>23 vezes</em> em 90 dias. Vale perguntar: <em>ela ainda diz o que você quer dizer?</em> Ou cansou? Ou nunca encaixou de verdade?
+          <br><br>
+          Vamos passar uma por uma e decidir.
+        </div>
+      </div>
+
+      <button class="btn-primary hill">Decidir cada uma →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 4 — Decisão por afirmação (4 caminhos)
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>04 /</span> 4 caminhos por afirmação<small>Manter · refinar · substituir · aposentar</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Revisão Q1</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar current"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 4</strong> · afirmação IV</span>
+        <span class="quarter-tag">Decisão</span>
+      </div>
+
+      <div class="step-hero">
+        <div class="step-eyebrow"><span class="pill">Afirmação IV</span>Relações</div>
+        <h1 class="step-headline">Esta é a<br>de atenção.</h1>
+      </div>
+
+      <div class="aim-paper" style="background: rgba(217, 52, 43, 0.05); border: 1px solid rgba(217, 52, 43, 0.2);">
+        <div class="aim-paper-label" style="color: var(--danger);">⚠ Pulada 23× em 90 dias</div>
+        <div class="aim-text" style="color: var(--fg);">
+          "Atraio as pessoas certas, no momento certo, para o que estou construindo."
+        </div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach</div>
+        <div class="coach-block-text">
+          Ela <em>passa</em> nos 4 testes técnicos. Mas algo na sua intuição rejeita — você pula. Murphy diria que isso é <strong>sinal de que a fé caiu</strong>. Talvez a frase soa boa, mas você não sente mais. <em>Decisão sua, agora.</em>
+        </div>
+      </div>
+
+      <div style="font-family: 'Space Mono', monospace; font-size: 9px; text-transform: uppercase; color: var(--fg-muted); letter-spacing: 0.08em; margin-bottom: 10px;">Escolha um caminho</div>
+
+      <div class="decision-grid">
+        <div class="decision-btn">
+          <div class="decision-icon">═</div>
+          <div class="decision-label">Manter intacta</div>
+          <div class="decision-desc">Volto a praticar com mais atenção</div>
+        </div>
+        <div class="decision-btn selected">
+          <div class="decision-icon">✎</div>
+          <div class="decision-label">Refinar palavras</div>
+          <div class="decision-desc">Mantenho a essência, mudo a forma</div>
+        </div>
+        <div class="decision-btn">
+          <div class="decision-icon">↻</div>
+          <div class="decision-label">Substituir</div>
+          <div class="decision-desc">Mesma dimensão, frase nova</div>
+        </div>
+        <div class="decision-btn">
+          <div class="decision-icon">✕</div>
+          <div class="decision-label">Aposentar</div>
+          <div class="decision-desc">Cumpriu — não preciso mais</div>
+        </div>
+      </div>
+
+      <button class="btn-primary hill">Refinar palavras →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 5 — Refinar uma específica (lado a lado)
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>05 /</span> Refinar lado a lado<small>Velha vs. nova, ao mesmo tempo</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Revisão Q1</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar current"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 4</strong> · refinando IV</span>
+        <span class="quarter-tag">Edição</span>
+      </div>
+
+      <div class="step-hero">
+        <div class="step-eyebrow"><span class="pill">Refinar</span>Afirmação IV</div>
+        <h1 class="step-headline">A velha à esquerda.<br>A nova você cria.</h1>
+        <div class="step-sub">Releia a velha em voz baixa antes de escrever a nova. Onde ela falha em te tocar?</div>
+      </div>
+
+      <div class="editor-pair">
+        <div class="editor-old">
+          <div class="editor-tag">Versão atual · Q1/2026</div>
+          <div class="editor-content">"Atraio as pessoas certas, no momento certo, para o que estou construindo."</div>
+        </div>
+
+        <div class="editor-new">
+          <div class="editor-tag new">✎ Nova versão · Q2/2026</div>
+          <textarea class="editor-input" rows="3">Eu construo no aberto e as pessoas certas me encontram.</textarea>
+          <div class="editor-meta">
+            <span><strong>11</strong> palavras</span>
+            <span class="belief-meter">
+              Fé:
+              <span class="belief-dot on"></span>
+              <span class="belief-dot on"></span>
+              <span class="belief-dot on"></span>
+              <span class="belief-dot on"></span>
+              <span class="belief-dot on"></span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach</div>
+        <div class="coach-block-text">
+          Interessante reformulação. <strong>"Eu construo no aberto"</strong> coloca a ação ativa de novo no centro — o "atrair" virou consequência, não esforço. E você marcou <em>5 de 5</em> em fé.
+          <br><br>
+          Murphy aprovaria — você ouviu sua própria voz, não a do livro.
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-secondary" style="margin-top: 0;">Outra tentativa</button>
+        <button class="btn-primary hill" style="margin-top: 0;">Aceitar nova →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 6 — Selar nova versão (transição cerimonial)
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>06 /</span> Selar Q2<small>Transição cerimonial</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Revisão Q1</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar current"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 6</strong> · selar</span>
+        <span class="quarter-tag">Q2 · 2026</span>
+      </div>
+
+      <div class="seal-hero">
+        <div class="seal-icon">✦</div>
+        <div class="seal-title">REVISÃO COMPLETA</div>
+        <div class="seal-sub">Quatro afirmações seguem firmes. Uma evoluiu. O Chief Aim mantido. Esta é a versão Q2 de você.</div>
+      </div>
+
+      <div class="seal-list">
+        <div class="seal-list-title">Manifesto · Q2/2026</div>
+        <div class="seal-aff">
+          <strong>I.</strong> <em>Eu sou o fundador que o JP App precisa — calmo, focado e decidido.</em>
+        </div>
+        <div class="seal-aff">
+          <strong>II.</strong> <em>O JP App cresce porque eu ajo no que importa, todos os dias.</em>
+        </div>
+        <div class="seal-aff">
+          <strong>III.</strong> <em>Tenho histórico de transformar visões em realidade. Confio nisso.</em>
+        </div>
+        <div class="seal-aff">
+          <strong>IV.</strong> <em>Eu construo no aberto e as pessoas certas me encontram.</em>
+          <span class="changed-tag">refinada</span>
+        </div>
+        <div class="seal-aff">
+          <strong>V.</strong> <em>Minha família, minha saúde e meu trabalho crescem juntos — nada à custa do outro.</em>
+        </div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach Hill + Murphy</div>
+        <div class="coach-block-text">
+          Hill teria respeitado essa revisão. Você não mudou por moda — mudou por escuta. Murphy ficaria satisfeito porque a nova IV soa <em>mais sua</em>.
+          <br><br>
+          Estas palavras agora ficam ativas até <strong>11.AGO.2026</strong>. Próxima revisão lá.
+        </div>
+      </div>
+
+      <button class="btn-primary hill">✦ Selar Q2 · começar hoje</button>
+      <button class="btn-secondary">Exportar manifesto em PDF</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

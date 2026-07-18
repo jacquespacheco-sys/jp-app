@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JP App — Wizard Afirmações · Capacidade & Relações</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #fafaf7;
+    --bg-elevated: #ffffff;
+    --bg-deep: #f4ede0;
+    --fg: #0a0a0a;
+    --fg-muted: #6b6b6b;
+    --fg-dim: #a0a0a0;
+    --accent: #a8ff00;
+    --accent-warm: #ffb84d;
+    --accent-ink: #0a0a0a;
+    --border: #e8e8e3;
+    --border-light: #f0f0eb;
+    --danger: #d9342b;
+    --success: #2da14a;
+    --hill-paper: #f4ede0;
+    --hill-ink: #1a1308;
+    --murphy-glow: rgba(255, 184, 77, 0.12);
+  }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: #d8d4cc;
+    color: var(--fg);
+    min-height: 100vh;
+    padding: 24px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
+  }
+
+  .intro {
+    width: 100%;
+    max-width: 1200px;
+    background: #fff;
+    color: #0a0a0a;
+    border: 1px solid #0a0a0a;
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-bottom: 8px;
+    box-shadow: 4px 4px 0 var(--accent-warm);
+  }
+  .intro h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  .intro h1 span { color: #c97a1f; }
+  .intro p {
+    font-size: 14px;
+    line-height: 1.55;
+    color: #333;
+    margin-bottom: 8px;
+    max-width: 920px;
+  }
+  .intro p strong { color: #c97a1f; }
+  .intro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 14px;
+  }
+  .intro-col {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 12px 14px;
+    background: #fafaf7;
+  }
+  .intro-col h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+  .intro-col h3 span {
+    background: var(--accent-warm);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    margin-right: 4px;
+  }
+  .intro-col p {
+    font-size: 12px;
+    line-height: 1.4;
+    color: #555;
+    margin: 0;
+  }
+
+  .phone-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .phone-step {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    color: #fff;
+    letter-spacing: 0.04em;
+    text-align: center;
+    max-width: 380px;
+  }
+  .phone-step span { color: var(--accent-warm); }
+  .phone-step small {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: #aaa;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+
+  .phone {
+    width: 380px;
+    height: 780px;
+    background: var(--bg);
+    border-radius: 36px;
+    border: 10px solid #0a0a0a;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.18);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topbar {
+    height: 52px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .topbar-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+  }
+  .topbar-logo span.dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--accent-warm);
+    border-radius: 50%;
+    margin: 0 4px 1px 4px;
+    vertical-align: middle;
+  }
+  .topbar-mode {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    border: 1px solid var(--border);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .page {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 18px 24px 18px;
+  }
+  .page::-webkit-scrollbar { width: 4px; }
+  .page::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .step-progress {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+  .step-bar {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+  }
+  .step-bar.done { background: var(--accent-warm); }
+  .step-bar.current { background: var(--accent-warm); box-shadow: 0 0 8px rgba(255, 184, 77, 0.5); }
+  .step-meta {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+  }
+  .step-meta strong { color: var(--fg); }
+  .step-meta .session-tag {
+    background: var(--bg-deep);
+    color: var(--hill-ink);
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 8.5px;
+  }
+
+  .step-hero { margin-bottom: 16px; }
+  .step-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fg-muted);
+    margin-bottom: 6px;
+  }
+  .step-eyebrow .pill {
+    background: var(--accent-warm);
+    color: var(--accent-ink);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+  .step-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.02em;
+    line-height: 1.05;
+    margin-bottom: 10px;
+  }
+  .step-sub {
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 13.5px;
+    color: var(--fg-muted);
+    line-height: 1.5;
+  }
+
+  .coach-block {
+    background: var(--hill-paper);
+    color: var(--hill-ink);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .coach-block-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #c97a1f;
+    margin-bottom: 8px;
+  }
+  .coach-block-text {
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .coach-block-text em { font-style: italic; }
+  .coach-block-text strong { font-weight: 600; }
+
+  /* ---------- Evidence picker (Capacidade) ---------- */
+  .evidence-intro {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--fg);
+    margin-bottom: 12px;
+  }
+  .evidence-list {
+    margin-bottom: 14px;
+  }
+  .evidence-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .evidence-card:hover { border-color: var(--fg); }
+  .evidence-card.selected {
+    border-color: var(--accent-warm);
+    background: var(--murphy-glow);
+  }
+  .evidence-source {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    background: var(--border-light);
+    padding: 3px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.06em;
+    flex-shrink: 0;
+  }
+  .evidence-card.selected .evidence-source {
+    background: var(--accent-warm);
+    color: var(--accent-ink);
+  }
+  .evidence-body { flex: 1; }
+  .evidence-title {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.35;
+    margin-bottom: 3px;
+  }
+  .evidence-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .evidence-check {
+    width: 20px; height: 20px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-size: 13px;
+  }
+  .evidence-card.selected .evidence-check {
+    background: var(--accent-warm);
+    border-color: var(--accent-warm);
+    color: var(--accent-ink);
+  }
+
+  .evidence-add {
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    width: 100%;
+  }
+  .evidence-add:hover { border-color: var(--fg); color: var(--fg); }
+
+  /* ---------- Editor frame ---------- */
+  .editor-frame {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .editor-frame.suggested {
+    border-color: var(--accent-warm);
+    background: var(--murphy-glow);
+  }
+  .editor-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--fg-muted);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .editor-label .badge-derived {
+    background: var(--accent-warm);
+    color: var(--accent-ink);
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.06em;
+  }
+  .editor-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--fg);
+    font-family: 'Crimson Pro', serif;
+    font-size: 17px;
+    line-height: 1.4;
+    resize: none;
+    font-style: italic;
+  }
+  .editor-input:focus { outline: none; }
+  .editor-meta {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    letter-spacing: 0.06em;
+  }
+  .editor-meta strong { color: var(--fg); }
+  .belief-meter {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .belief-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+  }
+  .belief-dot.on { background: var(--accent-warm); }
+
+  /* ---------- Warning / detection box (Relações) ---------- */
+  .warn-box {
+    background: rgba(217, 52, 43, 0.06);
+    border: 1px solid rgba(217, 52, 43, 0.3);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .warn-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--danger);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .warn-text {
+    font-family: 'Crimson Pro', serif;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--fg);
+  }
+  .warn-text strong { font-weight: 600; }
+  .warn-text em { font-style: italic; color: var(--danger); }
+
+  .transform-box {
+    background: rgba(45, 161, 74, 0.06);
+    border: 1px solid rgba(45, 161, 74, 0.3);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .transform-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--success);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .transform-arrow {
+    text-align: center;
+    color: var(--fg-muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    margin: 4px 0 8px 0;
+  }
+
+  .compare-line {
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .compare-line.from { color: var(--fg-muted); text-decoration: line-through; }
+  .compare-line.to { color: var(--fg); font-weight: 500; }
+  .compare-line strong { color: var(--success); font-weight: 600; }
+
+  /* ---------- Chips ---------- */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .chip {
+    padding: 8px 12px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    font-size: 11.5px;
+    color: var(--fg);
+    cursor: pointer;
+  }
+  .chip:hover { border-color: var(--fg); }
+
+  .label-tiny {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn-primary {
+    width: 100%;
+    padding: 13px;
+    background: var(--fg);
+    color: var(--bg);
+    border: none;
+    border-radius: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .btn-primary.accent {
+    background: var(--accent-warm);
+    color: var(--accent-ink);
+  }
+  .btn-secondary {
+    width: 100%;
+    padding: 11px;
+    background: transparent;
+    color: var(--fg-muted);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .btn-row .btn-primary { flex: 1; margin-top: 0; }
+  .btn-row .btn-half {
+    flex: 1;
+    padding: 13px;
+    border-radius: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--fg);
+  }
+
+  /* ---------- Pause / between sessions card ---------- */
+  .pause-card {
+    background: var(--fg);
+    color: var(--bg);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .pause-icon {
+    font-size: 28px;
+    color: var(--accent-warm);
+    margin-bottom: 10px;
+  }
+  .pause-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+  .pause-sub {
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(255,255,255,0.75);
+  }
+
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>WIZARD · <span>CAPACIDADE & RELAÇÕES</span></h1>
+  <p>Detalhe das duas sessões com nuances específicas. Cada uma teve que ser desenhada diferente das outras porque carregam armadilhas distintas — <strong>síndrome do impostor</strong> em Capacidade, <strong>externalização do controle</strong> em Relações.</p>
+  <div class="intro-grid">
+    <div class="intro-col">
+      <h3><span>3ª</span> CAPACIDADE</h3>
+      <p>Risco: afirmação genérica que o subconsciente rejeita ("Eu sou capaz de qualquer coisa"). Solução: <strong>ancorar em evidência real</strong>. Usuário escolhe 2-3 conquistas, daí extrai a afirmação.</p>
+    </div>
+    <div class="intro-col">
+      <h3><span>4ª</span> RELAÇÕES</h3>
+      <p>Risco: afirmação que depende dos outros ("As pessoas certas me procuram"). Solução: <strong>reformular como teu posicionamento</strong>. Coach detecta externalização e propõe transformação.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 1 — Sessão 2, Dia 2 — Coleta de evidências
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>01 /</span> Capacidade · ancoragem<small>Sessão 2 · Dia 2 · escolher evidências</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Wizard</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar current"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 4</strong> · 3ª afirmação</span>
+        <span class="session-tag">Sessão 2 · Dia 2</span>
+      </div>
+
+      <div class="step-hero">
+        <div class="step-eyebrow"><span class="pill">Dimensão 3/5</span>Capacidade</div>
+        <h1 class="step-headline">Antes da frase,<br>as provas.</h1>
+        <div class="step-sub">"Eu sou capaz" no abstrato é fácil de duvidar. Vamos ancorar na sua história real.</div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach</div>
+        <div class="coach-block-text">
+          Murphy dizia: <em>"o subconsciente não obedece o que você grita — ele obedece o que você acredita"</em>. Para acreditar que é capaz, escolha <strong>2 ou 3 conquistas</strong> que você mesmo viveu. Suas. Não importa o tamanho.
+        </div>
+      </div>
+
+      <div class="label-tiny">Selecione 2-3 · seu histórico no JP App</div>
+
+      <div class="evidence-list">
+        <div class="evidence-card selected">
+          <div class="evidence-source">CHIEF AIM 2023</div>
+          <div class="evidence-body">
+            <div class="evidence-title">"Lançar STATE Innovation Center em SP até dez/23"</div>
+            <div class="evidence-meta">Cumprido · concluído em 11/2023</div>
+          </div>
+          <div class="evidence-check">✓</div>
+        </div>
+
+        <div class="evidence-card selected">
+          <div class="evidence-source">GOAL Q4/25</div>
+          <div class="evidence-body">
+            <div class="evidence-title">"Fechar 3 eventos corporativos &gt; R$ 200k"</div>
+            <div class="evidence-meta">Cumprido · 3/3 · jan/2026</div>
+          </div>
+          <div class="evidence-check">✓</div>
+        </div>
+
+        <div class="evidence-card">
+          <div class="evidence-source">PROJECT</div>
+          <div class="evidence-body">
+            <div class="evidence-title">"Construir e lançar o JP App (versão alpha)"</div>
+            <div class="evidence-meta">Concluído · mar/2026</div>
+          </div>
+          <div class="evidence-check"></div>
+        </div>
+
+        <div class="evidence-card">
+          <div class="evidence-source">GOAL 2022</div>
+          <div class="evidence-body">
+            <div class="evidence-title">"Sair do emprego e empreender em tempo integral"</div>
+            <div class="evidence-meta">Cumprido · há 4 anos</div>
+          </div>
+          <div class="evidence-check"></div>
+        </div>
+      </div>
+
+      <button class="evidence-add">+ Adicionar conquista manual</button>
+
+      <button class="btn-primary accent" style="margin-top: 16px;">Extrair afirmação dessas evidências →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 2 — Capacidade: AI suggests, user edits
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>02 /</span> Capacidade · refinar<small>Coach sugere, você edita</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Wizard</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar current"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 4</strong> · 3ª afirmação · refinando</span>
+        <span class="session-tag">Sessão 2 · Dia 2</span>
+      </div>
+
+      <div class="step-hero">
+        <div class="step-eyebrow"><span class="pill">Capacidade</span>Versão sugerida</div>
+        <h1 class="step-headline">Você escolheu duas<br>vitórias. Olha:</h1>
+        <div class="step-sub">A frase abaixo é derivada delas. Edite até soar como <em>sua voz</em>.</div>
+      </div>
+
+      <div style="background: var(--hill-paper); border-radius: 10px; padding: 14px; margin-bottom: 12px;">
+        <div class="label-tiny" style="margin-bottom: 6px; color: #c97a1f;">Suas evidências escolhidas</div>
+        <div style="font-family: 'Crimson Pro', serif; font-size: 13px; line-height: 1.5; color: var(--hill-ink);">
+          ◆ Lançou o STATE em SP em 2023<br>
+          ◆ Fechou 3 eventos &gt; R$ 200k em Q4/25
+        </div>
+      </div>
+
+      <div class="editor-frame suggested">
+        <div class="editor-label">
+          <span>Versão sugerida pelo Coach</span>
+          <span class="badge-derived">Derivada · edite</span>
+        </div>
+        <textarea class="editor-input" rows="3">Tenho histórico de transformar visões em realidade — o STATE e os eventos provam. Confio nisso.</textarea>
+        <div class="editor-meta">
+          <span><strong>14</strong> palavras</span>
+          <span class="belief-meter">
+            Fé:
+            <span class="belief-dot on"></span>
+            <span class="belief-dot on"></span>
+            <span class="belief-dot on"></span>
+            <span class="belief-dot on"></span>
+            <span class="belief-dot"></span>
+          </span>
+        </div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach Hill + Murphy</div>
+        <div class="coach-block-text">
+          Note: a frase <strong>cita evidência</strong> — isso é o que a torna inacusável pelo seu próprio subconsciente. Murphy chamaria isto de "afirmação ancorada". Hill aprovaria pelo realismo.
+          <br><br>
+          A frase está em <em>14 palavras</em>. Murphy preferia 8-12. Quer encurtar?
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-half">Encurtar com coach</button>
+        <button class="btn-primary accent">Aceitar →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 3 — Between sessions pause
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>03 /</span> Pausa entre sessões<small>O subconsciente trabalha melhor com tempo</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Wizard</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+      </div>
+      <div class="step-meta">
+        <span>3 de 5 afirmações · prontas</span>
+        <span class="session-tag">Sessão 2 · Dia 2 · fim</span>
+      </div>
+
+      <div class="pause-card">
+        <div class="pause-icon">☾</div>
+        <div class="pause-title">PARE POR HOJE.</div>
+        <div class="pause-sub">Você fez três afirmações sólidas. Use-as no ritual da noite hoje. As duas restantes esperam até amanhã.</div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach</div>
+        <div class="coach-block-text">
+          Sei que dá vontade de fechar tudo agora. Resista. Murphy era enfático: <em>o subconsciente leva 24-72h para começar a aceitar uma afirmação nova</em>. Se você empilha cinco de uma vez, sua mente trata como ruído. Distribuído, ela trata como instrução.
+          <br><br>
+          Use as três que você tem. Amanhã voltamos para <strong>Relações</strong>.
+        </div>
+      </div>
+
+      <div style="background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+        <div class="label-tiny" style="margin-bottom: 10px;">Suas três afirmações até aqui</div>
+        <div style="font-family: 'Crimson Pro', serif; font-size: 14px; line-height: 1.55; color: var(--fg);">
+          <strong>I.</strong> <em>Eu sou o fundador que o JP App precisa — calmo, focado e decidido.</em><br><br>
+          <strong>II.</strong> <em>O JP App cresce porque eu ajo no que importa, todos os dias.</em><br><br>
+          <strong>III.</strong> <em>Tenho histórico de transformar visões em realidade. Confio nisso.</em>
+        </div>
+      </div>
+
+      <button class="btn-primary accent">Usar no ritual da noite hoje</button>
+      <button class="btn-secondary">Quero continuar agora mesmo assim</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 4 — Sessão 3, Dia 3 — Relações: usuário escreve algo problemático
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>04 /</span> Relações · primeira tentativa<small>Sessão 3 · Dia 3</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Wizard</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar current"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 5</strong> · 4ª afirmação</span>
+        <span class="session-tag">Sessão 3 · Dia 3</span>
+      </div>
+
+      <div class="step-hero">
+        <div class="step-eyebrow"><span class="pill">Dimensão 4/5</span>Relações</div>
+        <h1 class="step-headline">Como você se posiciona<br>com as pessoas?</h1>
+        <div class="step-sub">Esta dimensão tem uma armadilha sutil. Vamos escrever e ver.</div>
+      </div>
+
+      <div class="label-tiny">Templates para começar</div>
+      <div class="chips">
+        <div class="chip">Eu atraio...</div>
+        <div class="chip">Eu me apresento como...</div>
+        <div class="chip">Eu peço com clareza...</div>
+        <div class="chip">Eu sirvo / contribuo...</div>
+      </div>
+
+      <div class="editor-frame">
+        <div class="editor-label">Sua afirmação · escreva primeiro</div>
+        <textarea class="editor-input" rows="3">As pessoas certas aparecem na minha vida no momento certo.</textarea>
+        <div class="editor-meta">
+          <span><strong>10</strong> palavras</span>
+          <span class="belief-meter">
+            Fé:
+            <span class="belief-dot on"></span>
+            <span class="belief-dot on"></span>
+            <span class="belief-dot on"></span>
+            <span class="belief-dot"></span>
+            <span class="belief-dot"></span>
+          </span>
+        </div>
+      </div>
+
+      <button class="btn-primary accent">Testar afirmação →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 5 — Relações: detection of externalization
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>05 /</span> Relações · detecção<small>Coach percebe externalização</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Wizard</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar current"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 5</strong> · refinando</span>
+        <span class="session-tag">Sessão 3 · Dia 3</span>
+      </div>
+
+      <div class="step-hero">
+        <div class="step-eyebrow"><span class="pill">Relações</span>Análise</div>
+        <h1 class="step-headline">Espera. Tem algo<br>que precisamos<br>conversar.</h1>
+      </div>
+
+      <div class="warn-box">
+        <div class="warn-eyebrow">⚠ Externalização detectada</div>
+        <div class="warn-text">
+          Sua frase: <em>"As pessoas certas aparecem na minha vida no momento certo."</em>
+          <br><br>
+          O subconsciente só programa <strong>o teu comportamento</strong>, não o dos outros. Esta frase coloca a ação fora de você. Murphy diria que ela <em>passa</em> pelo teste do presente e do positivo — mas falha no <strong>pessoal</strong>.
+        </div>
+      </div>
+
+      <div class="transform-box">
+        <div class="transform-eyebrow">✓ Como transformar</div>
+        <div class="compare-line from">As pessoas certas aparecem na minha vida no momento certo.</div>
+        <div class="transform-arrow">↓ vira ↓</div>
+        <div class="compare-line to">Eu me posiciono e me apresento de forma que <strong>pessoas certas me reconhecem</strong>.</div>
+        <div style="font-size: 11.5px; color: var(--fg-muted); margin-top: 8px; line-height: 1.4;">A ação volta pra você. O resultado é parecido — mas agora o subconsciente sabe o que <em>fazer</em>.</div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach</div>
+        <div class="coach-block-text">
+          Murphy era duro nessa: <em>"você não pode programar o subconsciente alheio"</em>. Mas você pode programar como <strong>você</strong> se apresenta — e isso, sim, atrai diferente. É a mesma coisa, dita do lado certo.
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-half">Mantenho a original</button>
+        <button class="btn-primary accent">Usar a transformada →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PHONE 6 — Relações: final edit with belief calibration
+     ============================================================ -->
+<div class="phone-wrap">
+  <div class="phone-step"><span>06 /</span> Relações · editando final<small>Calibrando fé + edição final</small></div>
+  <div class="phone">
+    <div class="topbar">
+      <div class="topbar-logo">JP<span class="dot"></span>APP</div>
+      <div class="topbar-mode">Wizard</div>
+    </div>
+    <div class="page">
+      <div class="step-progress">
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar done"></div>
+        <div class="step-bar current"></div>
+        <div class="step-bar"></div>
+        <div class="step-bar"></div>
+      </div>
+      <div class="step-meta">
+        <span><strong>Passo 5</strong> · editando</span>
+        <span class="session-tag">Sessão 3 · Dia 3</span>
+      </div>
+
+      <div class="step-hero">
+        <div class="step-eyebrow"><span class="pill">Relações</span>Versão final</div>
+        <h1 class="step-headline">Edite até soar<br>como sua voz.</h1>
+        <div class="step-sub">A versão do coach é um ponto de partida. Personalize. Encurte. Encontre a palavra exata.</div>
+      </div>
+
+      <div class="editor-frame">
+        <div class="editor-label">Sua 4ª afirmação · editável</div>
+        <textarea class="editor-input" rows="3">Atraio as pessoas certas, no momento certo, para o que estou construindo.</textarea>
+        <div class="editor-meta">
+          <span><strong>13</strong> palavras</span>
+          <span class="belief-meter">
+            Fé:
+            <span class="belief-dot on"></span>
+            <span class="belief-dot on"></span>
+            <span class="belief-dot on"></span>
+            <span class="belief-dot on"></span>
+            <span class="belief-dot"></span>
+          </span>
+        </div>
+      </div>
+
+      <div class="coach-block">
+        <div class="coach-block-eyebrow">✦ Coach</div>
+        <div class="coach-block-text">
+          Você simplificou para <em>"Atraio as pessoas certas"</em> — mais natural, mais sua. Mantém o controle em você (<strong>"atraio"</strong>, ação do sujeito) e fica mais curta. Boa edição.
+          <br><br>
+          Fé em 4/5. Sólido. Aceito.
+        </div>
+      </div>
+
+      <div style="background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+        <div class="label-tiny" style="margin-bottom: 10px;">4 de 5 prontas · falta a última</div>
+        <div style="font-family: 'Crimson Pro', serif; font-size: 13px; line-height: 1.7; color: var(--fg-muted);">
+          <strong style="color: var(--fg);">I.</strong> Eu sou o fundador que o JP App precisa...<br>
+          <strong style="color: var(--fg);">II.</strong> O JP App cresce porque eu ajo...<br>
+          <strong style="color: var(--fg);">III.</strong> Tenho histórico de transformar visões...<br>
+          <strong style="color: var(--accent-ink); background: var(--accent-warm); padding: 1px 5px; border-radius: 3px;">IV.</strong> <em>Atraio as pessoas certas, no momento certo, para o que estou construindo.</em>
+        </div>
+      </div>
+
+      <button class="btn-primary accent">Aceitar → ir para a 5ª (Integração)</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
